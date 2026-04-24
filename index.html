@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DZ Tech Press — L'info Tech & Télécoms en Algérie</title>
+    <meta name="description" content="Actualités télécoms, mobile et startups en Algérie. Suivez l'innovation tech algérienne : 5G, numérique, entrepreneuriat. Info fiable et rapide.">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="loading-overlay" id="loader">
+        <div class="loader"></div>
+        <div class="loading-text">DZ Tech Press</div>
+    </div>
+
+    <div class="reading-progress" id="readingProgress"></div>
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="top-bar-left">
+                <span><i class="fas fa-calendar-alt"></i> <span id="currentDate"></span></span>
+                <span><i class="fas fa-map-marker-alt"></i> Alger, Algérie</span>
+                <span><i class="fas fa-thermometer-half"></i> 22°C</span>
+            </div>
+            <div class="top-bar-right">
+                <!-- CORRECTION: Liens sociaux actifs -->
+                <a href="https://facebook.com/dztechpress" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://twitter.com/dztechpress" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="https://linkedin.com/company/dztechpress" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                <a href="https://youtube.com/@dztechpress" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container header-content">
+            <a href="#" class="logo" onclick="goHome()">
+                <div class="logo-icon">DZ</div>
+                <div class="logo-text">
+                    <h1>DZ <span>Tech</span> Press</h1>
+                    <p>Télécoms • Mobile • Startups</p>
+                </div>
+            </a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#" onclick="goHome(); filterByCategory('all', event)" class="active" id="nav-all">Accueil</a></li>
+                    <li><a href="#" onclick="filterByCategory('Algérie', event)" id="nav-algerie">Algérie</a></li>
+                    <li><a href="#" onclick="filterByCategory('Télécoms', event)" id="nav-telecoms">Télécoms</a></li>
+                    <li><a href="#" onclick="filterByCategory('Mobile', event)" id="nav-mobile">Mobile</a></li>
+                    <li><a href="#" onclick="filterByCategory('Startups', event)" id="nav-startups">Startups</a></li>
+                    <li><a href="#" onclick="filterByCategory('Innovation', event)" id="nav-innovation">Innovation</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <button class="theme-toggle" onclick="toggleTheme()" title="Mode Sombre/Clair">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Rechercher..." autocomplete="off">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- BREAKING NEWS -->
+    <div class="breaking-news">
+        <div class="container">
+            <div class="breaking-label"><i class="fas fa-bolt"></i> URGENT</div>
+            <div class="breaking-ticker">
+                <div class="ticker-track" id="breakingTicker"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main id="mainContent">
+        <!-- HERO SECTION -->
+        <section class="hero-section" id="heroSection">
+            <div class="container">
+                <div class="hero-grid" id="heroGrid"></div>
+            </div>
+        </section>
+
+        <!-- CONTENT + SIDEBAR -->
+        <section class="content-layout container">
+            <div class="news-column">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span class="icon"><i class="fas fa-newspaper"></i></span>
+                        <span id="gridTitle">Dernières Actualités</span>
+                    </h2>
+                    <div class="tag-filters" id="tagFilters"></div>
+                </div>
+                <div class="news-grid" id="newsGrid"></div>
+                <div class="pagination" id="pagination"></div>
+                <button class="load-more-btn" id="loadMoreBtn" onclick="loadMoreArticles()">
+                    <i class="fas fa-plus-circle"></i> Charger plus d'articles
+                </button>
+            </div>
+
+            <aside class="sidebar">
+                <div class="sidebar-widget">
+                    <h3 class="widget-title"><i class="fas fa-fire"></i> Les Plus Lus</h3>
+                    <ul class="trending-list" id="trendingList"></ul>
+                </div>
+                <div class="sidebar-widget newsletter-widget">
+                    <h3 class="widget-title"><i class="fas fa-envelope"></i> Newsletter</h3>
+                    <p>Recevez l'essentiel de l'actualité tech chaque matin.</p>
+                    <form class="newsletter-form" onsubmit="subscribeNewsletter(event)">
+                        <input type="email" placeholder="Votre adresse email" required>
+                        <button type="submit">S'abonner</button>
+                    </form>
+                </div>
+                <div class="sidebar-widget">
+                    <h3 class="widget-title"><i class="fas fa-tags"></i> Tags</h3>
+                    <div class="tag-cloud" id="tagCloud"></div>
+                </div>
+            </aside>
+        </section>
+
+        <!-- STATS BAR -->
+        <section class="stats-bar" id="statsSection">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fas fa-signal"></i></div>
+                        <div class="stat-number" data-target="48">0</div>
+                        <div class="stat-label">Millions d'abonnés</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="fas fa-rocket"></i></div>
+                        <div class="stat-number" data-target="1247">0</div>
+                        <div class="stat-label">Startups actives</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fas fa-broadcast-tower"></i></div>
+                        <div class="stat-number" data-target="89">0</div>
+                        <div class="stat-label">% couverture 4G</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon yellow"><i class="fas fa-coins"></i></div>
+                        <div class="stat-number" data-target="320">0</div>
+                        <div class="stat-label">M$ investis</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ARTICLE PAGE -->
+    <main id="articlePage" class="article-page" style="display:none;">
+        <div class="container">
+            <button class="back-btn" onclick="goHome()">
+                <i class="fas fa-arrow-left"></i> Retour à l'accueil
+            </button>
+            <article class="article-content" id="articleContent"></article>
+            <div class="related-articles" id="relatedArticles">
+                <h3>Vous pourriez aussi aimer</h3>
+                <div class="related-grid" id="relatedGrid"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div class="logo-icon" style="margin-bottom:10px;">DZ</div>
+                    <p>DZ Tech Press est votre source d'information de référence sur l'actualité tech en Algérie.</p>
+                    <div class="footer-social">
+                        <a href="https://facebook.com/dztechpress" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://twitter.com/dztechpress" target="_blank"><i class="fab fa-twitter"></i></a>
+                        <a href="https://linkedin.com/company/dztechpress" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                        <!-- CORRECTION: Ajout de YouTube -->
+                        <a href="https://youtube.com/@dztechpress" target="_blank"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h3>Rubriques</h3>
+                    <ul class="footer-links">
+                        <li><a href="#" onclick="filterByCategory('Algérie', event)">Algérie</a></li>
+                        <li><a href="#" onclick="filterByCategory('Télécoms', event)">Télécoms</a></li>
+                        <li><a href="#" onclick="filterByCategory('Startups', event)">Startups</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Services</h3>
+                    <ul class="footer-links">
+                        <li><a href="#" onclick="showToast('Inscription bientôt disponible')">Newsletter</a></li>
+                        <li><a href="#">Flux RSS</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Légal</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Mentions légales</a></li>
+                        <li><a href="#">Confidentialité</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 DZ Tech Press — Algérie</p>
+            </div>
+        </div>
+    </footer>
+
+    <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
