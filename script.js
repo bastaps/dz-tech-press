@@ -1,6 +1,6 @@
 // ===== CONFIG =====
 let allArticles = [];
-const TOTAL_ARTICLES = 12; // Mettre à jour selon le nombre réel d'articles
+const TOTAL_ARTICLES = 13; // Mettre à jour selon le nombre réel d'articles
 const ITEMS_PER_PAGE = 6;
 let currentPage = 1;
 let currentFilter = 'all';

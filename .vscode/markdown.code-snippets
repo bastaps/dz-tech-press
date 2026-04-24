@@ -1,0 +1,20 @@
+{
+    "Article Press Front Matter": {
+        "prefix": "article-frontmatter",
+        "body": [
+            "---",
+            "titre: \"${1:titre}\"",
+            "categorie: ${2:Catégorie}",
+            "date: ${3:$(date +%Y-%m-%d)}",
+            "heure: ${4:19:15}",
+            "image: images/${5:titre}.jpg",
+            "extrait: \"${6:Texte.}\"",
+            "tags: [${7:Algérie, Numérique, Innovation}]",
+            "une: ${8|true,false|}",
+            "---",
+            "",
+            "$0"
+        ],
+        "description": "Insère le front matter standard pour un article de presse DZ Tech Press."
+    }
+}
