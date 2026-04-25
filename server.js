@@ -40,17 +40,39 @@ const upload = multer({
 app.use(express.json());
 app.use(express.static('.'));
 
+const articlesDir = 'articles';
+const listJsonPath = path.join(articlesDir, 'list.json');
+
+async function fileExists(filePath) {
+    try {
+        await fs.access(filePath);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+async function generateArticlesList() {
+    const files = await fs.readdir(articlesDir);
+    const mdFiles = files
+        .filter(file => file.endsWith('.md'))
+        .sort((a, b) => parseInt(a.replace('.md', ''), 10) - parseInt(b.replace('.md', ''), 10));
+
+    await fs.writeFile(listJsonPath, JSON.stringify(mdFiles, null, 2), 'utf-8');
+    return mdFiles;
+}
+
 /**
  * API pour récupérer automatiquement la liste des articles
  */
 app.get('/api/articles', async (req, res) => {
     try {
-        const articlesDir = 'articles';
-        const files = await fs.readdir(articlesDir);
-        const mdFiles = files
-            .filter(file => file.endsWith('.md'))
-            .sort((a, b) => parseInt(a.replace('.md', ''), 10) - parseInt(b.replace('.md', ''), 10));
+        if (await fileExists(listJsonPath)) {
+            const json = await fs.readFile(listJsonPath, 'utf-8');
+            return res.json(JSON.parse(json));
+        }
 
+        const mdFiles = await generateArticlesList();
         res.json(mdFiles);
     } catch (error) {
         console.error('Erreur liste articles:', error);
@@ -112,6 +134,9 @@ ${contenu}
 
         // Sauvegarder le fichier markdown
         await fs.writeFile(articlePath, frontMatter);
+
+        // Mettre à jour la liste des articles
+        await generateArticlesList();
 
         // Mettre à jour TOTAL_ARTICLES dans script.js
         let scriptContent = await fs.readFile('script.js', 'utf-8');
@@ -210,6 +235,10 @@ app.get('/admin', (req, res) => {
         </body>
         </html>
     `);
+});
+
+generateArticlesList().catch(error => {
+    console.warn('Impossible de générer articles/list.json au démarrage:', error.message);
 });
 
 app.listen(PORT, () => {

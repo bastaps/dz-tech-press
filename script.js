@@ -19,13 +19,18 @@ document.getElementById('currentDate').textContent = new Date().toLocaleDateStri
 // ===== CHARGEMENT =====
 async function loadArticles() {
     try {
-        const listResponse = await fetch('/api/articles');
         let articleFiles = [];
+        const listResponse = await fetch('/articles/list.json');
 
         if (listResponse.ok) {
             articleFiles = await listResponse.json();
         } else {
-            throw new Error('Impossible de récupérer la liste des articles');
+            const apiResponse = await fetch('/api/articles');
+            if (apiResponse.ok) {
+                articleFiles = await apiResponse.json();
+            } else {
+                throw new Error('Impossible de récupérer la liste des articles');
+            }
         }
 
         for (const fileName of articleFiles) {
@@ -52,7 +57,7 @@ async function loadArticles() {
         }
     } catch (e) {
         console.warn('Chargement automatique impossible, fallback statique:', e);
-        // Fallback statique si le serveur API n'est pas disponible
+        // Fallback statique si la liste n'est pas disponible
         for (let i = 1; i <= TOTAL_ARTICLES; i++) {
             try {
                 const res = await fetch(`articles/${i}.md`);
