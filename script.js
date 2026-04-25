@@ -1,6 +1,7 @@
 // ===== CONFIG =====
 let allArticles = [];
 const ITEMS_PER_PAGE = 6;
+const TOTAL_ARTICLES = 15; // Mettre à jour quand un nouvel article est ajouté manuellement
 let currentPage = 1;
 let currentFilter = 'all';
 let currentTag = null;
@@ -52,7 +53,7 @@ async function loadArticles() {
     } catch (e) {
         console.warn('Chargement automatique impossible, fallback statique:', e);
         // Fallback statique si le serveur API n'est pas disponible
-        for (let i = 1; i <= 14; i++) {
+        for (let i = 1; i <= TOTAL_ARTICLES; i++) {
             try {
                 const res = await fetch(`articles/${i}.md`);
                 if (res.ok) {
