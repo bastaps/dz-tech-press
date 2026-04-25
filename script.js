@@ -1,7 +1,7 @@
 // ===== CONFIG =====
 let allArticles = [];
 const ITEMS_PER_PAGE = 6;
-const TOTAL_ARTICLES = 15; // Mettre à jour quand un nouvel article est ajouté manuellement
+const TOTAL_ARTICLES = 16; // Mettre à jour quand un nouvel article est ajouté manuellement
 let currentPage = 1;
 let currentFilter = 'all';
 let currentTag = null;

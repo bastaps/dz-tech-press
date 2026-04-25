@@ -269,8 +269,8 @@
                 <div class="form-group">
                     <label>Image <span class="required">*</span></label>
                     <div class="file-input-wrapper">
-                        <input type="file" id="image" accept="image/*" required onchange="previewImage(event)">
-                        <span class="file-label"><i class="fas fa-cloud-upload-alt"></i> Choisir une image</span>
+                        <input type="file" id="image" name="image" accept="image/*" required onchange="previewImage(event)">
+                        <label for="image" class="file-label"><i class="fas fa-cloud-upload-alt"></i> Choisir une image</label>
                     </div>
                     <div id="imagePreview" class="image-preview"></div>
                 </div>
