@@ -29,7 +29,7 @@ async function loadArticles() {
                 allArticles.push(art);
             }
         }
-        allArticles.sort((a, b) => new Date(b.date) - new Date(a.date));
+        allArticles.sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
         
         if (allArticles.length) {
             renderHero(allArticles);
@@ -468,3 +468,105 @@ function initCounters() {
     
     document.querySelectorAll('.stat-number').forEach(c => obs.observe(c));
 }
+
+// ===== ADMIN PANEL =====
+window.toggleAdminPanel = function() {
+    const modal = document.getElementById('adminModal');
+    const isShowing = modal.classList.contains('show');
+    if (isShowing) {
+        closeAdminPanel();
+    } else {
+        modal.classList.add('show');
+        // Set default date and time to now
+        const now = new Date();
+        document.getElementById('date').valueAsDate = now;
+        document.getElementById('heure').value = now.toTimeString().slice(0, 5);
+    }
+};
+
+window.closeAdminPanel = function() {
+    const modal = document.getElementById('adminModal');
+    modal.classList.remove('show');
+    setTimeout(() => {
+        document.getElementById('articleForm').reset();
+        document.getElementById('imagePreview').innerHTML = '';
+    }, 300);
+};
+
+window.previewImage = function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = `<img src="${ev.target.result}" alt="Aperçu">`;
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+window.submitArticle = async function(e) {
+    e.preventDefault();
+    
+    const titre = document.getElementById('titre').value;
+    const categorie = document.getElementById('categorie').value;
+    const date = document.getElementById('date').value;
+    const heure = document.getElementById('heure').value;
+    const extrait = document.getElementById('extrait').value;
+    const tags = document.getElementById('tags').value.split(',').map(t => t.trim());
+    const contenu = document.getElementById('contenu').value;
+    const imageFile = document.getElementById('image').files[0];
+    
+    if (!imageFile) {
+        showToast('⚠️ Veuillez sélectionner une image');
+        return;
+    }
+    
+    try {
+        showToast('⏳ Traitement en cours...');
+        
+        // Create FormData for file upload
+        const formData = new FormData();
+        formData.append('titre', titre);
+        formData.append('categorie', categorie);
+        formData.append('date', date);
+        formData.append('heure', heure);
+        formData.append('extrait', extrait);
+        formData.append('tags', tags.join(', '));
+        formData.append('contenu', contenu);
+        formData.append('image', imageFile);
+        
+        // Send to server
+        const response = await fetch('/api/create-article', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            showToast('✅ Article créé avec succès!');
+            
+            // Reload articles after a short delay
+            setTimeout(() => {
+                allArticles = [];
+                loadArticles();
+                closeAdminPanel();
+            }, 1000);
+        } else {
+            const error = await response.json();
+            showToast(`❌ Erreur: ${error.message}`);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showToast(`❌ Erreur lors de la création: ${error.message}`);
+    }
+};
+
+// Close modal when clicking outside
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('adminModal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'adminModal') {
+            closeAdminPanel();
+        }
+    });
+});

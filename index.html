@@ -215,6 +215,81 @@
         <i class="fas fa-arrow-up"></i>
     </button>
 
+    <!-- ADMIN BUTTON -->
+    <button class="admin-btn" id="adminBtn" onclick="toggleAdminPanel()" title="Ajouter un article">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- ADMIN MODAL -->
+    <div class="admin-modal" id="adminModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeAdminPanel()">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2><i class="fas fa-newspaper"></i> Créer un nouvel article</h2>
+            <form id="articleForm" onsubmit="submitArticle(event)">
+                
+                <div class="form-group">
+                    <label>Titre <span class="required">*</span></label>
+                    <input type="text" id="titre" required maxlength="200" placeholder="Titre de l'article">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Catégorie <span class="required">*</span></label>
+                        <select id="categorie" required>
+                            <option value="">-- Sélectionner --</option>
+                            <option value="Algérie">Algérie</option>
+                            <option value="Télécoms">Télécoms</option>
+                            <option value="Mobile">Mobile</option>
+                            <option value="Startups">Startups</option>
+                            <option value="Innovation">Innovation</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date <span class="required">*</span></label>
+                        <input type="date" id="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Heure <span class="required">*</span></label>
+                        <input type="time" id="heure" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Extrait <span class="required">*</span></label>
+                    <textarea id="extrait" required maxlength="300" placeholder="Résumé de l'article (max 300 caractères)" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Tags (séparés par des virgules) <span class="required">*</span></label>
+                    <input type="text" id="tags" required placeholder="Ex: Numérisation, Gouvernance, Ministère">
+                </div>
+
+                <div class="form-group">
+                    <label>Image <span class="required">*</span></label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="image" accept="image/*" required onchange="previewImage(event)">
+                        <span class="file-label"><i class="fas fa-cloud-upload-alt"></i> Choisir une image</span>
+                    </div>
+                    <div id="imagePreview" class="image-preview"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Contenu <span class="required">*</span></label>
+                    <textarea id="contenu" required placeholder="Contenu de l'article (Markdown supporté)" rows="10"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeAdminPanel()">Annuler</button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Créer & Déployer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script src="script.js"></script>
