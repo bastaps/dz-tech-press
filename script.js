@@ -1,6 +1,5 @@
 // ===== CONFIG =====
 let allArticles = [];
-const TOTAL_ARTICLES = 13; // Mettre à jour selon le nombre réel d'articles
 const ITEMS_PER_PAGE = 6;
 let currentPage = 1;
 let currentFilter = 'all';
@@ -19,16 +18,26 @@ document.getElementById('currentDate').textContent = new Date().toLocaleDateStri
 // ===== CHARGEMENT =====
 async function loadArticles() {
     try {
-        for (let i = 1; i <= TOTAL_ARTICLES; i++) {
-            const res = await fetch(`articles/${i}.md`);
+        const listResponse = await fetch('/api/articles');
+        let articleFiles = [];
+
+        if (listResponse.ok) {
+            articleFiles = await listResponse.json();
+        } else {
+            throw new Error('Impossible de récupérer la liste des articles');
+        }
+
+        for (const fileName of articleFiles) {
+            const res = await fetch(`articles/${fileName}`);
             if (res.ok) {
                 const text = await res.text();
                 const art = parseMarkdownFile(text);
-                art.id = i;
-                art.views = articleViews[i] || Math.floor(Math.random() * 500) + 50;
+                art.id = parseInt(fileName.replace('.md', ''), 10);
+                art.views = articleViews[art.id] || Math.floor(Math.random() * 500) + 50;
                 allArticles.push(art);
             }
         }
+
         allArticles.sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
         
         if (allArticles.length) {
@@ -40,8 +49,34 @@ async function loadArticles() {
             renderPagination(allArticles);
             initCounters();
         }
-    } catch (e) { 
-        console.error('Erreur chargement:', e); 
+    } catch (e) {
+        console.warn('Chargement automatique impossible, fallback statique:', e);
+        // Fallback statique si le serveur API n'est pas disponible
+        for (let i = 1; i <= 14; i++) {
+            try {
+                const res = await fetch(`articles/${i}.md`);
+                if (res.ok) {
+                    const text = await res.text();
+                    const art = parseMarkdownFile(text);
+                    art.id = i;
+                    art.views = articleViews[i] || Math.floor(Math.random() * 500) + 50;
+                    allArticles.push(art);
+                }
+            } catch (innerError) {
+                console.warn(`Article ${i} introuvable`, innerError);
+            }
+        }
+
+        allArticles.sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
+        if (allArticles.length) {
+            renderHero(allArticles);
+            renderGrid(allArticles.slice(0, ITEMS_PER_PAGE));
+            renderTicker(allArticles);
+            renderTrending();
+            renderTags();
+            renderPagination(allArticles);
+            initCounters();
+        }
     }
 }
 

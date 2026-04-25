@@ -41,6 +41,24 @@ app.use(express.json());
 app.use(express.static('.'));
 
 /**
+ * API pour récupérer automatiquement la liste des articles
+ */
+app.get('/api/articles', async (req, res) => {
+    try {
+        const articlesDir = 'articles';
+        const files = await fs.readdir(articlesDir);
+        const mdFiles = files
+            .filter(file => file.endsWith('.md'))
+            .sort((a, b) => parseInt(a.replace('.md', ''), 10) - parseInt(b.replace('.md', ''), 10));
+
+        res.json(mdFiles);
+    } catch (error) {
+        console.error('Erreur liste articles:', error);
+        res.status(500).json({ message: 'Impossible de charger la liste des articles' });
+    }
+});
+
+/**
  * API pour créer un nouvel article
  */
 app.post('/api/create-article', upload.single('image'), async (req, res) => {
