@@ -306,3 +306,32 @@ body.dark-mode .top-bar { background: #020617; }
     .article-body { padding: 25px; }
     .article-body h1 { font-size: 1.6rem; }
 }
+/* ===== PASSWORD PROTECTION STYLING ===== */
+.admin-modal.show {
+    display: flex;
+}
+
+.admin-modal-content {
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Amélioration du bouton Admin */
+.admin-toggle {
+    transition: all 0.3s ease;
+}
+
+.admin-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(192, 57, 43, 0.3);
+}

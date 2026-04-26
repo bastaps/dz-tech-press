@@ -1,11 +1,14 @@
 // ===== CONFIG =====
 let allArticles = [];
 const ITEMS_PER_PAGE = 6;
-const TOTAL_ARTICLES = 18; // Mettre à jour quand un nouvel article est ajouté manuellement
+const TOTAL_ARTICLES = 19; // Mettre à jour quand un nouvel article est ajouté manuellement
 let currentPage = 1;
 let currentFilter = 'all';
 let currentTag = null;
 let articleViews = JSON.parse(localStorage.getItem('articleViews') || '{}');
+
+// ===== MOT DE PASSE ADMIN =====
+const ADMIN_PASSWORD = 'admin2026'; // ⚠️ 
 
 // ===== INIT =====
 window.addEventListener('load', () => {
@@ -21,7 +24,7 @@ async function loadArticles() {
     try {
         let articleFiles = [];
         const listResponse = await fetch('/articles/list.json');
-
+        
         if (listResponse.ok) {
             articleFiles = await listResponse.json();
         } else {
@@ -57,7 +60,7 @@ async function loadArticles() {
         }
     } catch (e) {
         console.warn('Chargement automatique impossible, fallback statique:', e);
-        // Fallback statique si la liste n'est pas disponible
+        
         for (let i = 1; i <= TOTAL_ARTICLES; i++) {
             try {
                 const res = await fetch(`articles/${i}.md`);
@@ -92,19 +95,19 @@ function parseMarkdownFile(text) {
     
     const parts = text.split('---');
     if (parts.length < 3) return { titre: 'Erreur', contenu: text, tags: [], readingTime: 0 };
-    
+
     const fm = parts[1];
     const content = parts.slice(2).join('---');
-    
+
     const get = (k) => { 
         const m = fm.match(new RegExp(`${k}:\\s*(.*)`)); 
         return m ? m[1].trim().replace(/^["']|["']$/g, '') : ''; 
     };
-    
+
     const tagsMatch = fm.match(/tags:\s*\[(.*)\]/);
     const tags = tagsMatch ? tagsMatch[1].split(',').map(t => t.trim()) : [];
     const readingTime = Math.ceil(content.split(/\s+/).length / 200);
-    
+
     return { 
         titre: get('titre'), 
         date: get('date'), 
@@ -123,26 +126,28 @@ function renderHero(arts) {
     const h = arts[0];
     const s = arts.slice(1, 3);
     
-    let html = `<div class="hero-main" onclick="openArticle(${h.id})">
-        <img src="${h.image}" alt="${h.titre}" loading="lazy">
-        <div class="hero-overlay">
-            <span class="category-tag ${cls(h.categorie)}">${h.categorie}</span>
-            <h2>${h.titre}</h2>
-            <p>${h.extrait}</p>
-        </div>
-    </div>
-    <div class="hero-side-card">`;
-    
-    s.forEach(a => {
-        html += `<div onclick="openArticle(${a.id})">
-            <img src="${a.image}" alt="${a.titre}" loading="lazy">
+    let html = `
+        <div class="hero-main" onclick="openArticle(${h.id})">
+            <img src="${h.image}" alt="${h.titre}" loading="lazy">
             <div class="hero-overlay">
-                <span class="category-tag ${cls(a.categorie)}">${a.categorie}</span>
-                <h2>${a.titre}</h2>
+                <span class="category-tag ${cls(h.categorie)}">${h.categorie}</span>
+                <h2>${h.titre}</h2>
+                <p>${h.extrait}</p>
             </div>
-        </div>`;
+        </div>
+        <div class="hero-side-card">`;
+
+    s.forEach(a => {
+        html += `
+            <div onclick="openArticle(${a.id})">
+                <img src="${a.image}" alt="${a.titre}" loading="lazy">
+                <div class="hero-overlay">
+                    <span class="category-tag ${cls(a.categorie)}">${a.categorie}</span>
+                    <h2>${a.titre}</h2>
+                </div>
+            </div>`;
     });
-    
+
     html += '</div>';
     document.getElementById('heroGrid').innerHTML = html;
 }
@@ -150,9 +155,10 @@ function renderHero(arts) {
 // ===== RENDER GRID =====
 function renderGrid(arts) {
     const grid = document.getElementById('newsGrid');
-    if (!arts.length) { 
-        grid.innerHTML = '<p style="text-align:center;grid-column:1/-1;padding:40px;color:var(--text-muted)">Aucun article.</p>'; 
-        return; 
+    
+    if (!arts.length) {
+        grid.innerHTML = '<p style="text-align:center;padding:40px;">Aucun article.</p>';
+        return;
     }
     
     grid.innerHTML = arts.map((a, i) => `
@@ -189,7 +195,7 @@ function renderPagination(arts) {
         document.getElementById('loadMoreBtn').classList.add('hidden'); 
         return; 
     }
-    
+
     for (let i = 1; i <= total; i++) {
         const btn = document.createElement('button');
         btn.textContent = i;
@@ -197,7 +203,7 @@ function renderPagination(arts) {
         btn.onclick = () => goToPage(i);
         pag.appendChild(btn);
     }
-    
+
     document.getElementById('loadMoreBtn').classList.toggle('hidden', currentPage >= total);
 }
 
@@ -235,13 +241,14 @@ window.openArticle = function(id) {
     art.views++;
     articleViews[id] = art.views;
     localStorage.setItem('articleViews', JSON.stringify(articleViews));
-    
+
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('articlePage').style.display = 'block';
     window.scrollTo({top:0, behavior:'smooth'});
     updateSEO(art);
-    
-    let html = `<img src="${art.image}" alt="${art.titre}" loading="lazy">
+
+    let html = `
+        <img src="${art.image}" alt="${art.titre}" loading="lazy">
         <div class="article-body">
             <div class="article-meta">
                 <span class="category-tag ${cls(art.categorie)}">${art.categorie}</span>
@@ -252,26 +259,29 @@ window.openArticle = function(id) {
             </div>
             <h1>${art.titre}</h1>
             <div class="article-text">${art.contenu}</div>`;
-    
+
     if (art.tags && art.tags.length) {
-        html += `<div style="margin:30px 0;padding-top:20px;border-top:1px solid var(--border)">
-            <strong>Tags:</strong> 
-            ${art.tags.map(t => `<span class="tag-filter" style="margin-left:8px" onclick="filterByTag('${t}');goHome()">${t}</span>`).join('')}
-        </div>`;
+        html += `
+            <div style="margin:30px 0;padding-top:20px;border-top:1px solid var(--border)">
+                <strong>Tags:</strong> 
+                ${art.tags.map(t => `<span class="tag-filter" style="margin-left:8px" onclick="filterByTag('${t}');goHome()">${t}</span>`).join('')}
+            </div>`;
     }
-    
-    html += `<div class="share-buttons">
-        <button class="share-btn facebook" onclick="share('facebook')"><i class="fab fa-facebook-f"></i> Facebook</button>
-        <button class="share-btn twitter" onclick="share('twitter')"><i class="fab fa-twitter"></i> Twitter</button>
-        <button class="share-btn whatsapp" onclick="share('whatsapp')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-        <button class="share-btn linkedin" onclick="share('linkedin')"><i class="fab fa-linkedin-in"></i> LinkedIn</button>
-        <button class="share-btn copy" onclick="copyLink()"><i class="fas fa-link"></i> Copier</button>
-    </div>`;
-    
+
+    html += `
+        <div class="share-buttons">
+            <button class="share-btn facebook" onclick="share('facebook')"><i class="fab fa-facebook-f"></i> Facebook</button>
+            <button class="share-btn twitter" onclick="share('twitter')"><i class="fab fa-twitter"></i> Twitter</button>
+            <button class="share-btn whatsapp" onclick="share('whatsapp')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+            <button class="share-btn linkedin" onclick="share('linkedin')"><i class="fab fa-linkedin-in"></i> LinkedIn</button>
+            <button class="share-btn copy" onclick="copyLink()"><i class="fas fa-link"></i> Copier</button>
+        </div>`;
+
     document.getElementById('articleContent').innerHTML = html;
-    
+
     const rel = allArticles.filter(a => a.id !== id && a.categorie === art.categorie).slice(0, 3);
     const relBox = document.getElementById('relatedArticles');
+    
     if (rel.length) {
         relBox.style.display = 'block';
         document.getElementById('relatedGrid').innerHTML = rel.map(a => `
@@ -283,47 +293,41 @@ window.openArticle = function(id) {
     } else {
         relBox.style.display = 'none';
     }
-    
+
     document.title = art.titre + ' | DZ Tech Press';
 };
 
-// ===== CORRECTION : GO HOME COMPLET =====
+// ===== GO HOME =====
 window.goHome = function() {
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('articlePage').style.display = 'none';
     document.getElementById('searchInput').value = '';
     
-    // Réinitialiser les filtres
     currentFilter = 'all'; 
     currentTag = null; 
     currentPage = 1;
-    
-    // Réactiver le menu Accueil
+
     document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'));
     document.getElementById('nav-all').classList.add('active');
     document.getElementById('gridTitle').textContent = 'Dernières Actualités';
-    
-    // CORRECTION: Afficher le HERO (la Une)
     document.getElementById('heroSection').classList.remove('hidden');
-    
-    // Réafficher le contenu complet (Hero + Grille)
+
     renderHero(allArticles);
     renderGrid(allArticles.slice(0, ITEMS_PER_PAGE));
     renderPagination(allArticles);
-    
+
     updateSEO(null);
     document.title = 'DZ Tech Press — L\'info Tech & Télécoms en Algérie';
-    
-    // Scroll en haut
     window.scrollTo({top: 0, behavior: 'smooth'});
-}
+};
 
 // ===== SEARCH & FILTER =====
-document.getElementById('searchInput').addEventListener('input', e => {
+document.getElementById('searchInput')?.addEventListener('input', e => {
     const v = e.target.value.toLowerCase();
-    if (!v) { 
-        goHome(); 
-        return; 
+    
+    if (!v) {
+        goHome();
+        return;
     }
     
     document.getElementById('heroSection').classList.add('hidden');
@@ -332,7 +336,7 @@ document.getElementById('searchInput').addEventListener('input', e => {
         a.extrait.toLowerCase().includes(v) || 
         (a.tags && a.tags.some(t => t.toLowerCase().includes(v)))
     );
-    
+
     currentPage = 1;
     document.getElementById('gridTitle').textContent = `Résultats pour "${v}" (${res.length})`;
     renderGrid(res.slice(0, ITEMS_PER_PAGE));
@@ -340,10 +344,10 @@ document.getElementById('searchInput').addEventListener('input', e => {
 });
 
 window.filterByCategory = function(cat, ev) {
-    if(ev) { 
-        ev.preventDefault(); 
-        document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active')); 
-        ev.currentTarget.classList.add('active'); 
+    if(ev) {
+        ev.preventDefault();
+        document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'));
+        ev.currentTarget.classList.add('active');
     }
     
     currentFilter = cat; 
@@ -351,7 +355,7 @@ window.filterByCategory = function(cat, ev) {
     currentPage = 1;
     document.getElementById('heroSection').classList.add('hidden');
     document.getElementById('searchInput').value = '';
-    
+
     const f = cat === 'all' ? allArticles : allArticles.filter(a => a.categorie === cat);
     document.getElementById('gridTitle').textContent = cat === 'all' ? 'Dernières Actualités' : `Rubrique : ${cat}`;
     renderGrid(f.slice(0, ITEMS_PER_PAGE)); 
@@ -370,7 +374,7 @@ window.filterByTag = function(tag) {
     currentFilter = 'all'; 
     currentPage = 1;
     document.getElementById('heroSection').classList.add('hidden');
-    
+
     const f = allArticles.filter(a => a.tags && a.tags.includes(tag));
     document.getElementById('gridTitle').textContent = `Tag : ${tag} (${f.length})`;
     renderGrid(f.slice(0, ITEMS_PER_PAGE)); 
@@ -380,15 +384,15 @@ window.filterByTag = function(tag) {
 // ===== SIDEBAR WIDGETS =====
 function renderTrending() {
     const sorted = [...allArticles].sort((a,b) => b.views - a.views).slice(0, 5);
-    document.getElementById('trendingList').innerHTML = sorted.map((a,i) => `
-        <li class="trending-item" onclick="openArticle(${a.id})">
+    document.getElementById('trendingList').innerHTML = sorted.map((a,i) => 
+        `<li class="trending-item" onclick="openArticle(${a.id})">
             <span class="trending-number">${String(i+1).padStart(2,'0')}</span>
             <div class="trending-content">
                 <h4>${a.titre}</h4>
                 <span><i class="far fa-eye"></i> ${a.views} lectures</span>
             </div>
-        </li>
-    `).join('');
+        </li>`
+    ).join('');
 }
 
 function renderTags() {
@@ -400,11 +404,11 @@ function renderTags() {
     });
     
     const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 15);
-    
+
     document.getElementById('tagCloud').innerHTML = sorted.map(([t,c]) => 
         `<span class="tag-cloud-item" onclick="filterByTag('${t}')">${t} (${c})</span>`
     ).join('');
-    
+
     document.getElementById('tagFilters').innerHTML = `<span class="tag-filter active" onclick="filterByTag('all')">Tous</span>` + 
         sorted.slice(0, 5).map(([t]) => `<span class="tag-filter" onclick="filterByTag('${t}')">${t}</span>`).join('');
 }
@@ -413,41 +417,44 @@ function renderTags() {
 window.share = function(p) {
     const u = encodeURIComponent(window.location.href);
     const t = encodeURIComponent(currentArt.titre);
-    const urls = { 
-        facebook: `https://www.facebook.com/sharer/sharer.php?u=${u}`, 
-        twitter: `https://twitter.com/intent/tweet?url=${u}&text=${t}`, 
-        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${u}`, 
-        whatsapp: `https://wa.me/?text=${t}%20${u}` 
+    
+    const urls = {
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${u}`,
+        twitter: `https://twitter.com/intent/tweet?url=${u}&text=${t}`,
+        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${u}`,
+        whatsapp: `https://wa.me/?text=${t}%20${u}`
     };
+    
     if(urls[p]) window.open(urls[p], '_blank', 'width=600,height=400');
 };
 
-window.copyLink = () => { 
-    navigator.clipboard.writeText(window.location.href); 
-    showToast('Lien copié !'); 
+window.copyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    showToast('Lien copié !');
 };
 
-window.subscribeNewsletter = (e) => { 
-    e.preventDefault(); 
-    showToast('Merci pour votre inscription !'); 
-    e.target.reset(); 
+window.subscribeNewsletter = (e) => {
+    e.preventDefault();
+    showToast('Merci pour votre inscription !');
+    e.target.reset();
 };
 
-window.showToast = (msg) => { 
-    const t = document.getElementById('toast'); 
-    t.textContent = msg; 
-    t.classList.add('show'); 
-    setTimeout(() => t.classList.remove('show'), 3000); 
+window.showToast = (msg) => {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
 };
 
-function cls(c) { 
-    return { 
-        'Algérie':'tag-algerie', 
-        'Télécoms':'tag-telecoms', 
-        'Mobile':'tag-mobile', 
-        'Startups':'tag-startups', 
-        'Innovation':'tag-innovation' 
-    }[c] || 'tag-telecoms'; 
+function cls(c) {
+    return {
+        'Algérie':'tag-algerie',
+        'Télécoms':'tag-telecoms',
+        'Mobile':'tag-mobile',
+        'Startups':'tag-startups',
+        'Innovation':'tag-innovation'
+    }[c] || 'tag-telecoms';
 }
 
 function updateSEO(a) {
@@ -462,7 +469,11 @@ window.toggleTheme = () => {
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    document.querySelector('.theme-toggle i').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    
+    const icon = document.querySelector('.theme-toggle i');
+    if (icon) {
+        icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    }
 };
 
 function loadTheme() {
@@ -501,37 +512,48 @@ function initCounters() {
                         el.textContent = target;
                     }
                 };
+                
                 up(); 
                 obs.unobserve(el);
             }
         });
     }, {threshold: 0.5});
-    
+
     document.querySelectorAll('.stat-number').forEach(c => obs.observe(c));
 }
 
-// ===== ADMIN PANEL =====
+// ===== ADMIN PANEL AVEC MOT DE PASSE =====
 window.toggleAdminPanel = function() {
-    const modal = document.getElementById('adminModal');
-    const isShowing = modal.classList.contains('show');
-    if (isShowing) {
-        closeAdminPanel();
-    } else {
-        modal.classList.add('show');
-        // Set default date and time to now
-        const now = new Date();
-        document.getElementById('date').valueAsDate = now;
-        document.getElementById('heure').value = now.toTimeString().slice(0, 5);
+    const password = prompt('🔒 Mot de passe administrateur:');
+    
+    if (password === ADMIN_PASSWORD) {
+        const modal = document.getElementById('adminModal');
+        if (modal) {
+            modal.classList.add('show');
+            
+            const now = new Date();
+            const dateInput = document.getElementById('date');
+            const timeInput = document.getElementById('heure');
+            
+            if (dateInput) dateInput.valueAsDate = now;
+            if (timeInput) timeInput.value = now.toTimeString().slice(0, 5);
+        }
+    } else if (password !== null) {
+        showToast('❌ Mot de passe incorrect!');
     }
 };
 
 window.closeAdminPanel = function() {
     const modal = document.getElementById('adminModal');
-    modal.classList.remove('show');
-    setTimeout(() => {
-        document.getElementById('articleForm').reset();
-        document.getElementById('imagePreview').innerHTML = '';
-    }, 300);
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            const form = document.getElementById('articleForm');
+            const preview = document.getElementById('imagePreview');
+            if (form) form.reset();
+            if (preview) preview.innerHTML = '';
+        }, 300);
+    }
 };
 
 window.previewImage = function(e) {
@@ -540,7 +562,9 @@ window.previewImage = function(e) {
         const reader = new FileReader();
         reader.onload = (ev) => {
             const preview = document.getElementById('imagePreview');
-            preview.innerHTML = `<img src="${ev.target.result}" alt="Aperçu">`;
+            if (preview) {
+                preview.innerHTML = `<img src="${ev.target.result}" alt="Aperçu">`;
+            }
         };
         reader.readAsDataURL(file);
     }
@@ -557,16 +581,15 @@ window.submitArticle = async function(e) {
     const tags = document.getElementById('tags').value.split(',').map(t => t.trim());
     const contenu = document.getElementById('contenu').value;
     const imageFile = document.getElementById('image').files[0];
-    
+
     if (!imageFile) {
         showToast('⚠️ Veuillez sélectionner une image');
         return;
     }
-    
+
     try {
         showToast('⏳ Traitement en cours...');
         
-        // Create FormData for file upload
         const formData = new FormData();
         formData.append('titre', titre);
         formData.append('categorie', categorie);
@@ -577,7 +600,6 @@ window.submitArticle = async function(e) {
         formData.append('contenu', contenu);
         formData.append('image', imageFile);
         
-        // Send to server
         const response = await fetch('/api/create-article', {
             method: 'POST',
             body: formData
@@ -587,7 +609,6 @@ window.submitArticle = async function(e) {
             const result = await response.json();
             showToast('✅ Article créé avec succès!');
             
-            // Reload articles after a short delay
             setTimeout(() => {
                 allArticles = [];
                 loadArticles();
@@ -605,9 +626,12 @@ window.submitArticle = async function(e) {
 
 // Close modal when clicking outside
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('adminModal')?.addEventListener('click', (e) => {
-        if (e.target.id === 'adminModal') {
-            closeAdminPanel();
-        }
-    });
+    const modal = document.getElementById('adminModal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target.id === 'adminModal') {
+                closeAdminPanel();
+            }
+        });
+    }
 });
