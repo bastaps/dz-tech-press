@@ -1,14 +1,17 @@
 // ===== CONFIG =====
 let allArticles = [];
 const ITEMS_PER_PAGE = 6;
-const TOTAL_ARTICLES = 20; // Mettre à jour quand un nouvel article est ajouté manuellement
+const TOTAL_ARTICLES = 20;
 let currentPage = 1;
 let currentFilter = 'all';
 let currentTag = null;
 let articleViews = JSON.parse(localStorage.getItem('articleViews') || '{}');
 
+// ===== CONFIG API DISTANTE (Render/Vercel) =====
+const REMOTE_API = 'https://dz-tech-press-api.onrender.com'; // ⚠️ À mettre à jour après déploiement
+
 // ===== MOT DE PASSE ADMIN =====
-const ADMIN_PASSWORD = 'admin2026'; // ⚠️ 
+const ADMIN_PASSWORD = 'admin2026';
 
 // ===== INIT =====
 window.addEventListener('load', () => {
@@ -570,6 +573,7 @@ window.previewImage = function(e) {
     }
 };
 
+// ===== SOUMISSION ARTICLE (Smart: Cloudflare ou Local) =====
 window.submitArticle = async function(e) {
     e.preventDefault();
     
@@ -578,7 +582,7 @@ window.submitArticle = async function(e) {
     const date = document.getElementById('date').value;
     const heure = document.getElementById('heure').value;
     const extrait = document.getElementById('extrait').value;
-    const tags = document.getElementById('tags').value.split(',').map(t => t.trim());
+    const tags = document.getElementById('tags').value;
     const contenu = document.getElementById('contenu').value;
     const imageFile = document.getElementById('image').files[0];
 
@@ -589,38 +593,37 @@ window.submitArticle = async function(e) {
 
     try {
         showToast('⏳ Traitement en cours...');
-        
+
         const formData = new FormData();
         formData.append('titre', titre);
         formData.append('categorie', categorie);
         formData.append('date', date);
         formData.append('heure', heure);
         formData.append('extrait', extrait);
-        formData.append('tags', tags.join(', '));
+        formData.append('tags', tags);
         formData.append('contenu', contenu);
         formData.append('image', imageFile);
-        
-        const response = await fetch('/api/create-article', {
+
+        // 🎯 Détection : Cloudflare → API distante, Local → API locale
+        const isCloudflare = window.location.hostname.includes('pages.dev');
+        const apiUrl = isCloudflare ? `${REMOTE_API}/api/create-article` : '/api/create-article';
+
+        const response = await fetch(apiUrl, {
             method: 'POST',
             body: formData
         });
-        
+
         if (response.ok) {
             const result = await response.json();
-            showToast('✅ Article créé avec succès!');
-            
-            setTimeout(() => {
-                allArticles = [];
-                loadArticles();
-                closeAdminPanel();
-            }, 1000);
+            showToast('✅ Article créé et déployé !');
+            setTimeout(() => { allArticles = []; loadArticles(); closeAdminPanel(); }, 2000);
         } else {
             const error = await response.json();
             showToast(`❌ Erreur: ${error.message}`);
         }
     } catch (error) {
-        console.error('Error:', error);
-        showToast(`❌ Erreur lors de la création: ${error.message}`);
+        console.error('Erreur:', error);
+        showToast(`❌ Erreur: ${error.message}`);
     }
 };
 
