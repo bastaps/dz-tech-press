@@ -1,12 +1,12 @@
 // ===== CONFIG =====
 let allArticles = [];
 const ITEMS_PER_PAGE = 6;
-const TOTAL_ARTICLES = 25;
+const TOTAL_ARTICLES = 26;
 let currentPage = 1;
 let currentFilter = 'all';
 let currentTag = null;
 let articleViews = JSON.parse(localStorage.getItem('articleViews') || '{}');
-let currentEditingId = null; // Variable pour suivre l'article en cours de lecture/édition
+let currentEditingId = null; // Suit l'article ouvert pour le mode Crayon
 
 // ===== CONFIG AUDIO =====
 const synth = window.speechSynthesis;
@@ -44,7 +44,7 @@ async function loadArticles() {
             }
         }
 
-        allArticles = []; // Reset local avant chargement
+        allArticles = [];
         for (const fileName of articleFiles) {
             const res = await fetch(`articles/${fileName}`);
             if (res.ok) {
@@ -68,29 +68,7 @@ async function loadArticles() {
             initCounters();
         }
     } catch (e) {
-        console.warn('Fallback statique:', e);
-        for (let i = 1; i <= TOTAL_ARTICLES; i++) {
-            try {
-                const res = await fetch(`articles/${i}.md`);
-                if (res.ok) {
-                    const text = await res.text();
-                    const art = parseMarkdownFile(text);
-                    art.id = i;
-                    art.views = articleViews[i] || Math.floor(Math.random() * 500) + 50;
-                    allArticles.push(art);
-                }
-            } catch (innerError) { console.warn(`Article ${i} missing`, innerError); }
-        }
-        allArticles.sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
-        if (allArticles.length) {
-            renderHero(allArticles);
-            renderGrid(allArticles.slice(0, ITEMS_PER_PAGE));
-            renderTicker(allArticles);
-            renderTrending();
-            renderTags();
-            renderPagination(allArticles);
-            initCounters();
-        }
+        console.warn('Erreur chargement articles:', e);
     }
 }
 
@@ -190,12 +168,12 @@ function renderTicker(arts) {
     if(document.getElementById('breakingTicker')) document.getElementById('breakingTicker').innerHTML = html + html;
 }
 
-// ===== ARTICLE VIEW =====
+// ===== OUVERTURE ARTICLE (MODE CRAYON) =====
 window.openArticle = function(id) {
     const art = allArticles.find(a => a.id === id);
     if (!art) return;
     
-    // Logique du bouton Admin (✏️ pour modifier)
+    // Changement du bouton en Crayon
     currentEditingId = id;
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) {
@@ -246,7 +224,6 @@ window.openArticle = function(id) {
         </div>`;
 
     document.getElementById('articleContent').innerHTML = html;
-
     initAudioReader(art.titre + ". " + art.rawContent);
 
     const rel = allArticles.filter(a => a.id !== id && a.categorie === art.categorie).slice(0, 3);
@@ -319,11 +296,11 @@ function initAudioReader(textToRead) {
     }
 }
 
-// ===== GO HOME =====
+// ===== RETOUR ACCUEIL (MODE PLUS) =====
 window.goHome = function() {
     if (synth) synth.cancel();
     
-    // Logique du bouton Admin (+ pour créer)
+    // Remise du bouton en Plus
     currentEditingId = null;
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) {
@@ -489,10 +466,8 @@ function updateSEO(a) {
 
 window.toggleTheme = () => {
     document.body.classList.toggle('dark-mode');
-    const isDark = document.body.classList.contains('dark-mode');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
     const icon = document.querySelector('.theme-toggle i');
-    if (icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    if (icon) icon.className = document.body.classList.contains('dark-mode') ? 'fas fa-sun' : 'fas fa-moon';
 };
 
 function loadTheme() {
@@ -525,18 +500,19 @@ function initCounters() {
     document.querySelectorAll('.stat-number').forEach(c => obs.observe(c));
 }
 
-// ===== GESTION ADMIN MODIFIÉE =====
+// ===== GESTION ADMIN (MODIFICATION IMAGE OPTIONNELLE) =====
 window.toggleAdminPanel = function() {
     const password = prompt('🔒 Mot de passe:');
     if (password === ADMIN_PASSWORD) {
         const modal = document.getElementById('adminModal');
+        const imgInput = document.getElementById('image');
         if (!modal) return;
         
         modal.classList.add('show');
         const now = new Date();
         
-        // Logique Différenciée : Modification vs Création
         if (currentEditingId) {
+            // MODE MODIFICATION (CRAYON)
             const art = allArticles.find(a => a.id === currentEditingId);
             if (art) {
                 document.getElementById('titre').value = art.titre;
@@ -546,12 +522,25 @@ window.toggleAdminPanel = function() {
                 document.getElementById('extrait').value = art.extrait;
                 document.getElementById('tags').value = art.tags.join(', ');
                 document.getElementById('contenu').value = art.rawContent;
+                
+                // RENDRE L'IMAGE OPTIONNELLE POUR L'EDITION
+                if (imgInput) imgInput.required = false;
+                
+                // Afficher l'image actuelle dans l'aperçu
+                if (document.getElementById('imagePreview')) {
+                    document.getElementById('imagePreview').innerHTML = `<p style="font-size:0.8rem;margin-bottom:5px;">Image actuelle :</p><img src="${art.image}" alt="Actuelle">`;
+                }
+                
                 document.querySelector('#adminModal h2').innerHTML = '<i class="fas fa-pencil-alt"></i> Modifier l\'article';
             }
         } else {
-            // Nouveau formulaire vide
+            // MODE CRÉATION (PLUS)
             document.getElementById('articleForm').reset();
             document.getElementById('imagePreview').innerHTML = '';
+            
+            // RENDRE L'IMAGE OBLIGATOIRE POUR LA CRÉATION
+            if (imgInput) imgInput.required = true;
+            
             if (document.getElementById('date')) document.getElementById('date').valueAsDate = now;
             if (document.getElementById('heure')) document.getElementById('heure').value = now.toTimeString().slice(0, 5);
             document.querySelector('#adminModal h2').innerHTML = '<i class="fas fa-newspaper"></i> Créer un nouvel article';
@@ -589,7 +578,15 @@ window.submitArticle = async function(e) {
     formData.append('extrait', document.getElementById('extrait').value);
     formData.append('tags', document.getElementById('tags').value);
     formData.append('contenu', document.getElementById('contenu').value);
-    formData.append('image', document.getElementById('image').files[0]);
+    
+    const imgFile = document.getElementById('image').files[0];
+    if (imgFile) {
+        formData.append('image', imgFile);
+    } else if (currentEditingId) {
+        // Si on modifie sans changer l'image, on peut envoyer l'ancienne URL ou un flag
+        const art = allArticles.find(a => a.id === currentEditingId);
+        formData.append('existingImage', art.image);
+    }
 
     try {
         showToast('⏳ Traitement...');
@@ -605,7 +602,7 @@ window.submitArticle = async function(e) {
             }, 2000); 
         }
         else { const error = await response.json(); showToast(`❌ ${error.message}`); }
-    } catch (error) { showToast(`❌ Erreur`); }
+    } catch (error) { showToast(`❌ Erreur réseau`); }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
