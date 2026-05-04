@@ -1,12 +1,12 @@
 // ===== CONFIG =====
 let allArticles = [];
 const ITEMS_PER_PAGE = 6;
-const TOTAL_ARTICLES = 26;
+const TOTAL_ARTICLES = 23;
 let currentPage = 1;
 let currentFilter = 'all';
 let currentTag = null;
 let articleViews = JSON.parse(localStorage.getItem('articleViews') || '{}');
-let currentEditingId = null; // Suit l'article ouvert pour le mode Crayon
+let currentEditingId = null; 
 
 // ===== CONFIG AUDIO =====
 const synth = window.speechSynthesis;
@@ -173,7 +173,6 @@ window.openArticle = function(id) {
     const art = allArticles.find(a => a.id === id);
     if (!art) return;
     
-    // Changement du bouton en Crayon
     currentEditingId = id;
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) {
@@ -300,7 +299,6 @@ function initAudioReader(textToRead) {
 window.goHome = function() {
     if (synth) synth.cancel();
     
-    // Remise du bouton en Plus
     currentEditingId = null;
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) {
@@ -500,19 +498,24 @@ function initCounters() {
     document.querySelectorAll('.stat-number').forEach(c => obs.observe(c));
 }
 
-// ===== GESTION ADMIN (MODIFICATION IMAGE OPTIONNELLE) =====
+// ===== GESTION ADMIN (AVEC SUPPRESSION) =====
 window.toggleAdminPanel = function() {
     const password = prompt('🔒 Mot de passe:');
     if (password === ADMIN_PASSWORD) {
         const modal = document.getElementById('adminModal');
         const imgInput = document.getElementById('image');
-        if (!modal) return;
+        const actionsDiv = document.querySelector('.form-actions');
+        if (!modal || !actionsDiv) return;
         
         modal.classList.add('show');
         const now = new Date();
+
+        // Nettoyage de l'ancien bouton supprimer s'il existe
+        const oldDel = document.getElementById('dynamicDelBtn');
+        if (oldDel) oldDel.remove();
         
         if (currentEditingId) {
-            // MODE MODIFICATION (CRAYON)
+            // MODE MODIFICATION
             const art = allArticles.find(a => a.id === currentEditingId);
             if (art) {
                 document.getElementById('titre').value = art.titre;
@@ -522,31 +525,62 @@ window.toggleAdminPanel = function() {
                 document.getElementById('extrait').value = art.extrait;
                 document.getElementById('tags').value = art.tags.join(', ');
                 document.getElementById('contenu').value = art.rawContent;
-                
-                // RENDRE L'IMAGE OPTIONNELLE POUR L'EDITION
                 if (imgInput) imgInput.required = false;
-                
-                // Afficher l'image actuelle dans l'aperçu
                 if (document.getElementById('imagePreview')) {
                     document.getElementById('imagePreview').innerHTML = `<p style="font-size:0.8rem;margin-bottom:5px;">Image actuelle :</p><img src="${art.image}" alt="Actuelle">`;
                 }
-                
                 document.querySelector('#adminModal h2').innerHTML = '<i class="fas fa-pencil-alt"></i> Modifier l\'article';
+
+                // AJOUT DU BOUTON SUPPRIMER DYNAMIQUEMENT
+                const delBtn = document.createElement('button');
+                delBtn.type = 'button';
+                delBtn.id = 'dynamicDelBtn';
+                delBtn.className = 'btn-secondary';
+                delBtn.style.background = '#d21034';
+                delBtn.style.color = '#fff';
+                delBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer';
+                delBtn.onclick = deleteArticle;
+                actionsDiv.prepend(delBtn);
             }
         } else {
-            // MODE CRÉATION (PLUS)
+            // MODE CRÉATION
             document.getElementById('articleForm').reset();
             document.getElementById('imagePreview').innerHTML = '';
-            
-            // RENDRE L'IMAGE OBLIGATOIRE POUR LA CRÉATION
             if (imgInput) imgInput.required = true;
-            
             if (document.getElementById('date')) document.getElementById('date').valueAsDate = now;
             if (document.getElementById('heure')) document.getElementById('heure').value = now.toTimeString().slice(0, 5);
             document.querySelector('#adminModal h2').innerHTML = '<i class="fas fa-newspaper"></i> Créer un nouvel article';
         }
     } else if (password !== null) showToast('❌ Incorrect');
 };
+
+// FONCTION DE SUPPRESSION
+async function deleteArticle() {
+    if (!currentEditingId) return;
+    if (!confirm("⚠️ Voulez-vous vraiment supprimer cet article ? Cette action est irréversible.")) return;
+
+    try {
+        showToast('⏳ Suppression...');
+        const isCloudflare = window.location.hostname.includes('pages.dev');
+        const apiUrl = isCloudflare ? `${REMOTE_API}/api/delete-article/${currentEditingId}` : `/api/delete-article/${currentEditingId}`;
+        
+        const response = await fetch(apiUrl, { method: 'DELETE' });
+        
+        if (response.ok) {
+            showToast('✅ Supprimé !');
+            setTimeout(() => {
+                closeAdminPanel();
+                goHome();
+                loadArticles();
+            }, 2000);
+        } else {
+            const error = await response.json();
+            showToast(`❌ ${error.message}`);
+        }
+    } catch (error) {
+        showToast(`❌ Erreur réseau`);
+    }
+}
 
 window.closeAdminPanel = function() {
     const modal = document.getElementById('adminModal');
@@ -580,18 +614,16 @@ window.submitArticle = async function(e) {
     formData.append('contenu', document.getElementById('contenu').value);
     
     const imgFile = document.getElementById('image').files[0];
-    if (imgFile) {
-        formData.append('image', imgFile);
-    } else if (currentEditingId) {
-        // Si on modifie sans changer l'image, on peut envoyer l'ancienne URL ou un flag
-        const art = allArticles.find(a => a.id === currentEditingId);
-        formData.append('existingImage', art.image);
-    }
+    if (imgFile) formData.append('image', imgFile);
 
     try {
         showToast('⏳ Traitement...');
         const isCloudflare = window.location.hostname.includes('pages.dev');
         const apiUrl = isCloudflare ? `${REMOTE_API}/api/create-article` : '/api/create-article';
+        
+        // On peut ajouter l'ID si c'est une modification
+        if (currentEditingId) formData.append('id', currentEditingId);
+
         const response = await fetch(apiUrl, { method: 'POST', body: formData });
         if (response.ok) { 
             showToast('✅ Déployé !'); 
