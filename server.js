@@ -1,84 +1,52 @@
 /**
- * Server pour gérer la création, la modification et la suppression d'articles
- * Lance avec: node server.js
- * Accédez à: http://localhost:3000
+ * Server pour DZ Tech Press - Version Render & GitHub
  */
 
 const express = require('express');
 const multer = require('multer');
-const fs = require('fs').promises;
 const path = require('path');
-const { execSync } = require('child_process');
+// Importation de l'outil pour parler à GitHub (Octokit)
+const { Octokit } = require("@octokit/rest");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configuration multer pour les uploads d'images
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'images/');
-    },
-    filename: (req, file, cb) => {
-        const timestamp = Date.now();
-        const ext = path.extname(file.originalname);
-        cb(null, `${timestamp}${ext}`);
-    }
-});
+// CONFIGURATION GITHUB (Utilise le Token que tu as mis dans Render)
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+const OWNER = "bastaps"; 
+const REPO = "dz-tech-press"; // Ton nom de dépôt corrigé ici
 
-const upload = multer({ 
-    storage,
-    fileFilter: (req, file, cb) => {
-        const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-        if (allowedMimes.includes(file.mimetype)) {
-            cb(null, true);
-        } else {
-            cb(new Error('Type d\'image non supporté'));
-        }
-    }
-});
+// Stockage en mémoire vive (nécessaire pour Render)
+const upload = multer({ storage: multer.memoryStorage() });
 
 app.use(express.json());
 app.use(express.static('.'));
 
-const articlesDir = 'articles';
-const listJsonPath = path.join(articlesDir, 'list.json');
-
-async function fileExists(filePath) {
+/**
+ * Fonction pour envoyer les fichiers vers GitHub
+ */
+async function pushToGithub(filePath, content, message, isImage = false) {
     try {
-        await fs.access(filePath);
+        let currentSha;
+        try {
+            const { data } = await octokit.repos.getContent({ owner: OWNER, repo: REPO, path: filePath });
+            currentSha = data.sha;
+        } catch (e) { currentSha = null; }
+
+        await octokit.repos.createOrUpdateFileContents({
+            owner: OWNER,
+            repo: REPO,
+            path: filePath,
+            message: message,
+            content: isImage ? content.toString('base64') : Buffer.from(content).toString('base64'),
+            sha: currentSha
+        });
         return true;
-    } catch {
+    } catch (error) {
+        console.error("Erreur GitHub API:", error);
         return false;
     }
 }
-
-async function generateArticlesList() {
-    const files = await fs.readdir(articlesDir);
-    const mdFiles = files
-        .filter(file => file.endsWith('.md'))
-        .sort((a, b) => parseInt(a.replace('.md', ''), 10) - parseInt(b.replace('.md', ''), 10));
-
-    await fs.writeFile(listJsonPath, JSON.stringify(mdFiles, null, 2), 'utf-8');
-    return mdFiles;
-}
-
-/**
- * API pour récupérer automatiquement la liste des articles
- */
-app.get('/api/articles', async (req, res) => {
-    try {
-        if (await fileExists(listJsonPath)) {
-            const json = await fs.readFile(listJsonPath, 'utf-8');
-            return res.json(JSON.parse(json));
-        }
-
-        const mdFiles = await generateArticlesList();
-        res.json(mdFiles);
-    } catch (error) {
-        console.error('Erreur liste articles:', error);
-        res.status(500).json({ message: 'Impossible de charger la liste des articles' });
-    }
-});
 
 /**
  * API pour créer ou MODIFIER un article
@@ -87,117 +55,51 @@ app.post('/api/create-article', upload.single('image'), async (req, res) => {
     try {
         const { id, titre, categorie, date, heure, extrait, tags, contenu } = req.body;
         
-        // Image obligatoire uniquement si c'est un nouvel article (pas d'ID)
-        if (!id && !req.file) {
-            return res.status(400).json({ message: 'Image manquante' });
-        }
+        let articleFileName = (id && id !== "null") ? `${id}.md` : `${Date.now()}.md`;
 
-        let articleFileName;
-        let isUpdate = false;
-
-        if (id && id !== "null") {
-            // MODE MODIFICATION : On utilise l'ID existant
-            articleFileName = `${id}.md`;
-            isUpdate = true;
-        } else {
-            // MODE CRÉATION : On calcule le prochain numéro
-            const files = await fs.readdir(articlesDir);
-            const numbers = files
-                .filter(f => f.endsWith('.md'))
-                .map(f => parseInt(f.replace('.md', '')))
-                .filter(n => !isNaN(n));
-            const nextNumber = Math.max(...numbers, 0) + 1;
-            articleFileName = `${nextNumber}.md`;
-        }
-
-        const articlePath = path.join(articlesDir, articleFileName);
-
-        // Récupération du chemin de l'image (nouvelle ou ancienne)
-        let imagePath;
+        let imagePath = req.body.existingImage || "";
         if (req.file) {
-            imagePath = `images/${req.file.filename}`;
-        } else {
-            // Si modification sans nouvelle image, on garde l'ancienne (logique simplifiée)
-            const oldContent = await fs.readFile(articlePath, 'utf-8');
-            const match = oldContent.match(/image:\s*(.*)/);
-            imagePath = match ? match[1].trim().replace(/^["']|["']$/g, '') : "";
+            imagePath = `images/${Date.now()}-${req.file.originalname}`;
+            await pushToGithub(imagePath, req.file.buffer, "Upload image via Render", true);
         }
 
         const tagsFormatted = tags.split(',').map(t => t.trim()).filter(t => t).map(t => `"${t}"`).join(', ');
+        const frontMatter = `---\ntitre: "${titre.replace(/"/g, '\\"')}"\ncategorie: ${categorie}\ndate: ${date}\nheure: ${heure}\nimage: ${imagePath}\nextrait: "${extrait.replace(/"/g, '\\"')}"\ntags: [${tagsFormatted}]\n---\n\n${contenu}\n`;
 
-        const frontMatter = `---
-titre: "${titre.replace(/"/g, '\\"')}"
-categorie: ${categorie}
-date: ${date}
-heure: ${heure}
-image: ${imagePath}
-extrait: "${extrait.replace(/"/g, '\\"')}"
-tags: [${tagsFormatted}]
----
+        // Envoi du texte vers GitHub
+        const success = await pushToGithub(`articles/${articleFileName}`, frontMatter, `Article: ${titre}`);
 
-${contenu}
-`;
-
-        await fs.writeFile(articlePath, frontMatter);
-        await generateArticlesList();
-
-        // Mise à jour de TOTAL_ARTICLES si c'est une création
-        if (!isUpdate) {
-            let scriptContent = await fs.readFile('script.js', 'utf-8');
-            const newScript = scriptContent.replace(/const TOTAL_ARTICLES = \d+;/, `const TOTAL_ARTICLES = ${articleFileName.replace('.md', '')};`);
-            await fs.writeFile('script.js', newScript);
-        }
-
-        // Commit et push automatique
-        try {
-            execSync('git add -A', { cwd: process.cwd(), stdio: 'pipe' });
-            execSync(`git commit -m "✅ ${isUpdate ? 'MAJ' : 'Nouveau'}: ${titre}"`, { cwd: process.cwd(), stdio: 'pipe' });
-            execSync('git push origin main', { cwd: process.cwd(), stdio: 'pipe' });
-        } catch (gitError) { console.warn('Git sync error:', gitError.message); }
-
-        res.json({ success: true, message: isUpdate ? 'Modifié' : 'Créé' });
-
+        if (success) res.json({ success: true });
+        else res.status(500).json({ message: "Erreur synchro GitHub" });
     } catch (error) {
-        console.error('Erreur:', error);
-        res.status(500).json({ message: `Erreur: ${error.message}` });
+        res.status(500).json({ message: error.message });
     }
 });
 
 /**
- * API POUR SUPPRIMER UN ARTICLE (Corrige l'erreur réseau)
+ * API POUR SUPPRIMER UN ARTICLE
  */
 app.delete('/api/delete-article/:id', async (req, res) => {
     try {
         const id = req.params.id;
-        const articlePath = path.join(articlesDir, `${id}.md`);
+        const filePath = `articles/${id}.md`;
+        const { data } = await octokit.repos.getContent({ owner: OWNER, repo: REPO, path: filePath });
         
-        await fs.unlink(articlePath);
-        await generateArticlesList();
-
-        // Synchro GitHub pour informer Cloudflare de la suppression
-        try {
-            execSync('git add -A', { cwd: process.cwd(), stdio: 'pipe' });
-            execSync(`git commit -m "🗑️ Suppression article ${id}"`, { cwd: process.cwd(), stdio: 'pipe' });
-            execSync('git push origin main', { cwd: process.cwd(), stdio: 'pipe' });
-        } catch (gitError) { console.warn('Git sync error:', gitError.message); }
-
-        res.json({ success: true, message: 'Article supprimé' });
+        await octokit.repos.deleteFile({
+            owner: OWNER, repo: REPO, path: filePath,
+            message: `Suppression article ${id}`,
+            sha: data.sha
+        });
+        res.json({ success: true });
     } catch (error) {
-        res.status(500).json({ message: 'Erreur lors de la suppression' });
+        res.status(500).json({ message: "Erreur suppression GitHub" });
     }
 });
 
-/**
- * Page d'information
- */
 app.get('/admin', (req, res) => {
-    res.send(`<h1>✅ Serveur Admin Actif</h1><p>Prêt pour Création, Modification et Suppression.</p>`);
-});
-
-generateArticlesList().catch(error => {
-    console.warn('Impossible de générer articles/list.json au démarrage:', error.message);
+    res.send(`<h1>✅ Serveur Admin DZ Tech Press en ligne</h1>`);
 });
 
 app.listen(PORT, () => {
-    console.log(`\n🚀 Serveur Admin lancé sur http://localhost:${PORT}\n`);
+    console.log(`🚀 Serveur actif sur le port ${PORT}`);
 });
