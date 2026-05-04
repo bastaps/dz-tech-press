@@ -1,11 +1,12 @@
 // ===== CONFIG =====
 let allArticles = [];
 const ITEMS_PER_PAGE = 6;
-const TOTAL_ARTICLES = 23;
+const TOTAL_ARTICLES = 24;
 let currentPage = 1;
 let currentFilter = 'all';
 let currentTag = null;
 let articleViews = JSON.parse(localStorage.getItem('articleViews') || '{}');
+let currentEditingId = null; // Variable pour suivre l'article en cours de lecture/édition
 
 // ===== CONFIG AUDIO =====
 const synth = window.speechSynthesis;
@@ -43,6 +44,7 @@ async function loadArticles() {
             }
         }
 
+        allArticles = []; // Reset local avant chargement
         for (const fileName of articleFiles) {
             const res = await fetch(`articles/${fileName}`);
             if (res.ok) {
@@ -118,7 +120,7 @@ function parseMarkdownFile(text) {
         image: get('image'), 
         extrait: get('extrait'), 
         contenu: marked.parse(content), 
-        rawContent: content, 
+        rawContent: content.trim(), 
         tags, 
         readingTime 
     };
@@ -193,6 +195,14 @@ window.openArticle = function(id) {
     const art = allArticles.find(a => a.id === id);
     if (!art) return;
     
+    // Logique du bouton Admin (✏️ pour modifier)
+    currentEditingId = id;
+    const adminBtn = document.getElementById('adminBtn');
+    if (adminBtn) {
+        adminBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+        adminBtn.title = "Modifier cet article";
+    }
+
     art.views++;
     articleViews[id] = art.views;
     localStorage.setItem('articleViews', JSON.stringify(articleViews));
@@ -202,7 +212,6 @@ window.openArticle = function(id) {
     window.scrollTo({top:0, behavior:'smooth'});
     updateSEO(art);
 
-    // INSERTION AUDIO DANS META + ARTICLE
     let html = `
         <img src="${art.image}" alt="${art.titre}" loading="lazy">
         <div class="article-body">
@@ -212,7 +221,6 @@ window.openArticle = function(id) {
                 <span><i class="far fa-clock"></i> ${art.heure}</span>
                 <span class="reading-time"><i class="fas fa-book-open"></i> ${art.readingTime} min</span>
                 <span><i class="far fa-eye"></i> ${art.views} vues</span>
-                <!-- BOUTON AUDIO DANS LES META -->
                 <button class="meta-audio-btn" onclick="triggerAudio()">
                     <i class="fas fa-volume-up"></i> Écouter
                 </button>
@@ -239,10 +247,8 @@ window.openArticle = function(id) {
 
     document.getElementById('articleContent').innerHTML = html;
 
-    // INITIALISER AUDIO AVEC LE TEXTE
     initAudioReader(art.titre + ". " + art.rawContent);
 
-    // RELATED ARTICLES
     const rel = allArticles.filter(a => a.id !== id && a.categorie === art.categorie).slice(0, 3);
     const relBox = document.getElementById('relatedArticles');
     if (rel.length) {
@@ -258,20 +264,19 @@ window.openArticle = function(id) {
     document.title = art.titre + ' | DZ Tech Press';
 };
 
-// ===== LOGIQUE AUDIO AMÉLIORÉE =====
+// ===== LOGIQUE AUDIO =====
 function initAudioReader(textToRead) {
     const playBtn = document.getElementById('listenBtn');
     const stopBtn = document.getElementById('stopBtn');
     const stickyContainer = document.getElementById('stickyAudio');
 
-    // NETTOYAGE RADICAL POUR LA VOIX
     const cleanText = textToRead
-        .replace(/<[^>]*>/g, '') // Supprimer tout le HTML
-        .replace(/!\[.*?\]\(.*?\)/g, '') // Supprimer images markdown
-        .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Garder texte des liens
-        .replace(/[#*`~_]/g, '') // Supprimer symboles Markdown
-        .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '') // Supprimer emojis
-        .replace(/\n/g, ' ') // Sauts de ligne vers espaces
+        .replace(/<[^>]*>/g, '') 
+        .replace(/!\[.*?\]\(.*?\)/g, '') 
+        .replace(/\[(.*?)\]\(.*?\)/g, '$1') 
+        .replace(/[#*`~_]/g, '') 
+        .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '') 
+        .replace(/\n/g, ' ') 
         .trim();
 
     window.triggerAudio = () => {
@@ -317,6 +322,15 @@ function initAudioReader(textToRead) {
 // ===== GO HOME =====
 window.goHome = function() {
     if (synth) synth.cancel();
+    
+    // Logique du bouton Admin (+ pour créer)
+    currentEditingId = null;
+    const adminBtn = document.getElementById('adminBtn');
+    if (adminBtn) {
+        adminBtn.innerHTML = '<i class="fas fa-plus"></i>';
+        adminBtn.title = "Ajouter un article";
+    }
+
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('articlePage').style.display = 'none';
     document.getElementById('searchInput').value = '';
@@ -511,14 +525,37 @@ function initCounters() {
     document.querySelectorAll('.stat-number').forEach(c => obs.observe(c));
 }
 
+// ===== GESTION ADMIN MODIFIÉE =====
 window.toggleAdminPanel = function() {
     const password = prompt('🔒 Mot de passe:');
     if (password === ADMIN_PASSWORD) {
         const modal = document.getElementById('adminModal');
-        if (modal) modal.classList.add('show');
+        if (!modal) return;
+        
+        modal.classList.add('show');
         const now = new Date();
-        if (document.getElementById('date')) document.getElementById('date').valueAsDate = now;
-        if (document.getElementById('heure')) document.getElementById('heure').value = now.toTimeString().slice(0, 5);
+        
+        // Logique Différenciée : Modification vs Création
+        if (currentEditingId) {
+            const art = allArticles.find(a => a.id === currentEditingId);
+            if (art) {
+                document.getElementById('titre').value = art.titre;
+                document.getElementById('categorie').value = art.categorie;
+                document.getElementById('date').value = art.date;
+                document.getElementById('heure').value = art.heure;
+                document.getElementById('extrait').value = art.extrait;
+                document.getElementById('tags').value = art.tags.join(', ');
+                document.getElementById('contenu').value = art.rawContent;
+                document.querySelector('#adminModal h2').innerHTML = '<i class="fas fa-pencil-alt"></i> Modifier l\'article';
+            }
+        } else {
+            // Nouveau formulaire vide
+            document.getElementById('articleForm').reset();
+            document.getElementById('imagePreview').innerHTML = '';
+            if (document.getElementById('date')) document.getElementById('date').valueAsDate = now;
+            if (document.getElementById('heure')) document.getElementById('heure').value = now.toTimeString().slice(0, 5);
+            document.querySelector('#adminModal h2').innerHTML = '<i class="fas fa-newspaper"></i> Créer un nouvel article';
+        }
     } else if (password !== null) showToast('❌ Incorrect');
 };
 
@@ -526,7 +563,10 @@ window.closeAdminPanel = function() {
     const modal = document.getElementById('adminModal');
     if (modal) {
         modal.classList.remove('show');
-        setTimeout(() => { if (document.getElementById('articleForm')) document.getElementById('articleForm').reset(); if (document.getElementById('imagePreview')) document.getElementById('imagePreview').innerHTML = ''; }, 300);
+        setTimeout(() => { 
+            if (document.getElementById('articleForm')) document.getElementById('articleForm').reset(); 
+            if (document.getElementById('imagePreview')) document.getElementById('imagePreview').innerHTML = ''; 
+        }, 300);
     }
 };
 
@@ -556,7 +596,14 @@ window.submitArticle = async function(e) {
         const isCloudflare = window.location.hostname.includes('pages.dev');
         const apiUrl = isCloudflare ? `${REMOTE_API}/api/create-article` : '/api/create-article';
         const response = await fetch(apiUrl, { method: 'POST', body: formData });
-        if (response.ok) { showToast('✅ Déployé !'); setTimeout(() => { allArticles = []; loadArticles(); closeAdminPanel(); }, 2000); }
+        if (response.ok) { 
+            showToast('✅ Déployé !'); 
+            setTimeout(() => { 
+                allArticles = []; 
+                loadArticles(); 
+                closeAdminPanel(); 
+            }, 2000); 
+        }
         else { const error = await response.json(); showToast(`❌ ${error.message}`); }
     } catch (error) { showToast(`❌ Erreur`); }
 };
