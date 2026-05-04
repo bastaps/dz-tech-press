@@ -27,7 +27,6 @@
                 <span><i class="fas fa-thermometer-half"></i> 22°C</span>
             </div>
             <div class="top-bar-right">
-                <!-- CORRECTION: Liens sociaux actifs -->
                 <a href="https://facebook.com/dztechpress" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
                 <a href="https://twitter.com/dztechpress" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
                 <a href="https://linkedin.com/company/dztechpress" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
@@ -159,6 +158,16 @@
             <button class="back-btn" onclick="goHome()">
                 <i class="fas fa-arrow-left"></i> Retour à l'accueil
             </button>
+
+            <!-- NOUVELLE BARRE AUDIO AJOUTÉE ICI -->
+            <div id="audioPlayer" class="audio-player-container">
+                <button id="listenBtn" class="audio-main-btn"><i class="fas fa-play"></i> Écouter l'article</button>
+                <button id="stopBtn" class="audio-main-btn stop" style="display:none;"><i class="fas fa-stop"></i> Arrêter</button>
+                <div class="audio-visualizer">
+                    <div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div>
+                </div>
+            </div>
+
             <article class="article-content" id="articleContent"></article>
             <div class="related-articles" id="relatedArticles">
                 <h3>Vous pourriez aussi aimer</h3>
@@ -178,7 +187,6 @@
                         <a href="https://facebook.com/dztechpress" target="_blank"><i class="fab fa-facebook-f"></i></a>
                         <a href="https://twitter.com/dztechpress" target="_blank"><i class="fab fa-twitter"></i></a>
                         <a href="https://linkedin.com/company/dztechpress" target="_blank"><i class="fab fa-linkedin-in"></i></a>
-                        <!-- CORRECTION: Ajout de YouTube -->
                         <a href="https://youtube.com/@dztechpress" target="_blank"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>

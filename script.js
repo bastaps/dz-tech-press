@@ -7,8 +7,12 @@ let currentFilter = 'all';
 let currentTag = null;
 let articleViews = JSON.parse(localStorage.getItem('articleViews') || '{}');
 
+// ===== CONFIG AUDIO (NOUVEAU) =====
+const synth = window.speechSynthesis;
+let currentUtterance = null;
+
 // ===== CONFIG API DISTANTE (Render/Vercel) =====
-const REMOTE_API = 'https://dz-tech-press-api.onrender.com'; // ⚠️ À mettre à jour après déploiement
+const REMOTE_API = 'https://dz-tech-press-api.onrender.com'; 
 
 // ===== MOT DE PASSE ADMIN =====
 const ADMIN_PASSWORD = 'admin2026';
@@ -119,6 +123,7 @@ function parseMarkdownFile(text) {
         image: get('image'), 
         extrait: get('extrait'), 
         contenu: marked.parse(content), 
+        rawContent: content, // Gardé pour la lecture audio
         tags, 
         readingTime 
     };
@@ -159,6 +164,7 @@ function renderHero(arts) {
 function renderGrid(arts) {
     const grid = document.getElementById('newsGrid');
     
+    if (!grid) return;
     if (!arts.length) {
         grid.innerHTML = '<p style="text-align:center;padding:40px;">Aucun article.</p>';
         return;
@@ -186,51 +192,6 @@ function renderGrid(arts) {
 function renderTicker(arts) {
     const html = arts.map(a => `<span class="ticker-item">${a.titre}</span>`).join('');
     document.getElementById('breakingTicker').innerHTML = html + html;
-}
-
-// ===== PAGINATION =====
-function renderPagination(arts) {
-    const total = Math.ceil(arts.length / ITEMS_PER_PAGE);
-    const pag = document.getElementById('pagination');
-    pag.innerHTML = '';
-    
-    if (total <= 1) { 
-        document.getElementById('loadMoreBtn').classList.add('hidden'); 
-        return; 
-    }
-
-    for (let i = 1; i <= total; i++) {
-        const btn = document.createElement('button');
-        btn.textContent = i;
-        btn.className = i === currentPage ? 'active' : '';
-        btn.onclick = () => goToPage(i);
-        pag.appendChild(btn);
-    }
-
-    document.getElementById('loadMoreBtn').classList.toggle('hidden', currentPage >= total);
-}
-
-window.goToPage = function(p) {
-    currentPage = p;
-    const filtered = getFiltered();
-    const start = (p-1) * ITEMS_PER_PAGE;
-    renderGrid(filtered.slice(start, start + ITEMS_PER_PAGE));
-    renderPagination(filtered);
-    document.getElementById('newsGrid').scrollIntoView({behavior:'smooth'});
-};
-
-window.loadMoreArticles = function() {
-    currentPage++;
-    const filtered = getFiltered();
-    renderGrid(filtered.slice(0, currentPage * ITEMS_PER_PAGE));
-    renderPagination(filtered);
-};
-
-function getFiltered() {
-    let f = allArticles;
-    if (currentFilter !== 'all') f = f.filter(a => a.categorie === currentFilter);
-    if (currentTag) f = f.filter(a => a.tags && a.tags.includes(currentTag));
-    return f;
 }
 
 // ===== ARTICLE VIEW =====
@@ -282,6 +243,9 @@ window.openArticle = function(id) {
 
     document.getElementById('articleContent').innerHTML = html;
 
+    // --- INITIALISATION AUDIO (NOUVEAU) ---
+    initAudioReader(art.rawContent || art.titre + " " + art.extrait);
+
     const rel = allArticles.filter(a => a.id !== id && a.categorie === art.categorie).slice(0, 3);
     const relBox = document.getElementById('relatedArticles');
     
@@ -300,8 +264,65 @@ window.openArticle = function(id) {
     document.title = art.titre + ' | DZ Tech Press';
 };
 
+// ===== LOGIQUE AUDIO (NOUVEAU) =====
+function initAudioReader(textToRead) {
+    const playBtn = document.getElementById('listenBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const playerContainer = document.getElementById('audioPlayer');
+
+    if (!playBtn || !stopBtn) return;
+
+    // Nettoyage Markdown pour que la voix ne lise pas les symboles
+    const cleanText = textToRead
+        .replace(/#+/g, '') // Enlever les titres #
+        .replace(/!\[.*?\]\(.*?\)/g, '') // Enlever les images
+        .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Garder le texte des liens uniquement
+        .replace(/(\*\*|__)(.*?)\1/g, '$2') // Enlever le gras
+        .replace(/(\*|_)(.*?)\1/g, '$2') // Enlever l'italique
+        .replace(/`/g, '') // Enlever le code
+        .replace(/\n/g, ' '); // Remplacer sauts de ligne par espaces
+
+    playBtn.onclick = () => {
+        synth.cancel(); // Arrêter toute lecture en cours
+        
+        currentUtterance = new SpeechSynthesisUtterance(cleanText);
+        currentUtterance.lang = 'fr-FR';
+        currentUtterance.rate = 1.0;
+
+        currentUtterance.onstart = () => {
+            playBtn.style.display = 'none';
+            stopBtn.style.display = 'flex';
+            playerContainer.classList.add('playing');
+        };
+
+        currentUtterance.onend = () => {
+            resetAudioUI();
+        };
+
+        currentUtterance.onerror = () => {
+            resetAudioUI();
+        };
+
+        synth.speak(currentUtterance);
+    };
+
+    stopBtn.onclick = () => {
+        synth.cancel();
+        resetAudioUI();
+    };
+
+    function resetAudioUI() {
+        playBtn.style.display = 'flex';
+        stopBtn.style.display = 'none';
+        playerContainer.classList.remove('playing');
+    }
+}
+
 // ===== GO HOME =====
 window.goHome = function() {
+    // ARRETER L'AUDIO
+    if (synth) synth.cancel();
+
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('articlePage').style.display = 'none';
     document.getElementById('searchInput').value = '';
@@ -323,6 +344,52 @@ window.goHome = function() {
     document.title = 'DZ Tech Press — L\'info Tech & Télécoms en Algérie';
     window.scrollTo({top: 0, behavior: 'smooth'});
 };
+
+// ===== PAGINATION =====
+function renderPagination(arts) {
+    const total = Math.ceil(arts.length / ITEMS_PER_PAGE);
+    const pag = document.getElementById('pagination');
+    if(!pag) return;
+    pag.innerHTML = '';
+    
+    if (total <= 1) { 
+        if(document.getElementById('loadMoreBtn')) document.getElementById('loadMoreBtn').classList.add('hidden'); 
+        return; 
+    }
+
+    for (let i = 1; i <= total; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = i === currentPage ? 'active' : '';
+        btn.onclick = () => goToPage(i);
+        pag.appendChild(btn);
+    }
+
+    if(document.getElementById('loadMoreBtn')) document.getElementById('loadMoreBtn').classList.toggle('hidden', currentPage >= total);
+}
+
+window.goToPage = function(p) {
+    currentPage = p;
+    const filtered = getFiltered();
+    const start = (p-1) * ITEMS_PER_PAGE;
+    renderGrid(filtered.slice(start, start + ITEMS_PER_PAGE));
+    renderPagination(filtered);
+    document.getElementById('newsGrid').scrollIntoView({behavior:'smooth'});
+};
+
+window.loadMoreArticles = function() {
+    currentPage++;
+    const filtered = getFiltered();
+    renderGrid(filtered.slice(0, currentPage * ITEMS_PER_PAGE));
+    renderPagination(filtered);
+};
+
+function getFiltered() {
+    let f = allArticles;
+    if (currentFilter !== 'all') f = f.filter(a => a.categorie === currentFilter);
+    if (currentTag) f = f.filter(a => a.tags && a.tags.includes(currentTag));
+    return f;
+}
 
 // ===== SEARCH & FILTER =====
 document.getElementById('searchInput')?.addEventListener('input', e => {
@@ -408,12 +475,16 @@ function renderTags() {
     
     const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 15);
 
-    document.getElementById('tagCloud').innerHTML = sorted.map(([t,c]) => 
-        `<span class="tag-cloud-item" onclick="filterByTag('${t}')">${t} (${c})</span>`
-    ).join('');
+    if(document.getElementById('tagCloud')) {
+        document.getElementById('tagCloud').innerHTML = sorted.map(([t,c]) => 
+            `<span class="tag-cloud-item" onclick="filterByTag('${t}')">${t} (${c})</span>`
+        ).join('');
+    }
 
-    document.getElementById('tagFilters').innerHTML = `<span class="tag-filter active" onclick="filterByTag('all')">Tous</span>` + 
-        sorted.slice(0, 5).map(([t]) => `<span class="tag-filter" onclick="filterByTag('${t}')">${t}</span>`).join('');
+    if(document.getElementById('tagFilters')) {
+        document.getElementById('tagFilters').innerHTML = `<span class="tag-filter active" onclick="filterByTag('all')">Tous</span>` + 
+            sorted.slice(0, 5).map(([t]) => `<span class="tag-filter" onclick="filterByTag('${t}')">${t}</span>`).join('');
+    }
 }
 
 // ===== SHARE & UTILS =====
@@ -493,7 +564,7 @@ window.addEventListener('scroll', () => {
         const h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
         document.getElementById('readingProgress').style.width = ((window.scrollY / h) * 100) + '%';
     }
-    document.getElementById('backToTop').classList.toggle('visible', window.scrollY > 500);
+    if(document.getElementById('backToTop')) document.getElementById('backToTop').classList.toggle('visible', window.scrollY > 500);
 });
 
 // ===== COUNTERS =====
@@ -604,7 +675,6 @@ window.submitArticle = async function(e) {
         formData.append('contenu', contenu);
         formData.append('image', imageFile);
 
-        // 🎯 Détection : Cloudflare → API distante, Local → API locale
         const isCloudflare = window.location.hostname.includes('pages.dev');
         const apiUrl = isCloudflare ? `${REMOTE_API}/api/create-article` : '/api/create-article';
 
