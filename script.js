@@ -72,7 +72,7 @@ async function loadArticles() {
     }
 }
 
-// ===== PARSER =====
+// ===== PARSER (MODIFIÉ POUR TABLEAUX ET DISPOSITION) =====
 function parseMarkdownFile(text) {
     if (typeof marked === 'undefined') return { titre: 'Erreur', contenu: 'Librairie manquante', tags: [], readingTime: 0 };
     const parts = text.split('---');
@@ -97,7 +97,8 @@ function parseMarkdownFile(text) {
         categorie: get('categorie'), 
         image: get('image'), 
         extrait: get('extrait'), 
-        contenu: marked.parse(content), 
+        // OPTION "breaks: true" pour respecter les retours à la ligne exacts
+        contenu: marked.parse(content, { breaks: true, gfm: true }), 
         rawContent: content.trim(), 
         tags, 
         readingTime 
@@ -510,7 +511,6 @@ window.toggleAdminPanel = function() {
         modal.classList.add('show');
         const now = new Date();
 
-        // Nettoyage de l'ancien bouton supprimer s'il existe
         const oldDel = document.getElementById('dynamicDelBtn');
         if (oldDel) oldDel.remove();
         
@@ -531,7 +531,6 @@ window.toggleAdminPanel = function() {
                 }
                 document.querySelector('#adminModal h2').innerHTML = '<i class="fas fa-pencil-alt"></i> Modifier l\'article';
 
-                // AJOUT DU BOUTON SUPPRIMER DYNAMIQUEMENT
                 const delBtn = document.createElement('button');
                 delBtn.type = 'button';
                 delBtn.id = 'dynamicDelBtn';
@@ -621,7 +620,6 @@ window.submitArticle = async function(e) {
         const isCloudflare = window.location.hostname.includes('pages.dev');
         const apiUrl = isCloudflare ? `${REMOTE_API}/api/create-article` : '/api/create-article';
         
-        // On peut ajouter l'ID si c'est une modification
         if (currentEditingId) formData.append('id', currentEditingId);
 
         const response = await fetch(apiUrl, { method: 'POST', body: formData });

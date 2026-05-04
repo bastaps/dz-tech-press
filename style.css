@@ -186,7 +186,6 @@ body.dark-mode .top-bar { background: #020617; }
 .back-btn { background: var(--secondary); color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; margin-bottom: 30px; display: inline-flex; align-items: center; gap: 8px; transition: var(--transition); }
 .back-btn:hover { background: #b00d2b; transform: translateX(-5px); }
 
-/* --- NOUVELLE STRUCTURE WRAPPER POUR STICKY AUDIO --- */
 .article-wrapper {
     display: flex;
     gap: 30px;
@@ -247,12 +246,11 @@ body.dark-mode .top-bar { background: #020617; }
     box-shadow: var(--shadow-lg); 
 }
 
-.article-content img { width: 100%; max-height: 500px; object-fit: cover; }
+.article-content > img { width: 100%; max-height: 500px; object-fit: cover; }
 .article-body { padding: 40px; }
 .article-meta { display: flex; gap: 15px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid var(--border); font-size: 0.9rem; color: var(--text-muted); flex-wrap: wrap; align-items: center; }
 .article-meta span { display: flex; align-items: center; gap: 6px; }
 
-/* BOUTON ÉCOUTER DANS LES META */
 .meta-audio-btn {
     background: var(--bg);
     color: var(--primary);
@@ -278,6 +276,40 @@ body.dark-mode .top-bar { background: #020617; }
 .article-body h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.3; margin-bottom: 20px; color: var(--text-dark); }
 .article-body h2 { font-size: 1.5rem; color: var(--primary); margin: 30px 0 15px; border-left: 4px solid var(--secondary); padding-left: 15px; }
 .article-body p { font-size: 1.1rem; line-height: 1.8; color: #333; margin-bottom: 20px; }
+
+/* --- STYLE DES TABLEAUX ET IMAGES INTERNES --- */
+.article-text {
+    white-space: pre-wrap; /* Respecte les sauts de ligne et espaces originaux */
+}
+
+.article-text table {
+    width: 100%;
+    margin: 30px 0;
+    border-collapse: collapse;
+    overflow-x: auto;
+    display: block;
+    font-size: 0.95rem;
+}
+
+.article-text th, .article-text td {
+    padding: 12px 15px;
+    border: 1px solid var(--border);
+    text-align: left;
+}
+
+.article-text th {
+    background: var(--bg);
+    font-weight: 700;
+}
+
+.article-text img {
+    max-width: 350px; /* Images internes petites */
+    height: auto;
+    display: block;
+    margin: 25px auto;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+}
 
 .share-buttons { display: flex; gap: 10px; margin: 30px 0; padding: 20px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
 .share-btn { flex: 1; min-width: 120px; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition); color: #fff; }
@@ -314,7 +346,6 @@ body.dark-mode .top-bar { background: #020617; }
 .back-to-top.visible { display: flex; }
 .back-to-top:hover { background: var(--secondary); transform: translateY(-3px); }
 
-/* ADMIN PANEL */
 .admin-btn { position: fixed; bottom: 30px; right: 100px; width: 55px; height: 55px; background: linear-gradient(135deg, var(--secondary), #e84453); color: #fff; border: none; border-radius: 50%; cursor: pointer; font-size: 1.3rem; box-shadow: var(--shadow-lg); transition: var(--transition); z-index: 98; display: flex; align-items: center; justify-content: center; }
 .admin-btn:hover { transform: scale(1.1); box-shadow: 0 8px 20px rgba(210, 16, 52, 0.4); }
 .admin-btn:active { transform: scale(0.95); }
@@ -389,7 +420,6 @@ body.dark-mode .top-bar { background: #020617; }
     .article-body { padding: 25px; }
     .article-body h1 { font-size: 1.6rem; }
 
-    /* SUR MOBILE : AUDIO EN BAS FIXE */
     .audio-sticky-bar {
         position: fixed;
         bottom: 100px;
