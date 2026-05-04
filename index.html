@@ -79,14 +79,12 @@
 
     <!-- MAIN CONTENT -->
     <main id="mainContent">
-        <!-- HERO SECTION -->
         <section class="hero-section" id="heroSection">
             <div class="container">
                 <div class="hero-grid" id="heroGrid"></div>
             </div>
         </section>
 
-        <!-- CONTENT + SIDEBAR -->
         <section class="content-layout container">
             <div class="news-column">
                 <div class="section-header">
@@ -123,7 +121,6 @@
             </aside>
         </section>
 
-        <!-- STATS BAR -->
         <section class="stats-bar" id="statsSection">
             <div class="container">
                 <div class="stats-grid">
@@ -158,17 +155,22 @@
             <button class="back-btn" onclick="goHome()">
                 <i class="fas fa-arrow-left"></i> Retour à l'accueil
             </button>
-
-            <!-- NOUVELLE BARRE AUDIO AJOUTÉE ICI -->
-            <div id="audioPlayer" class="audio-player-container">
-                <button id="listenBtn" class="audio-main-btn"><i class="fas fa-play"></i> Écouter l'article</button>
-                <button id="stopBtn" class="audio-main-btn stop" style="display:none;"><i class="fas fa-stop"></i> Arrêter</button>
-                <div class="audio-visualizer">
-                    <div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div>
+            
+            <div class="article-wrapper">
+                <!-- LECTEUR AUDIO STICKY (Flottant à gauche) -->
+                <div id="stickyAudio" class="audio-sticky-bar">
+                    <button id="listenBtn" class="audio-fab" title="Écouter l'article">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button id="stopBtn" class="audio-fab stop" style="display:none;" title="Arrêter">
+                        <i class="fas fa-stop"></i>
+                    </button>
+                    <div class="audio-status">ÉCOUTER</div>
                 </div>
+
+                <article class="article-content" id="articleContent"></article>
             </div>
 
-            <article class="article-content" id="articleContent"></article>
             <div class="related-articles" id="relatedArticles">
                 <h3>Vous pourriez aussi aimer</h3>
                 <div class="related-grid" id="relatedGrid"></div>
@@ -223,12 +225,10 @@
         <i class="fas fa-arrow-up"></i>
     </button>
 
-    <!-- ADMIN BUTTON -->
     <button class="admin-btn" id="adminBtn" onclick="toggleAdminPanel()" title="Ajouter un article">
         <i class="fas fa-plus"></i>
     </button>
 
-    <!-- ADMIN MODAL -->
     <div class="admin-modal" id="adminModal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeAdminPanel()">
@@ -236,12 +236,10 @@
             </button>
             <h2><i class="fas fa-newspaper"></i> Créer un nouvel article</h2>
             <form id="articleForm" onsubmit="submitArticle(event)">
-                
                 <div class="form-group">
                     <label>Titre <span class="required">*</span></label>
                     <input type="text" id="titre" required maxlength="200" placeholder="Titre de l'article">
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label>Catégorie <span class="required">*</span></label>
@@ -263,17 +261,14 @@
                         <input type="time" id="heure" required>
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label>Extrait <span class="required">*</span></label>
                     <textarea id="extrait" required maxlength="300" placeholder="Résumé de l'article (max 300 caractères)" rows="3"></textarea>
                 </div>
-
                 <div class="form-group">
-                    <label>Tags (séparés par des virgules) <span class="required">*</span></label>
-                    <input type="text" id="tags" required placeholder="Ex: Numérisation, Gouvernance, Ministère">
+                    <label>Tags <span class="required">*</span></label>
+                    <input type="text" id="tags" required placeholder="Ex: Numérisation, Gouvernance">
                 </div>
-
                 <div class="form-group">
                     <label>Image <span class="required">*</span></label>
                     <div class="file-input-wrapper">
@@ -282,24 +277,19 @@
                     </div>
                     <div id="imagePreview" class="image-preview"></div>
                 </div>
-
                 <div class="form-group">
                     <label>Contenu <span class="required">*</span></label>
-                    <textarea id="contenu" required placeholder="Contenu de l'article (Markdown supporté)" rows="10"></textarea>
+                    <textarea id="contenu" required placeholder="Markdown supporté" rows="10"></textarea>
                 </div>
-
                 <div class="form-actions">
                     <button type="button" class="btn-secondary" onclick="closeAdminPanel()">Annuler</button>
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-save"></i> Créer & Déployer
-                    </button>
+                    <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Créer & Déployer</button>
                 </div>
             </form>
         </div>
     </div>
 
     <div class="toast" id="toast"></div>
-
     <script src="script.js"></script>
 </body>
 </html>

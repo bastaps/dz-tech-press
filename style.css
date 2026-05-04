@@ -185,11 +185,95 @@ body.dark-mode .top-bar { background: #020617; }
 .article-page { background: var(--article-bg); min-height: 100vh; padding: 60px 0 100px; }
 .back-btn { background: var(--secondary); color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; margin-bottom: 30px; display: inline-flex; align-items: center; gap: 8px; transition: var(--transition); }
 .back-btn:hover { background: #b00d2b; transform: translateX(-5px); }
-.article-content { background: var(--bg-white); max-width: 800px; margin: 0 auto; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-lg); }
+
+/* --- NOUVELLE STRUCTURE WRAPPER POUR STICKY AUDIO --- */
+.article-wrapper {
+    display: flex;
+    gap: 30px;
+    max-width: 950px;
+    margin: 0 auto;
+    position: relative;
+    align-items: flex-start;
+}
+
+.audio-sticky-bar {
+    position: sticky;
+    top: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 60px;
+    z-index: 10;
+}
+
+.audio-fab {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.audio-fab:hover {
+    transform: scale(1.1);
+    background: var(--primary-dark);
+}
+
+.audio-fab.stop {
+    background: var(--secondary);
+}
+
+.audio-status {
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+}
+
+.article-content { 
+    background: var(--bg-white); 
+    flex: 1;
+    border-radius: var(--radius); 
+    overflow: hidden; 
+    box-shadow: var(--shadow-lg); 
+}
+
 .article-content img { width: 100%; max-height: 500px; object-fit: cover; }
 .article-body { padding: 40px; }
 .article-meta { display: flex; gap: 15px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid var(--border); font-size: 0.9rem; color: var(--text-muted); flex-wrap: wrap; align-items: center; }
 .article-meta span { display: flex; align-items: center; gap: 6px; }
+
+/* BOUTON ÉCOUTER DANS LES META */
+.meta-audio-btn {
+    background: var(--bg);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition);
+}
+
+.meta-audio-btn:hover {
+    background: var(--primary);
+    color: #fff;
+}
+
 .reading-time { background: var(--bg); padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; color: var(--text-dark); }
 .article-body h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.3; margin-bottom: 20px; color: var(--text-dark); }
 .article-body h2 { font-size: 1.5rem; color: var(--primary); margin: 30px 0 15px; border-left: 4px solid var(--secondary); padding-left: 15px; }
@@ -292,6 +376,7 @@ body.dark-mode .top-bar { background: #020617; }
     .footer-grid { grid-template-columns: repeat(2, 1fr); }
     .main-nav { display: none; }
 }
+
 @media (max-width: 768px) {
     .top-bar { display: none; }
     .hero-side-card { grid-template-columns: 1fr; height: auto; }
@@ -303,108 +388,19 @@ body.dark-mode .top-bar { background: #020617; }
     .footer-grid { grid-template-columns: 1fr; }
     .article-body { padding: 25px; }
     .article-body h1 { font-size: 1.6rem; }
-}
-/* ===== PASSWORD PROTECTION STYLING ===== */
-.admin-modal.show {
-    display: flex;
-}
 
-.admin-modal-content {
-    animation: modalSlideIn 0.3s ease;
-}
-
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-50px);
+    /* SUR MOBILE : AUDIO EN BAS FIXE */
+    .audio-sticky-bar {
+        position: fixed;
+        bottom: 100px;
+        right: 20px;
+        top: auto;
+        width: auto;
+        flex-direction: row;
+        background: var(--bg-white);
+        padding: 10px;
+        border-radius: 40px;
+        box-shadow: var(--shadow-lg);
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Amélioration du bouton Admin */
-.admin-toggle {
-    transition: all 0.3s ease;
-}
-
-.admin-toggle:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(192, 57, 43, 0.3);
-}
-
-/* ===== AUDIO PLAYER STYLING (DZ TECH PRESS STYLE) ===== */
-.audio-player-container {
-    background: var(--bg-white);
-    padding: 15px 25px;
-    border-radius: var(--radius);
-    margin-bottom: 25px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    border-left: 5px solid var(--primary);
-    box-shadow: var(--shadow-sm);
-}
-
-.audio-main-btn {
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 30px;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: var(--transition);
-}
-
-.audio-main-btn:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-}
-
-.audio-main-btn.stop {
-    background: var(--secondary);
-}
-
-.audio-main-btn.stop:hover {
-    background: #b00d2b;
-}
-
-.audio-visualizer {
-    display: none;
-    align-items: flex-end;
-    gap: 4px;
-    height: 20px;
-}
-
-.audio-player-container.playing .audio-visualizer {
-    display: flex;
-}
-
-.v-bar {
-    width: 4px;
-    height: 5px;
-    background: var(--primary);
-    border-radius: 2px;
-    animation: audioWave 0.6s ease-in-out infinite alternate;
-}
-
-.v-bar:nth-child(2) { animation-delay: 0.2s; }
-.v-bar:nth-child(3) { animation-delay: 0.4s; }
-.v-bar:nth-child(4) { animation-delay: 0.1s; }
-
-@keyframes audioWave {
-    from { height: 5px; }
-    to { height: 20px; }
-}
-
-/* Adapt for Dark Mode */
-body.dark-mode .audio-player-container {
-    background: var(--bg-white);
-    border-color: var(--primary);
+    .audio-status { display: none; }
 }
