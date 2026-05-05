@@ -42,9 +42,7 @@ async function loadArticles() {
         if (!listResponse.ok) throw new Error('Impossible de charger la liste');
         const articleFiles = await listResponse.json();
 
-        allArticles = [];
-        
-        // Chargement en parallèle pour plus de rapidité
+        // Chargement en parallèle de tous les fichiers .md
         const articlePromises = articleFiles.map(async (fileName) => {
             const res = await fetch(`${API_BASE}/api/article-content/${fileName}`);
             if (res.ok) {
@@ -65,6 +63,7 @@ async function loadArticles() {
         const results = await Promise.all(articlePromises);
         allArticles = results.filter(a => a !== null);
 
+        // Tri par date (plus récent en premier)
         allArticles.sort((a, b) => new Date(b.date) - new Date(a.date));
         
         if (allArticles.length) {
@@ -229,6 +228,23 @@ window.openArticle = function(id) {
 
     document.getElementById('articleContent').innerHTML = html;
     initAudioReader(art.titre + ". " + art.rawContent);
+
+    // --- RESTAURATION DE LA SECTION "VOUS POURRIEZ AUSSI AIMER" ---
+    const rel = allArticles.filter(a => a.id != id && a.categorie === art.categorie).slice(0, 3);
+    const relBox = document.getElementById('relatedArticles');
+    const relGrid = document.getElementById('relatedGrid');
+    
+    if (rel.length > 0 && relBox && relGrid) {
+        relBox.style.display = 'block';
+        relGrid.innerHTML = rel.map(a => `
+            <div class="related-card" onclick="openArticle('${a.id}')">
+                <img src="${a.image}" onerror="this.src='https://via.placeholder.com/400x200?text=Indisponible'">
+                <h4>${a.titre}</h4>
+            </div>
+        `).join('');
+    } else if (relBox) {
+        relBox.style.display = 'none';
+    }
 };
 
 // ===== LOGIQUE AUDIO =====
@@ -350,13 +366,11 @@ function loadTheme() {
 }
 
 window.addEventListener('scroll', () => {
-    // Barre de progression de lecture
     if (document.getElementById('articlePage').style.display !== 'none') {
         const h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
         const progress = document.getElementById('readingProgress');
         if(progress) progress.style.width = ((window.scrollY / h) * 100) + '%';
     }
-    // Affichage de la flèche verte (Back to top)
     const btt = document.getElementById('backToTop');
     if(btt) btt.classList.toggle('visible', window.scrollY > 500);
 });
