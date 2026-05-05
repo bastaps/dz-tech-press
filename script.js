@@ -42,7 +42,9 @@ async function loadArticles() {
         if (!listResponse.ok) throw new Error('Impossible de charger la liste');
         const articleFiles = await listResponse.json();
 
-        // Chargement en parallèle de tous les fichiers .md
+        allArticles = [];
+        
+        // Chargement en parallèle pour plus de rapidité
         const articlePromises = articleFiles.map(async (fileName) => {
             const res = await fetch(`${API_BASE}/api/article-content/${fileName}`);
             if (res.ok) {
@@ -63,7 +65,6 @@ async function loadArticles() {
         const results = await Promise.all(articlePromises);
         allArticles = results.filter(a => a !== null);
 
-        // Tri par date (plus récent en premier)
         allArticles.sort((a, b) => new Date(b.date) - new Date(a.date));
         
         if (allArticles.length) {
@@ -227,9 +228,11 @@ window.openArticle = function(id) {
         </div>`;
 
     document.getElementById('articleContent').innerHTML = html;
+    
+    // Initialisation lecteur audio
     initAudioReader(art.titre + ". " + art.rawContent);
 
-    // --- RESTAURATION DE LA SECTION "VOUS POURRIEZ AUSSI AIMER" ---
+    // Section "Vous pourriez aussi aimer"
     const rel = allArticles.filter(a => a.id != id && a.categorie === art.categorie).slice(0, 3);
     const relBox = document.getElementById('relatedArticles');
     const relGrid = document.getElementById('relatedGrid');
@@ -247,32 +250,52 @@ window.openArticle = function(id) {
     }
 };
 
-// ===== LOGIQUE AUDIO =====
+// ===== LOGIQUE AUDIO (CORRIGÉE) =====
 function initAudioReader(textToRead) {
     const playBtn = document.getElementById('listenBtn');
     const stopBtn = document.getElementById('stopBtn');
+    const stickyContainer = document.getElementById('stickyAudio');
+    
     const cleanText = textToRead.replace(/<[^>]*>/g, '').replace(/\n/g, ' ').trim();
 
+    function resetAudioUI() {
+        if(playBtn) playBtn.style.display = 'flex';
+        if(stopBtn) stopBtn.style.display = 'none';
+        if(stickyContainer) stickyContainer.classList.remove('playing');
+    }
+
     window.triggerAudio = () => {
-        if (synth.speaking) { synth.cancel(); resetAudioUI(); } 
-        else { startReading(); }
+        if (synth.speaking) {
+            synth.cancel();
+            resetAudioUI();
+        } else {
+            startReading();
+        }
     };
 
     function startReading() {
         synth.cancel();
         currentUtterance = new SpeechSynthesisUtterance(cleanText);
         currentUtterance.lang = 'fr-FR';
+        
         currentUtterance.onstart = () => {
             if(playBtn) playBtn.style.display = 'none';
             if(stopBtn) stopBtn.style.display = 'flex';
+            if(stickyContainer) stickyContainer.classList.add('playing');
         };
+
         currentUtterance.onend = resetAudioUI;
+        currentUtterance.onerror = resetAudioUI;
+
         synth.speak(currentUtterance);
     }
 
-    function resetAudioUI() {
-        if(playBtn) playBtn.style.display = 'flex';
-        if(stopBtn) stopBtn.style.display = 'none';
+    if(playBtn) playBtn.onclick = startReading;
+    if(stopBtn) {
+        stopBtn.onclick = () => {
+            synth.cancel();
+            resetAudioUI();
+        };
     }
 }
 
