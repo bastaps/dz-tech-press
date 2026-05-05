@@ -21,7 +21,6 @@ const ADMIN_PASSWORD = 'admin2026';
 
 // ===== INITIALISATION AU CHARGEMENT =====
 window.addEventListener('load', () => {
-    // Masquer le loader après 0.6s
     setTimeout(() => {
         const loader = document.getElementById('loader');
         if(loader) loader.classList.add('hidden');
@@ -31,41 +30,41 @@ window.addEventListener('load', () => {
     loadArticles();
 });
 
-// Affichage de la date du jour
 const dateSpan = document.getElementById('currentDate');
 if(dateSpan) {
     dateSpan.textContent = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-// ===== CHARGEMENT DES ARTICLES (VIA API) =====
+// ===== CHARGEMENT DES ARTICLES (OPTIMISÉ - PARALLÈLE) =====
 async function loadArticles() {
     try {
-        // 1. On demande la liste des fichiers .md au serveur
         const listResponse = await fetch(`${API_BASE}/api/articles`);
         if (!listResponse.ok) throw new Error('Impossible de charger la liste');
         const articleFiles = await listResponse.json();
 
         allArticles = [];
-        // 2. Pour chaque fichier, on récupère son contenu
-        for (const fileName of articleFiles) {
+        
+        // Chargement en parallèle pour plus de rapidité
+        const articlePromises = articleFiles.map(async (fileName) => {
             const res = await fetch(`${API_BASE}/api/article-content/${fileName}`);
             if (res.ok) {
                 const text = await res.text();
                 const art = parseMarkdownFile(text);
-                art.id = fileName.replace('.md', ''); // L'ID est le nom du fichier
+                art.id = fileName.replace('.md', '');
                 
-                // Correction du chemin des images pour Cloudflare
-                // Si on est sur le web, on pointe vers GitHub pour les images
                 if (!isLocal && art.image && !art.image.startsWith('http')) {
                     art.image = `https://raw.githubusercontent.com/bastaps/dz-tech-press/main/${art.image}`;
                 }
 
                 art.views = articleViews[art.id] || Math.floor(Math.random() * 500) + 50;
-                allArticles.push(art);
+                return art;
             }
-        }
+            return null;
+        });
 
-        // Tri par date décroissante
+        const results = await Promise.all(articlePromises);
+        allArticles = results.filter(a => a !== null);
+
         allArticles.sort((a, b) => new Date(b.date) - new Date(a.date));
         
         if (allArticles.length) {
@@ -79,7 +78,6 @@ async function loadArticles() {
         }
     } catch (e) {
         console.error('Erreur de chargement:', e);
-        showToast("Erreur de connexion au serveur");
     }
 }
 
@@ -115,7 +113,7 @@ function parseMarkdownFile(text) {
     };
 }
 
-// ===== FONCTIONS D'AFFICHAGE (RENDER) =====
+// ===== FONCTIONS D'AFFICHAGE =====
 
 function renderHero(arts) {
     const h = arts[0];
@@ -152,10 +150,6 @@ function renderHero(arts) {
 function renderGrid(arts) {
     const grid = document.getElementById('newsGrid');
     if (!grid) return;
-    if (!arts.length) {
-        grid.innerHTML = '<p style="text-align:center;padding:40px;">Aucun article trouvé.</p>';
-        return;
-    }
     grid.innerHTML = arts.map((a, i) => `
         <div class="news-card" style="animation-delay:${i*0.1}s" onclick="openArticle('${a.id}')">
             <div class="news-card-img">
@@ -237,16 +231,11 @@ window.openArticle = function(id) {
     initAudioReader(art.titre + ". " + art.rawContent);
 };
 
-// ===== LOGIQUE AUDIO (LECTURE VOCALE) =====
+// ===== LOGIQUE AUDIO =====
 function initAudioReader(textToRead) {
     const playBtn = document.getElementById('listenBtn');
     const stopBtn = document.getElementById('stopBtn');
-    const stickyContainer = document.getElementById('stickyAudio');
-
-    const cleanText = textToRead
-        .replace(/<[^>]*>/g, '') 
-        .replace(/\n/g, ' ') 
-        .trim();
+    const cleanText = textToRead.replace(/<[^>]*>/g, '').replace(/\n/g, ' ').trim();
 
     window.triggerAudio = () => {
         if (synth.speaking) { synth.cancel(); resetAudioUI(); } 
@@ -258,20 +247,17 @@ function initAudioReader(textToRead) {
         currentUtterance = new SpeechSynthesisUtterance(cleanText);
         currentUtterance.lang = 'fr-FR';
         currentUtterance.onstart = () => {
-            playBtn.style.display = 'none';
-            stopBtn.style.display = 'flex';
+            if(playBtn) playBtn.style.display = 'none';
+            if(stopBtn) stopBtn.style.display = 'flex';
         };
         currentUtterance.onend = resetAudioUI;
         synth.speak(currentUtterance);
     }
 
     function resetAudioUI() {
-        playBtn.style.display = 'flex';
-        stopBtn.style.display = 'none';
+        if(playBtn) playBtn.style.display = 'flex';
+        if(stopBtn) stopBtn.style.display = 'none';
     }
-
-    if(playBtn) playBtn.onclick = startReading;
-    if(stopBtn) stopBtn.onclick = () => { synth.cancel(); resetAudioUI(); };
 }
 
 // ===== RETOUR ACCUEIL =====
@@ -279,9 +265,7 @@ window.goHome = function() {
     if (synth) synth.cancel();
     currentEditingId = null;
     const adminBtn = document.getElementById('adminBtn');
-    if (adminBtn) {
-        adminBtn.innerHTML = '<i class="fas fa-plus"></i>';
-    }
+    if (adminBtn) adminBtn.innerHTML = '<i class="fas fa-plus"></i>';
 
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('articlePage').style.display = 'none';
@@ -355,7 +339,7 @@ function renderTags() {
     }
 }
 
-// ===== THEME ET UTILITAIRES =====
+// ===== THEME ET BOUTON RETOUR EN HAUT =====
 window.toggleTheme = () => {
     document.body.classList.toggle('dark-mode');
     localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
@@ -365,12 +349,24 @@ function loadTheme() {
     if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
 }
 
-window.showToast = (msg) => {
+window.addEventListener('scroll', () => {
+    // Barre de progression de lecture
+    if (document.getElementById('articlePage').style.display !== 'none') {
+        const h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const progress = document.getElementById('readingProgress');
+        if(progress) progress.style.width = ((window.scrollY / h) * 100) + '%';
+    }
+    // Affichage de la flèche verte (Back to top)
+    const btt = document.getElementById('backToTop');
+    if(btt) btt.classList.toggle('visible', window.scrollY > 500);
+});
+
+function showToast(msg) {
     const t = document.getElementById('toast');
     if (!t) return;
     t.textContent = msg; t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3000);
-};
+}
 
 function cls(c) {
     const maps = { 'Algérie':'tag-algerie','Télécoms':'tag-telecoms','Mobile':'tag-mobile','Startups':'tag-startups','Innovation':'tag-innovation' };
@@ -395,7 +391,7 @@ function initCounters() {
     document.querySelectorAll('.stat-number').forEach(c => obs.observe(c));
 }
 
-// ===== GESTION ADMIN (CREER / MODIFIER / SUPPRIMER) =====
+// ===== GESTION ADMIN =====
 
 window.toggleAdminPanel = function() {
     const pass = prompt('🔒 Mot de passe Admin:');
@@ -414,7 +410,6 @@ window.toggleAdminPanel = function() {
         document.getElementById('tags').value = art.tags.join(', ');
         document.getElementById('contenu').value = art.rawContent;
         
-        // Bouton supprimer visible seulement en mode édition
         if(!document.getElementById('delBtn')) {
             const delBtn = document.createElement('button');
             delBtn.id = 'delBtn';
@@ -455,12 +450,8 @@ window.submitArticle = async function(e) {
         if (response.ok) { 
             showToast('✅ Article enregistré !'); 
             setTimeout(() => window.location.reload(), 2000); 
-        } else {
-            showToast('❌ Erreur lors de l\'enregistrement');
         }
-    } catch (error) {
-        showToast('❌ Erreur réseau');
-    }
+    } catch (error) { showToast('❌ Erreur réseau'); }
 };
 
 async function deleteArticle() {
@@ -486,7 +477,6 @@ window.previewImage = function(e) {
     }
 };
 
-// Partage
 window.share = (p) => {
     const u = encodeURIComponent(window.location.href);
     const t = encodeURIComponent(document.title);
