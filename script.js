@@ -28,6 +28,7 @@ window.addEventListener('load', () => {
     
     loadTheme();
     loadArticles();
+    updateWeather(); // Météo au démarrage
 });
 
 const dateSpan = document.getElementById('currentDate');
@@ -420,7 +421,7 @@ function initCounters() {
     document.querySelectorAll('.stat-number').forEach(c => obs.observe(c));
 }
 
-// ===== GESTION ADMIN (CORRECTIONS IMAGE INCLUSES) =====
+// ===== GESTION ADMIN =====
 
 window.toggleAdminPanel = function() {
     const pass = prompt('🔒 Mot de passe Admin:');
@@ -439,7 +440,6 @@ window.toggleAdminPanel = function() {
         document.getElementById('tags').value = art.tags.join(', ');
         document.getElementById('contenu').value = art.rawContent;
         
-        // --- AFFICHAGE DE L'IMAGE ACTUELLE ---
         if (document.getElementById('imagePreview')) {
             document.getElementById('imagePreview').innerHTML = `<p style="font-size:0.8rem;margin-bottom:5px;">Image actuelle :</p><img src="${art.image}" style="max-width:100%; border-radius:8px;">`;
         }
@@ -479,7 +479,6 @@ window.submitArticle = async function(e) {
     if (imgFile) {
         formData.append('image', imgFile);
     } else if (currentEditingId) {
-        // --- CONSERVER L'IMAGE EXISTANTE SI AUCUN NOUVEAU FICHIER ---
         const art = allArticles.find(a => a.id == currentEditingId);
         formData.append('existingImage', art.image);
     }
@@ -534,3 +533,35 @@ window.copyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     showToast('Lien copié !');
 };
+
+// ===== NOUVELLE FONCTION MÉTÉO (CORRIGÉE ICONES ET LIENS) =====
+async function updateWeather() {
+    const widget = document.getElementById('weatherWidget');
+    if (!widget) return;
+    try {
+        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=36.7525&longitude=3.04197&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m');
+        const data = await response.json();
+        
+        const temp = Math.round(data.current.temperature_2m);
+        const code = data.current.weather_code;
+        const hum = data.current.relative_humidity_2m;
+        const wind = data.current.wind_speed_10m;
+
+        // Choix de l'icône descriptive
+        let icon = 'fa-sun'; 
+        let color = '#fbbf24'; // Jaune soleil
+        
+        if (code >= 1 && code <= 3) { icon = 'fa-cloud-sun'; color = '#94a3b8'; } // Nuage-soleil
+        if (code >= 45 && code <= 48) { icon = 'fa-smog'; color = '#64748b'; } // Brouillard
+        if (code >= 51 && code <= 67) { icon = 'fa-cloud-rain'; color = '#60a5fa'; } // Pluie légère
+        if (code >= 71 && code <= 77) { icon = 'fa-snowflake'; color = '#bae6fd'; } // Neige
+        if (code >= 80 && code <= 82) { icon = 'fa-cloud-showers-heavy'; color = '#2563eb'; } // Grosses averses
+        if (code >= 95) { icon = 'fa-bolt'; color = '#ef4444'; } // Alerte Orage (Rouge)
+
+        widget.innerHTML = `<i class="fas ${icon}" style="color:${color}; margin-right:5px;"></i> ${temp}°C`;
+        widget.title = `Météo Alger - Humidité: ${hum}% | Vent: ${wind} km/h`;
+        
+    } catch (e) {
+        widget.innerHTML = `<i class="fas fa-sun" style="color:#fbbf24"></i> 22°C`;
+    }
+}

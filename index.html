@@ -24,7 +24,10 @@
             <div class="top-bar-left">
                 <span><i class="fas fa-calendar-alt"></i> <span id="currentDate"></span></span>
                 <span><i class="fas fa-map-marker-alt"></i> Alger, Algérie</span>
-                <span><i class="fas fa-thermometer-half"></i> 22°C</span>
+                <!-- MODIFICATION MÉTÉO : LIEN ET ICONE -->
+                <span id="weatherWidget" style="cursor:pointer" onclick="window.open('https://www.meteo.dz/', '_blank')">
+                    <i class="fas fa-cloud-sun"></i> --°C
+                </span>
             </div>
             <div class="top-bar-right">
                 <a href="https://facebook.com/dztechpress" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
@@ -157,7 +160,6 @@
             </button>
             
             <div class="article-wrapper">
-                <!-- LECTEUR AUDIO STICKY (Flottant à gauche) -->
                 <div id="stickyAudio" class="audio-sticky-bar">
                     <button id="listenBtn" class="audio-fab" title="Écouter l'article">
                         <i class="fas fa-play"></i>
@@ -272,7 +274,7 @@
                 <div class="form-group">
                     <label>Image <span class="required">*</span></label>
                     <div class="file-input-wrapper">
-                        <input type="file" id="image" name="image" accept="image/*" required onchange="previewImage(event)">
+                        <input type="file" id="image" name="image" accept="image/*" onchange="previewImage(event)">
                         <label for="image" class="file-label"><i class="fas fa-cloud-upload-alt"></i> Choisir une image</label>
                     </div>
                     <div id="imagePreview" class="image-preview"></div>
