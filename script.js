@@ -1,62 +1,72 @@
-// ===== CONFIG =====
+// ===== CONFIGURATION GLOBALE =====
 let allArticles = [];
 const ITEMS_PER_PAGE = 6;
-const TOTAL_ARTICLES = 23;
 let currentPage = 1;
 let currentFilter = 'all';
 let currentTag = null;
 let articleViews = JSON.parse(localStorage.getItem('articleViews') || '{}');
 let currentEditingId = null; 
 
-// ===== CONFIG AUDIO =====
+// Configuration Audio
 const synth = window.speechSynthesis;
 let currentUtterance = null;
 
-// ===== API DISTANTE =====
-const REMOTE_API = 'https://dz-tech-press-api.onrender.com'; 
+// Détection automatique de l'adresse du serveur (Backend)
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const REMOTE_API = 'https://dz-tech-press-api.onrender.com';
+const API_BASE = isLocal ? '' : REMOTE_API;
 
-// ===== MOT DE PASSE ADMIN =====
+// Mot de passe Admin
 const ADMIN_PASSWORD = 'admin2026';
 
-// ===== INIT =====
+// ===== INITIALISATION AU CHARGEMENT =====
 window.addEventListener('load', () => {
-    setTimeout(() => document.getElementById('loader').classList.add('hidden'), 600);
+    // Masquer le loader après 0.6s
+    setTimeout(() => {
+        const loader = document.getElementById('loader');
+        if(loader) loader.classList.add('hidden');
+    }, 600);
+    
     loadTheme();
     loadArticles();
 });
 
-document.getElementById('currentDate').textContent = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+// Affichage de la date du jour
+const dateSpan = document.getElementById('currentDate');
+if(dateSpan) {
+    dateSpan.textContent = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
 
-// ===== CHARGEMENT =====
+// ===== CHARGEMENT DES ARTICLES (VIA API) =====
 async function loadArticles() {
     try {
-        let articleFiles = [];
-        const listResponse = await fetch('/articles/list.json');
-        
-        if (listResponse.ok) {
-            articleFiles = await listResponse.json();
-        } else {
-            const apiResponse = await fetch('/api/articles');
-            if (apiResponse.ok) {
-                articleFiles = await apiResponse.json();
-            } else {
-                throw new Error('Impossible de récupérer la liste des articles');
-            }
-        }
+        // 1. On demande la liste des fichiers .md au serveur
+        const listResponse = await fetch(`${API_BASE}/api/articles`);
+        if (!listResponse.ok) throw new Error('Impossible de charger la liste');
+        const articleFiles = await listResponse.json();
 
         allArticles = [];
+        // 2. Pour chaque fichier, on récupère son contenu
         for (const fileName of articleFiles) {
-            const res = await fetch(`articles/${fileName}`);
+            const res = await fetch(`${API_BASE}/api/article-content/${fileName}`);
             if (res.ok) {
                 const text = await res.text();
                 const art = parseMarkdownFile(text);
-                art.id = parseInt(fileName.replace('.md', ''), 10);
+                art.id = fileName.replace('.md', ''); // L'ID est le nom du fichier
+                
+                // Correction du chemin des images pour Cloudflare
+                // Si on est sur le web, on pointe vers GitHub pour les images
+                if (!isLocal && art.image && !art.image.startsWith('http')) {
+                    art.image = `https://raw.githubusercontent.com/bastaps/dz-tech-press/main/${art.image}`;
+                }
+
                 art.views = articleViews[art.id] || Math.floor(Math.random() * 500) + 50;
                 allArticles.push(art);
             }
         }
 
-        allArticles.sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
+        // Tri par date décroissante
+        allArticles.sort((a, b) => new Date(b.date) - new Date(a.date));
         
         if (allArticles.length) {
             renderHero(allArticles);
@@ -68,11 +78,12 @@ async function loadArticles() {
             initCounters();
         }
     } catch (e) {
-        console.warn('Erreur chargement articles:', e);
+        console.error('Erreur de chargement:', e);
+        showToast("Erreur de connexion au serveur");
     }
 }
 
-// ===== PARSER (MODIFIÉ POUR TABLEAUX ET DISPOSITION) =====
+// Parser Markdown
 function parseMarkdownFile(text) {
     if (typeof marked === 'undefined') return { titre: 'Erreur', contenu: 'Librairie manquante', tags: [], readingTime: 0 };
     const parts = text.split('---');
@@ -87,7 +98,7 @@ function parseMarkdownFile(text) {
     };
 
     const tagsMatch = fm.match(/tags:\s*\[(.*)\]/);
-    const tags = tagsMatch ? tagsMatch[1].split(',').map(t => t.trim()) : [];
+    const tags = tagsMatch ? tagsMatch[1].split(',').map(t => t.trim().replace(/"/g, '')) : [];
     const readingTime = Math.ceil(content.split(/\s+/).length / 200);
 
     return { 
@@ -97,7 +108,6 @@ function parseMarkdownFile(text) {
         categorie: get('categorie'), 
         image: get('image'), 
         extrait: get('extrait'), 
-        // OPTION "breaks: true" pour respecter les retours à la ligne exacts
         contenu: marked.parse(content, { breaks: true, gfm: true }), 
         rawContent: content.trim(), 
         tags, 
@@ -105,15 +115,17 @@ function parseMarkdownFile(text) {
     };
 }
 
-// ===== RENDER HERO =====
+// ===== FONCTIONS D'AFFICHAGE (RENDER) =====
+
 function renderHero(arts) {
     const h = arts[0];
     const s = arts.slice(1, 3);
-    if(!document.getElementById('heroGrid')) return;
+    const grid = document.getElementById('heroGrid');
+    if(!grid || !h) return;
     
     let html = `
-        <div class="hero-main" onclick="openArticle(${h.id})">
-            <img src="${h.image}" alt="${h.titre}" loading="lazy">
+        <div class="hero-main" onclick="openArticle('${h.id}')">
+            <img src="${h.image}" alt="${h.titre}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Indisponible'">
             <div class="hero-overlay">
                 <span class="category-tag ${cls(h.categorie)}">${h.categorie}</span>
                 <h2>${h.titre}</h2>
@@ -124,8 +136,8 @@ function renderHero(arts) {
 
     s.forEach(a => {
         html += `
-            <div onclick="openArticle(${a.id})">
-                <img src="${a.image}" alt="${a.titre}" loading="lazy">
+            <div onclick="openArticle('${a.id}')">
+                <img src="${a.image}" alt="${a.titre}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Indisponible'">
                 <div class="hero-overlay">
                     <span class="category-tag ${cls(a.categorie)}">${a.categorie}</span>
                     <h2>${a.titre}</h2>
@@ -134,21 +146,20 @@ function renderHero(arts) {
     });
 
     html += '</div>';
-    document.getElementById('heroGrid').innerHTML = html;
+    grid.innerHTML = html;
 }
 
-// ===== RENDER GRID =====
 function renderGrid(arts) {
     const grid = document.getElementById('newsGrid');
     if (!grid) return;
     if (!arts.length) {
-        grid.innerHTML = '<p style="text-align:center;padding:40px;">Aucun article.</p>';
+        grid.innerHTML = '<p style="text-align:center;padding:40px;">Aucun article trouvé.</p>';
         return;
     }
     grid.innerHTML = arts.map((a, i) => `
-        <div class="news-card" style="animation-delay:${i*0.1}s" onclick="openArticle(${a.id})">
+        <div class="news-card" style="animation-delay:${i*0.1}s" onclick="openArticle('${a.id}')">
             <div class="news-card-img">
-                <img src="${a.image}" alt="${a.titre}" loading="lazy">
+                <img src="${a.image}" alt="${a.titre}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Indisponible'">
                 <span class="category-tag ${cls(a.categorie)}">${a.categorie}</span>
             </div>
             <div class="news-card-body">
@@ -163,15 +174,15 @@ function renderGrid(arts) {
     `).join('');
 }
 
-// ===== TICKER =====
 function renderTicker(arts) {
     const html = arts.map(a => `<span class="ticker-item">${a.titre}</span>`).join('');
-    if(document.getElementById('breakingTicker')) document.getElementById('breakingTicker').innerHTML = html + html;
+    const ticker = document.getElementById('breakingTicker');
+    if(ticker) ticker.innerHTML = html + html;
 }
 
-// ===== OUVERTURE ARTICLE (MODE CRAYON) =====
+// ===== OUVERTURE D'UN ARTICLE =====
 window.openArticle = function(id) {
-    const art = allArticles.find(a => a.id === id);
+    const art = allArticles.find(a => a.id == id);
     if (!art) return;
     
     currentEditingId = id;
@@ -188,10 +199,9 @@ window.openArticle = function(id) {
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('articlePage').style.display = 'block';
     window.scrollTo({top:0, behavior:'smooth'});
-    updateSEO(art);
 
     let html = `
-        <img src="${art.image}" alt="${art.titre}" loading="lazy">
+        <img src="${art.image}" alt="${art.titre}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Indisponible'">
         <div class="article-body">
             <div class="article-meta">
                 <span class="category-tag ${cls(art.categorie)}">${art.categorie}</span>
@@ -225,23 +235,9 @@ window.openArticle = function(id) {
 
     document.getElementById('articleContent').innerHTML = html;
     initAudioReader(art.titre + ". " + art.rawContent);
-
-    const rel = allArticles.filter(a => a.id !== id && a.categorie === art.categorie).slice(0, 3);
-    const relBox = document.getElementById('relatedArticles');
-    if (rel.length) {
-        relBox.style.display = 'block';
-        document.getElementById('relatedGrid').innerHTML = rel.map(a => `
-            <div class="related-card" onclick="openArticle(${a.id})">
-                <img src="${a.image}" loading="lazy">
-                <h4>${a.titre}</h4>
-            </div>
-        `).join('');
-    } else { relBox.style.display = 'none'; }
-
-    document.title = art.titre + ' | DZ Tech Press';
 };
 
-// ===== LOGIQUE AUDIO =====
+// ===== LOGIQUE AUDIO (LECTURE VOCALE) =====
 function initAudioReader(textToRead) {
     const playBtn = document.getElementById('listenBtn');
     const stopBtn = document.getElementById('stopBtn');
@@ -249,204 +245,126 @@ function initAudioReader(textToRead) {
 
     const cleanText = textToRead
         .replace(/<[^>]*>/g, '') 
-        .replace(/!\[.*?\]\(.*?\)/g, '') 
-        .replace(/\[(.*?)\]\(.*?\)/g, '$1') 
-        .replace(/[#*`~_]/g, '') 
-        .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '') 
         .replace(/\n/g, ' ') 
         .trim();
 
     window.triggerAudio = () => {
-        if (synth.speaking) {
-            synth.cancel();
-            resetAudioUI();
-        } else {
-            startReading();
-        }
+        if (synth.speaking) { synth.cancel(); resetAudioUI(); } 
+        else { startReading(); }
     };
 
     function startReading() {
         synth.cancel();
         currentUtterance = new SpeechSynthesisUtterance(cleanText);
         currentUtterance.lang = 'fr-FR';
-        currentUtterance.rate = 1.0;
-
         currentUtterance.onstart = () => {
             playBtn.style.display = 'none';
             stopBtn.style.display = 'flex';
-            stickyContainer.classList.add('playing');
         };
-
-        currentUtterance.onend = () => resetAudioUI();
-        currentUtterance.onerror = () => resetAudioUI();
-
+        currentUtterance.onend = resetAudioUI;
         synth.speak(currentUtterance);
     }
-
-    playBtn.onclick = startReading;
-    stopBtn.onclick = () => {
-        synth.cancel();
-        resetAudioUI();
-    };
 
     function resetAudioUI() {
         playBtn.style.display = 'flex';
         stopBtn.style.display = 'none';
-        stickyContainer.classList.remove('playing');
     }
+
+    if(playBtn) playBtn.onclick = startReading;
+    if(stopBtn) stopBtn.onclick = () => { synth.cancel(); resetAudioUI(); };
 }
 
-// ===== RETOUR ACCUEIL (MODE PLUS) =====
+// ===== RETOUR ACCUEIL =====
 window.goHome = function() {
     if (synth) synth.cancel();
-    
     currentEditingId = null;
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) {
         adminBtn.innerHTML = '<i class="fas fa-plus"></i>';
-        adminBtn.title = "Ajouter un article";
     }
 
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('articlePage').style.display = 'none';
-    document.getElementById('searchInput').value = '';
-    currentFilter = 'all'; currentTag = null; currentPage = 1;
-    document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'));
-    document.getElementById('nav-all').classList.add('active');
-    document.getElementById('gridTitle').textContent = 'Dernières Actualités';
     document.getElementById('heroSection').classList.remove('hidden');
-    renderHero(allArticles);
-    renderGrid(allArticles.slice(0, ITEMS_PER_PAGE));
-    renderPagination(allArticles);
-    updateSEO(null);
-    document.title = 'DZ Tech Press — L\'info Tech & Télécoms en Algérie';
     window.scrollTo({top: 0, behavior: 'smooth'});
 };
 
-// ===== PAGINATION =====
+// ===== PAGINATION ET FILTRES =====
 function renderPagination(arts) {
     const total = Math.ceil(arts.length / ITEMS_PER_PAGE);
     const pag = document.getElementById('pagination');
     if(!pag) return;
     pag.innerHTML = '';
-    if (total <= 1) { 
-        if(document.getElementById('loadMoreBtn')) document.getElementById('loadMoreBtn').classList.add('hidden'); 
-        return; 
-    }
     for (let i = 1; i <= total; i++) {
         const btn = document.createElement('button');
         btn.textContent = i;
         btn.className = i === currentPage ? 'active' : '';
-        btn.onclick = () => goToPage(i);
+        btn.onclick = () => {
+            currentPage = i;
+            const start = (i-1) * ITEMS_PER_PAGE;
+            renderGrid(arts.slice(start, start + ITEMS_PER_PAGE));
+            renderPagination(arts);
+            window.scrollTo({top: 400, behavior: 'smooth'});
+        };
         pag.appendChild(btn);
     }
-    if(document.getElementById('loadMoreBtn')) document.getElementById('loadMoreBtn').classList.toggle('hidden', currentPage >= total);
 }
-
-window.goToPage = function(p) {
-    currentPage = p;
-    const filtered = getFiltered();
-    const start = (p-1) * ITEMS_PER_PAGE;
-    renderGrid(filtered.slice(start, start + ITEMS_PER_PAGE));
-    renderPagination(filtered);
-    document.getElementById('newsGrid').scrollIntoView({behavior:'smooth'});
-};
-
-window.loadMoreArticles = function() {
-    currentPage++;
-    const filtered = getFiltered();
-    renderGrid(filtered.slice(0, currentPage * ITEMS_PER_PAGE));
-    renderPagination(filtered);
-};
-
-function getFiltered() {
-    let f = allArticles;
-    if (currentFilter !== 'all') f = f.filter(a => a.categorie === currentFilter);
-    if (currentTag) f = f.filter(a => a.tags && a.tags.includes(currentTag));
-    return f;
-}
-
-// ===== SEARCH & FILTER =====
-document.getElementById('searchInput')?.addEventListener('input', e => {
-    const v = e.target.value.toLowerCase();
-    if (!v) { goHome(); return; }
-    document.getElementById('heroSection').classList.add('hidden');
-    const res = allArticles.filter(a => 
-        a.titre.toLowerCase().includes(v) || 
-        a.extrait.toLowerCase().includes(v) || 
-        (a.tags && a.tags.some(t => t.toLowerCase().includes(v)))
-    );
-    currentPage = 1;
-    document.getElementById('gridTitle').textContent = `Résultats pour "${v}" (${res.length})`;
-    renderGrid(res.slice(0, ITEMS_PER_PAGE));
-    renderPagination(res);
-});
 
 window.filterByCategory = function(cat, ev) {
-    if(ev) {
-        ev.preventDefault();
-        document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'));
-        ev.currentTarget.classList.add('active');
-    }
-    currentFilter = cat; currentTag = null; currentPage = 1;
+    if(ev) ev.preventDefault();
+    currentFilter = cat;
+    currentPage = 1;
     document.getElementById('heroSection').classList.add('hidden');
-    document.getElementById('searchInput').value = '';
-    const f = cat === 'all' ? allArticles : allArticles.filter(a => a.categorie === cat);
-    document.getElementById('gridTitle').textContent = cat === 'all' ? 'Dernières Actualités' : `Rubrique : ${cat}`;
-    renderGrid(f.slice(0, ITEMS_PER_PAGE)); renderPagination(f);
+    const filtered = cat === 'all' ? allArticles : allArticles.filter(a => a.categorie === cat);
+    renderGrid(filtered.slice(0, ITEMS_PER_PAGE));
+    renderPagination(filtered);
 };
 
 window.filterByTag = function(tag) {
-    if (tag === 'all') { goHome(); return; }
-    currentTag = tag; currentFilter = 'all'; currentPage = 1;
+    currentTag = tag;
     document.getElementById('heroSection').classList.add('hidden');
-    const f = allArticles.filter(a => a.tags && a.tags.includes(tag));
-    document.getElementById('gridTitle').textContent = `Tag : ${tag} (${f.length})`;
-    renderGrid(f.slice(0, ITEMS_PER_PAGE)); renderPagination(f);
+    const filtered = allArticles.filter(a => a.tags && a.tags.includes(tag));
+    renderGrid(filtered.slice(0, ITEMS_PER_PAGE));
+    renderPagination(filtered);
 };
 
 // ===== SIDEBAR WIDGETS =====
 function renderTrending() {
     const sorted = [...allArticles].sort((a,b) => b.views - a.views).slice(0, 5);
-    document.getElementById('trendingList').innerHTML = sorted.map((a,i) => 
-        `<li class="trending-item" onclick="openArticle(${a.id})">
-            <span class="trending-number">${String(i+1).padStart(2,'0')}</span>
-            <div class="trending-content">
-                <h4>${a.titre}</h4>
-                <span><i class="far fa-eye"></i> ${a.views} lectures</span>
-            </div>
-        </li>`
-    ).join('');
+    const list = document.getElementById('trendingList');
+    if(list) {
+        list.innerHTML = sorted.map((a,i) => 
+            `<li class="trending-item" onclick="openArticle('${a.id}')">
+                <span class="trending-number">${i+1}</span>
+                <div class="trending-content">
+                    <h4>${a.titre}</h4>
+                    <span>${a.views} vues</span>
+                </div>
+            </li>`
+        ).join('');
+    }
 }
 
 function renderTags() {
     const counts = {};
-    allArticles.forEach(a => { if (a.tags) { a.tags.forEach(t => counts[t] = (counts[t] || 0) + 1); } });
-    const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 15);
-    if(document.getElementById('tagCloud')) {
-        document.getElementById('tagCloud').innerHTML = sorted.map(([t,c]) => `<span class="tag-cloud-item" onclick="filterByTag('${t}')">${t} (${c})</span>`).join('');
-    }
-    if(document.getElementById('tagFilters')) {
-        document.getElementById('tagFilters').innerHTML = `<span class="tag-filter active" onclick="filterByTag('all')">Tous</span>` + 
-            sorted.slice(0, 5).map(([t]) => `<span class="tag-filter" onclick="filterByTag('${t}')">${t}</span>`).join('');
+    allArticles.forEach(a => a.tags?.forEach(t => counts[t] = (counts[t] || 0) + 1));
+    const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 10);
+    const cloud = document.getElementById('tagCloud');
+    if(cloud) {
+        cloud.innerHTML = sorted.map(([t,c]) => `<span class="tag-cloud-item" onclick="filterByTag('${t}')">${t} (${c})</span>`).join('');
     }
 }
 
-// ===== SHARE & UTILS =====
-window.share = function(p) {
-    const u = encodeURIComponent(window.location.href);
-    const t = encodeURIComponent(document.title);
-    const urls = {
-        facebook: `https://www.facebook.com/sharer/sharer.php?u=${u}`,
-        twitter: `https://twitter.com/intent/tweet?url=${u}&text=${t}`,
-        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${u}`,
-        whatsapp: `https://wa.me/?text=${t}%20${u}`
-    };
-    if(urls[p]) window.open(urls[p], '_blank', 'width=600,height=400');
+// ===== THEME ET UTILITAIRES =====
+window.toggleTheme = () => {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
 };
 
-window.copyLink = () => { navigator.clipboard.writeText(window.location.href); showToast('Lien copié !'); };
-window.subscribeNewsletter = (e) => { e.preventDefault(); showToast('Merci !'); e.target.reset(); };
+function loadTheme() {
+    if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+}
+
 window.showToast = (msg) => {
     const t = document.getElementById('toast');
     if (!t) return;
@@ -455,150 +373,65 @@ window.showToast = (msg) => {
 };
 
 function cls(c) {
-    return { 'Algérie':'tag-algerie','Télécoms':'tag-telecoms','Mobile':'tag-mobile','Startups':'tag-startups','Innovation':'tag-innovation' }[c] || 'tag-telecoms';
+    const maps = { 'Algérie':'tag-algerie','Télécoms':'tag-telecoms','Mobile':'tag-mobile','Startups':'tag-startups','Innovation':'tag-innovation' };
+    return maps[c] || 'tag-telecoms';
 }
-
-function updateSEO(a) {
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.content = a ? a.extrait : 'Actualités télécoms en Algérie';
-}
-
-window.toggleTheme = () => {
-    document.body.classList.toggle('dark-mode');
-    const icon = document.querySelector('.theme-toggle i');
-    if (icon) icon.className = document.body.classList.contains('dark-mode') ? 'fas fa-sun' : 'fas fa-moon';
-};
-
-function loadTheme() {
-    if (localStorage.getItem('theme') === 'dark') {
-        document.body.classList.add('dark-mode');
-        const icon = document.querySelector('.theme-toggle i');
-        if (icon) icon.className = 'fas fa-sun';
-    }
-}
-
-window.addEventListener('scroll', () => {
-    if (document.getElementById('articlePage').style.display !== 'none') {
-        const h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        document.getElementById('readingProgress').style.width = ((window.scrollY / h) * 100) + '%';
-    }
-    if(document.getElementById('backToTop')) document.getElementById('backToTop').classList.toggle('visible', window.scrollY > 500);
-});
 
 function initCounters() {
     const obs = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const el = entry.target; const target = +el.dataset.target;
-                const step = target / 125; let cur = 0;
-                const up = () => { cur += step; if(cur < target) { el.textContent = Math.floor(cur); requestAnimationFrame(up); } else { el.textContent = target; } };
+                let cur = 0;
+                const up = () => { 
+                    cur += target/100; 
+                    if(cur < target) { el.textContent = Math.floor(cur); requestAnimationFrame(up); } 
+                    else { el.textContent = target; } 
+                };
                 up(); obs.unobserve(el);
             }
         });
-    }, {threshold: 0.5});
+    });
     document.querySelectorAll('.stat-number').forEach(c => obs.observe(c));
 }
 
-// ===== GESTION ADMIN (AVEC SUPPRESSION) =====
+// ===== GESTION ADMIN (CREER / MODIFIER / SUPPRIMER) =====
+
 window.toggleAdminPanel = function() {
-    const password = prompt('🔒 Mot de passe:');
-    if (password === ADMIN_PASSWORD) {
-        const modal = document.getElementById('adminModal');
-        const imgInput = document.getElementById('image');
-        const actionsDiv = document.querySelector('.form-actions');
-        if (!modal || !actionsDiv) return;
-        
-        modal.classList.add('show');
-        const now = new Date();
+    const pass = prompt('🔒 Mot de passe Admin:');
+    if (pass !== ADMIN_PASSWORD) return showToast('❌ Accès refusé');
 
-        const oldDel = document.getElementById('dynamicDelBtn');
-        if (oldDel) oldDel.remove();
-        
-        if (currentEditingId) {
-            // MODE MODIFICATION
-            const art = allArticles.find(a => a.id === currentEditingId);
-            if (art) {
-                document.getElementById('titre').value = art.titre;
-                document.getElementById('categorie').value = art.categorie;
-                document.getElementById('date').value = art.date;
-                document.getElementById('heure').value = art.heure;
-                document.getElementById('extrait').value = art.extrait;
-                document.getElementById('tags').value = art.tags.join(', ');
-                document.getElementById('contenu').value = art.rawContent;
-                if (imgInput) imgInput.required = false;
-                if (document.getElementById('imagePreview')) {
-                    document.getElementById('imagePreview').innerHTML = `<p style="font-size:0.8rem;margin-bottom:5px;">Image actuelle :</p><img src="${art.image}" alt="Actuelle">`;
-                }
-                document.querySelector('#adminModal h2').innerHTML = '<i class="fas fa-pencil-alt"></i> Modifier l\'article';
-
-                const delBtn = document.createElement('button');
-                delBtn.type = 'button';
-                delBtn.id = 'dynamicDelBtn';
-                delBtn.className = 'btn-secondary';
-                delBtn.style.background = '#d21034';
-                delBtn.style.color = '#fff';
-                delBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer';
-                delBtn.onclick = deleteArticle;
-                actionsDiv.prepend(delBtn);
-            }
-        } else {
-            // MODE CRÉATION
-            document.getElementById('articleForm').reset();
-            document.getElementById('imagePreview').innerHTML = '';
-            if (imgInput) imgInput.required = true;
-            if (document.getElementById('date')) document.getElementById('date').valueAsDate = now;
-            if (document.getElementById('heure')) document.getElementById('heure').value = now.toTimeString().slice(0, 5);
-            document.querySelector('#adminModal h2').innerHTML = '<i class="fas fa-newspaper"></i> Créer un nouvel article';
-        }
-    } else if (password !== null) showToast('❌ Incorrect');
-};
-
-// FONCTION DE SUPPRESSION
-async function deleteArticle() {
-    if (!currentEditingId) return;
-    if (!confirm("⚠️ Voulez-vous vraiment supprimer cet article ? Cette action est irréversible.")) return;
-
-    try {
-        showToast('⏳ Suppression...');
-        const isCloudflare = window.location.hostname.includes('pages.dev');
-        const apiUrl = isCloudflare ? `${REMOTE_API}/api/delete-article/${currentEditingId}` : `/api/delete-article/${currentEditingId}`;
-        
-        const response = await fetch(apiUrl, { method: 'DELETE' });
-        
-        if (response.ok) {
-            showToast('✅ Supprimé !');
-            setTimeout(() => {
-                closeAdminPanel();
-                goHome();
-                loadArticles();
-            }, 2000);
-        } else {
-            const error = await response.json();
-            showToast(`❌ ${error.message}`);
-        }
-    } catch (error) {
-        showToast(`❌ Erreur réseau`);
-    }
-}
-
-window.closeAdminPanel = function() {
     const modal = document.getElementById('adminModal');
-    if (modal) {
-        modal.classList.remove('show');
-        setTimeout(() => { 
-            if (document.getElementById('articleForm')) document.getElementById('articleForm').reset(); 
-            if (document.getElementById('imagePreview')) document.getElementById('imagePreview').innerHTML = ''; 
-        }, 300);
+    modal.classList.add('show');
+
+    if (currentEditingId) {
+        const art = allArticles.find(a => a.id == currentEditingId);
+        document.getElementById('titre').value = art.titre;
+        document.getElementById('categorie').value = art.categorie;
+        document.getElementById('date').value = art.date;
+        document.getElementById('heure').value = art.heure;
+        document.getElementById('extrait').value = art.extrait;
+        document.getElementById('tags').value = art.tags.join(', ');
+        document.getElementById('contenu').value = art.rawContent;
+        
+        // Bouton supprimer visible seulement en mode édition
+        if(!document.getElementById('delBtn')) {
+            const delBtn = document.createElement('button');
+            delBtn.id = 'delBtn';
+            delBtn.type = 'button';
+            delBtn.className = 'btn-secondary';
+            delBtn.style.background = '#D21034';
+            delBtn.style.color = 'white';
+            delBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer';
+            delBtn.onclick = deleteArticle;
+            document.querySelector('.form-actions').prepend(delBtn);
+        }
     }
 };
 
-window.previewImage = function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (ev) => { if (document.getElementById('imagePreview')) document.getElementById('imagePreview').innerHTML = `<img src="${ev.target.result}" alt="Aperçu">`; };
-        reader.readAsDataURL(file);
-    }
+window.closeAdminPanel = () => {
+    document.getElementById('adminModal').classList.remove('show');
+    document.getElementById('delBtn')?.remove();
 };
 
 window.submitArticle = async function(e) {
@@ -614,28 +447,58 @@ window.submitArticle = async function(e) {
     
     const imgFile = document.getElementById('image').files[0];
     if (imgFile) formData.append('image', imgFile);
+    if (currentEditingId) formData.append('id', currentEditingId);
 
     try {
-        showToast('⏳ Traitement...');
-        const isCloudflare = window.location.hostname.includes('pages.dev');
-        const apiUrl = isCloudflare ? `${REMOTE_API}/api/create-article` : '/api/create-article';
-        
-        if (currentEditingId) formData.append('id', currentEditingId);
-
-        const response = await fetch(apiUrl, { method: 'POST', body: formData });
+        showToast('⏳ Envoi au serveur...');
+        const response = await fetch(`${API_BASE}/api/create-article`, { method: 'POST', body: formData });
         if (response.ok) { 
-            showToast('✅ Déployé !'); 
-            setTimeout(() => { 
-                allArticles = []; 
-                loadArticles(); 
-                closeAdminPanel(); 
-            }, 2000); 
+            showToast('✅ Article enregistré !'); 
+            setTimeout(() => window.location.reload(), 2000); 
+        } else {
+            showToast('❌ Erreur lors de l\'enregistrement');
         }
-        else { const error = await response.json(); showToast(`❌ ${error.message}`); }
-    } catch (error) { showToast(`❌ Erreur réseau`); }
+    } catch (error) {
+        showToast('❌ Erreur réseau');
+    }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('adminModal');
-    if (modal) modal.addEventListener('click', (e) => { if (e.target.id === 'adminModal') closeAdminPanel(); });
-});
+async function deleteArticle() {
+    if (!confirm("⚠️ Supprimer définitivement cet article ?")) return;
+    try {
+        showToast('⏳ Suppression...');
+        const response = await fetch(`${API_BASE}/api/delete-article/${currentEditingId}`, { method: 'DELETE' });
+        if (response.ok) {
+            showToast('✅ Supprimé !');
+            setTimeout(() => window.location.reload(), 2000);
+        }
+    } catch (e) { showToast('❌ Erreur réseau'); }
+}
+
+window.previewImage = function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            document.getElementById('imagePreview').innerHTML = `<img src="${ev.target.result}" style="max-width:100%">`;
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+// Partage
+window.share = (p) => {
+    const u = encodeURIComponent(window.location.href);
+    const t = encodeURIComponent(document.title);
+    const urls = {
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${u}`,
+        twitter: `https://twitter.com/intent/tweet?text=${t}&url=${u}`,
+        whatsapp: `https://wa.me/?text=${t}%20${u}`
+    };
+    if(urls[p]) window.open(urls[p], '_blank');
+};
+
+window.copyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    showToast('Lien copié !');
+};
