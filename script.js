@@ -44,7 +44,6 @@ async function loadArticles() {
 
         allArticles = [];
         
-        // Chargement en parallèle pour plus de rapidité
         const articlePromises = articleFiles.map(async (fileName) => {
             const res = await fetch(`${API_BASE}/api/article-content/${fileName}`);
             if (res.ok) {
@@ -229,10 +228,8 @@ window.openArticle = function(id) {
 
     document.getElementById('articleContent').innerHTML = html;
     
-    // Initialisation lecteur audio
     initAudioReader(art.titre + ". " + art.rawContent);
 
-    // Section "Vous pourriez aussi aimer"
     const rel = allArticles.filter(a => a.id != id && a.categorie === art.categorie).slice(0, 3);
     const relBox = document.getElementById('relatedArticles');
     const relGrid = document.getElementById('relatedGrid');
@@ -250,7 +247,7 @@ window.openArticle = function(id) {
     }
 };
 
-// ===== LOGIQUE AUDIO (CORRIGÉE) =====
+// ===== LOGIQUE AUDIO =====
 function initAudioReader(textToRead) {
     const playBtn = document.getElementById('listenBtn');
     const stopBtn = document.getElementById('stopBtn');
@@ -291,12 +288,7 @@ function initAudioReader(textToRead) {
     }
 
     if(playBtn) playBtn.onclick = startReading;
-    if(stopBtn) {
-        stopBtn.onclick = () => {
-            synth.cancel();
-            resetAudioUI();
-        };
-    }
+    if(stopBtn) stopBtn.onclick = () => { synth.cancel(); resetAudioUI(); };
 }
 
 // ===== RETOUR ACCUEIL =====
@@ -378,7 +370,7 @@ function renderTags() {
     }
 }
 
-// ===== THEME ET BOUTON RETOUR EN HAUT =====
+// ===== THEME ET SCROLL =====
 window.toggleTheme = () => {
     document.body.classList.toggle('dark-mode');
     localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
@@ -428,7 +420,7 @@ function initCounters() {
     document.querySelectorAll('.stat-number').forEach(c => obs.observe(c));
 }
 
-// ===== GESTION ADMIN =====
+// ===== GESTION ADMIN (CORRECTIONS IMAGE INCLUSES) =====
 
 window.toggleAdminPanel = function() {
     const pass = prompt('🔒 Mot de passe Admin:');
@@ -447,6 +439,11 @@ window.toggleAdminPanel = function() {
         document.getElementById('tags').value = art.tags.join(', ');
         document.getElementById('contenu').value = art.rawContent;
         
+        // --- AFFICHAGE DE L'IMAGE ACTUELLE ---
+        if (document.getElementById('imagePreview')) {
+            document.getElementById('imagePreview').innerHTML = `<p style="font-size:0.8rem;margin-bottom:5px;">Image actuelle :</p><img src="${art.image}" style="max-width:100%; border-radius:8px;">`;
+        }
+        
         if(!document.getElementById('delBtn')) {
             const delBtn = document.createElement('button');
             delBtn.id = 'delBtn';
@@ -464,6 +461,7 @@ window.toggleAdminPanel = function() {
 window.closeAdminPanel = () => {
     document.getElementById('adminModal').classList.remove('show');
     document.getElementById('delBtn')?.remove();
+    document.getElementById('imagePreview').innerHTML = '';
 };
 
 window.submitArticle = async function(e) {
@@ -478,7 +476,14 @@ window.submitArticle = async function(e) {
     formData.append('contenu', document.getElementById('contenu').value);
     
     const imgFile = document.getElementById('image').files[0];
-    if (imgFile) formData.append('image', imgFile);
+    if (imgFile) {
+        formData.append('image', imgFile);
+    } else if (currentEditingId) {
+        // --- CONSERVER L'IMAGE EXISTANTE SI AUCUN NOUVEAU FICHIER ---
+        const art = allArticles.find(a => a.id == currentEditingId);
+        formData.append('existingImage', art.image);
+    }
+
     if (currentEditingId) formData.append('id', currentEditingId);
 
     try {
@@ -508,7 +513,7 @@ window.previewImage = function(e) {
     if (file) {
         const reader = new FileReader();
         reader.onload = (ev) => {
-            document.getElementById('imagePreview').innerHTML = `<img src="${ev.target.result}" style="max-width:100%">`;
+            document.getElementById('imagePreview').innerHTML = `<p style="font-size:0.8rem;margin-bottom:5px;">Nouvelle image :</p><img src="${ev.target.result}" style="max-width:100%; border-radius:8px;">`;
         };
         reader.readAsDataURL(file);
     }
