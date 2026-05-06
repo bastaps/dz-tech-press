@@ -125,7 +125,11 @@ function renderHero(arts) {
         <div class="hero-main" onclick="openArticle('${h.id}')">
             <img src="${h.image}" alt="${h.titre}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Indisponible'">
             <div class="hero-overlay">
-                <span class="category-tag ${cls(h.categorie)}">${h.categorie}</span>
+                <div class="hero-meta-wrapper">
+                    <span class="category-tag ${cls(h.categorie)}">${h.categorie}</span>
+                    <span class="hero-meta-tag"><i class="far fa-calendar-alt"></i> ${h.date}</span>
+                    <span class="hero-meta-tag"><i class="far fa-clock"></i> ${h.heure}</span>
+                </div>
                 <h2>${h.titre}</h2>
                 <p>${h.extrait}</p>
             </div>
@@ -137,7 +141,11 @@ function renderHero(arts) {
             <div onclick="openArticle('${a.id}')">
                 <img src="${a.image}" alt="${a.titre}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Indisponible'">
                 <div class="hero-overlay">
-                    <span class="category-tag ${cls(a.categorie)}">${a.categorie}</span>
+                    <div class="hero-meta-wrapper">
+                        <span class="category-tag ${cls(a.categorie)}">${a.categorie}</span>
+                        <span class="hero-meta-tag"><i class="far fa-calendar-alt"></i> ${a.date}</span>
+                        <span class="hero-meta-tag"><i class="far fa-clock"></i> ${a.heure}</span>
+                    </div>
                     <h2>${a.titre}</h2>
                 </div>
             </div>`;
@@ -161,6 +169,7 @@ function renderGrid(arts) {
                 <p>${a.extrait}</p>
                 <div class="card-meta">
                     <span><i class="far fa-calendar"></i> ${a.date}</span>
+                    <span><i class="far fa-clock"></i> ${a.heure}</span>
                     <span><i class="far fa-eye"></i> ${a.views}</span>
                 </div>
             </div>

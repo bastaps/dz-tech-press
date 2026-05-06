@@ -104,7 +104,26 @@ body.dark-mode .top-bar { background: #020617; }
 .hero-side-card > div:hover img { transform: scale(1.03); }
 
 .hero-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 25px 20px 20px; background: linear-gradient(transparent, rgba(0,0,0,0.9)); color: #fff; pointer-events: none; }
-.category-tag { background: var(--secondary); color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: inline-block; margin-bottom: 8px; }
+
+.hero-meta-wrapper {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.hero-meta-tag {
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: inline-block;
+    backdrop-filter: blur(4px);
+}
+
+.category-tag { background: var(--secondary); color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: inline-block; }
 .tag-algerie { background: #1a73e8; }
 .tag-telecoms { background: var(--primary); }
 .tag-mobile { background: #f59e0b; }
