@@ -13,7 +13,7 @@ let currentUtterance = null;
 
 // Détection automatique de l'adresse du serveur (Backend)
 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const REMOTE_API = 'https://algeria-tech-api.onrender.com';
+const REMOTE_API = 'https://dz-tech-press-api.onrender.com';
 const API_BASE = isLocal ? '' : REMOTE_API;
 
 // Mot de passe Admin
