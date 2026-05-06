@@ -14,7 +14,7 @@ app.use(cors());
 const isCloud = !!process.env.GITHUB_TOKEN;
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 const OWNER = "bastaps"; 
-const REPO = "dz-tech-press";
+const REPO = "algeria-tech";
 
 const storage = isCloud ? multer.memoryStorage() : multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'images/'),
