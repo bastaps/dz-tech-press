@@ -3,6 +3,102 @@
   "feed": [
     {
       "id": "aHR0cHM6Ly93d3cu",
+      "title": "Un Français d’origine algérienne parmi les « 50 qui vont faire demain »",
+      "url": "https://www.tsa-algerie.com/un-francais-dorigine-algerienne-parmi-les-50-qui-vont-faire-demain/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-07 17:51:49",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Doctolib s’attaque au marché britannique avec le rachat de Medicus",
+      "url": "https://www.zdnet.fr/actualites/doctolib-sattaque-au-marche-britannique-avec-le-rachat-de-medicus-494753.htm?utm_source=rss_feed&utm_medium=link&utm_campaign=unknown",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-07 16:48:50",
+      "source": "zdnet.fr",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "« La structure financière nous le permet », Bouygues rassure sur le rachat de SFR et prépare l'intégration de SFR Business",
+      "url": "https://www.zdnet.fr/actualites/la-structure-financiere-nous-le-permet-bouygues-rassure-sur-le-rachat-de-sfr-et-prepare-lintegration-de-sfr-business-494740.htm?utm_source=rss_feed&utm_medium=link&utm_campaign=unknown",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-07 16:38:44",
+      "source": "zdnet.fr",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "IA : Washington veut s'assurer d'un accès prioritaire aux modèles de Microsoft, Google et xAI",
+      "url": "https://www.zdnet.fr/actualites/ia-washington-veut-sassurer-dun-acces-prioritaire-aux-modeles-de-microsoft-google-et-xai-494737.htm?utm_source=rss_feed&utm_medium=link&utm_campaign=unknown",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-07 16:25:25",
+      "source": "zdnet.fr",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "« Je pensais qu'il allait me frapper », les révélations choc du procès OpenAI",
+      "url": "https://www.zdnet.fr/actualites/je-pensais-quil-allait-me-frapper-les-revelations-choc-du-proces-openai-494735.htm?utm_source=rss_feed&utm_medium=link&utm_campaign=unknown",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-07 16:13:02",
+      "source": "zdnet.fr",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Semi-conducteurs : Samsung atteint pour la première fois une valorisation boursière de 1 000 milliards de dollars",
+      "url": "https://www.zdnet.fr/actualites/semi-conducteurs-samsung-atteint-pour-la-premiere-fois-une-valorisation-boursiere-de-1-000-milliards-de-dollars-494733.htm?utm_source=rss_feed&utm_medium=link&utm_campaign=unknown",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-07 15:56:15",
+      "source": "zdnet.fr",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Régulation : Le DMA s'attaque au verrouillage du Cloud et de l'IA",
+      "url": "https://www.zdnet.fr/actualites/regulation-le-dma-sattaque-au-verrouillage-du-cloud-et-de-lia-494731.htm?utm_source=rss_feed&utm_medium=link&utm_campaign=unknown",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-07 15:45:53",
+      "source": "zdnet.fr",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Anthropic scelle un pacte de 200 milliards de dollars avec Google Cloud",
+      "url": "https://www.zdnet.fr/actualites/anthropic-scelle-un-pacte-de-200-milliards-de-dollars-avec-google-cloud-494729.htm?utm_source=rss_feed&utm_medium=link&utm_campaign=unknown",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-07 15:24:10",
+      "source": "zdnet.fr",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
       "title": "Pourquoi Chrome a peut-être téléchargé discrètement un fichier de 4 Go sur votre PC – et comment s'en débarrasser",
       "url": "https://www.zdnet.fr/actualites/pourquoi-chrome-a-peut-etre-telecharge-discretement-un-fichier-de-4-go-sur-votre-pc-et-comment-sen-debarrasser-494718.htm?utm_source=rss_feed&utm_medium=link&utm_campaign=unknown",
       "tags": [
@@ -398,5 +494,5 @@
       "isManual": false
     }
   ],
-  "lastUpdated": "2026-05-07T17:27:37.425Z"
+  "lastUpdated": "2026-05-07T18:19:49.334Z"
 }
