@@ -6,14 +6,11 @@ let currentFilter = 'all';
 let currentTag = null;
 let articleViews = JSON.parse(localStorage.getItem('articleViews') || '{}');
 let currentEditingId = null;
-// Configuration Audio
 const synth = window.speechSynthesis;
 let currentUtterance = null;
-// Détection automatique de l'adresse du serveur (Backend)
 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const REMOTE_API = 'https://dz-tech-press-api.onrender.com';
 const API_BASE = isLocal ? '' : REMOTE_API;
-// Mot de passe Admin
 const ADMIN_PASSWORD = 'admin2026';
 
 // ===== INITIALISATION AU CHARGEMENT =====
@@ -22,10 +19,10 @@ window.addEventListener('load', () => {
         const loader = document.getElementById('loader');
         if (loader) loader.classList.add('hidden');
     }, 600);
-    
     loadTheme();
     loadArticles();
     updateWeather();
+    loadVeille();
 });
 
 const dateSpan = document.getElementById('currentDate');
@@ -33,15 +30,21 @@ if (dateSpan) {
     dateSpan.textContent = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-// ===== CHARGEMENT DES ARTICLES (OPTIMISÉ - PARALLÈLE) =====
+// Horloge temps réel (Restauration)
+const clockEl = document.getElementById('liveClock');
+function updateLiveClock() {
+    if (clockEl) clockEl.textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+updateLiveClock();
+setInterval(updateLiveClock, 1000);
+
+// ===== CHARGEMENT DES ARTICLES =====
 async function loadArticles() {
     try {
         const listResponse = await fetch(`${API_BASE}/api/articles`);
         if (!listResponse.ok) throw new Error('Impossible de charger la liste');
-        
         const articleFiles = await listResponse.json();
         allArticles = [];
-        
         const articlePromises = articleFiles.map(async (fileName) => {
             try {
                 const res = await fetch(`${API_BASE}/api/article-content/${fileName}`);
@@ -49,16 +52,14 @@ async function loadArticles() {
                     const text = await res.text();
                     const art = parseMarkdownFile(text);
                     art.id = fileName.replace('.md', '');
-                    
                     if (!isLocal && art.image && !art.image.startsWith('http')) {
                         art.image = `https://raw.githubusercontent.com/bastaps/algeria-tech/main/${art.image}`;
                     }
-
                     art.views = articleViews[art.id] || Math.floor(Math.random() * 500) + 50;
                     return art;
                 }
             } catch (err) {
-                console.error("Erreur chargement article:", fileName, err);
+                console.error("Erreur chargement article: ", fileName, err);
             }
             return null;
         });
@@ -66,8 +67,7 @@ async function loadArticles() {
         const results = await Promise.all(articlePromises);
         allArticles = results.filter(a => a !== null);
         allArticles.sort((a, b) => new Date(b.date) - new Date(a.date));
-        
-        // Sécurité : Si aucun article n'est chargé, on arrête ici proprement
+
         if (allArticles.length === 0) {
             console.warn("Aucun article trouvé.");
             const grid = document.getElementById('newsGrid');
@@ -79,18 +79,13 @@ async function loadArticles() {
         renderGrid(allArticles.slice(0, ITEMS_PER_PAGE));
         renderTicker(allArticles);
         renderTrending();
-        renderTags();
+        renderTags(); 
         renderPagination(allArticles);
         initCounters();
-
     } catch (e) {
         console.error('Erreur critique de chargement:', e);
         const grid = document.getElementById('newsGrid');
-        if (grid) grid.innerHTML = `<div style="text-align:center; padding:20px; color: red;">
-            <h3>Erreur de connexion au serveur</h3>
-            <p>Vérifiez que le serveur (server.js) est lancé sur le port 3000.</p>
-            <p>${e.message}</p>
-        </div>`;
+        if (grid) grid.innerHTML = `<div style="text-align:center; padding:20px; color: red;"><h3>Erreur de connexion au serveur</h3><p>Vérifiez que le serveur (server.js) est lancé.</p><p>${e.message}</p></div>`;
     }
 }
 
@@ -99,30 +94,26 @@ function parseMarkdownFile(text) {
     if (typeof marked === 'undefined') return { titre: 'Erreur', contenu: 'Librairie manquante', tags: [], readingTime: 0 };
     const parts = text.split('---');
     if (parts.length < 3) return { titre: 'Erreur', contenu: text, tags: [], readingTime: 0 };
-    
     const fm = parts[1];
     const content = parts.slice(2).join('---');
-    
-    const get = (k) => { 
-        const m = fm.match(new RegExp(`${k}:\\s*(.*)`)); 
-        return m ? m[1].trim().replace(/^["']|["']$/g, '') : ''; 
+    const get = (k) => {
+        const m = fm.match(new RegExp(`${k}:\\s*(.*)`));
+        return m ? m[1].trim().replace(/^["']|["']$/g, '') : '';
     };
-
     const tagsMatch = fm.match(/tags:\s*\[(.*)\]/);
     const tags = tagsMatch ? tagsMatch[1].split(',').map(t => t.trim().replace(/"/g, '')) : [];
     const readingTime = Math.ceil(content.split(/\s+/).length / 200);
-
-    return { 
-        titre: get('titre'), 
-        date: get('date'), 
-        heure: get('heure'), 
-        categorie: get('categorie'), 
-        image: get('image'), 
-        extrait: get('extrait'), 
-        contenu: marked.parse(content, { breaks: true, gfm: true }), 
-        rawContent: content.trim(), 
-        tags, 
-        readingTime 
+    return {
+        titre: get('titre'),
+        date: get('date'),
+        heure: get('heure'),
+        categorie: get('categorie'),
+        image: get('image'),
+        extrait: get('extrait'),
+        contenu: marked.parse(content, { breaks: true, gfm: true }),
+        rawContent: content.trim(),
+        tags,
+        readingTime
     };
 }
 
@@ -133,67 +124,25 @@ function renderHero(arts) {
     const s = arts.slice(1, 3);
     const grid = document.getElementById('heroGrid');
     if (!grid || !h) return;
-    
-    let html = `
-     <div class="hero-main" onclick="openArticle('${h.id}')">
-         <img src="${h.image}" alt="${h.titre}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Indisponible'">
-         <div class="hero-overlay">
-             <div class="hero-meta-wrapper">
-                 <span class="category-tag ${cls(h.categorie)}">${h.categorie}</span>
-                 <span class="hero-meta-tag"><i class="far fa-calendar-alt"></i> ${h.date}</span>
-                 <span class="hero-meta-tag"><i class="far fa-clock"></i> ${h.heure}</span>
-             </div>
-             <h2>${h.titre}</h2>
-             <p>${h.extrait}</p>
-         </div>
-     </div>
-     <div class="hero-side-card">`;
-
+    let html = `<div class="hero-main" onclick="openArticle('${h.id}')"><img src="${h.image}" alt="${h.titre}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Indisponible'"><div class="hero-overlay"><div class="hero-meta-wrapper"><span class="category-tag ${cls(h.categorie)}">${h.categorie}</span><span class="hero-meta-tag"><i class="far fa-calendar-alt"></i> ${h.date}</span><span class="hero-meta-tag"><i class="far fa-clock"></i> ${h.heure}</span></div><h2>${h.titre}</h2><p>${h.extrait}</p></div></div><div class="hero-side-card">`;
     s.forEach(a => {
-        html += `
-         <div onclick="openArticle('${a.id}')">
-             <img src="${a.image}" alt="${a.titre}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Indisponible'">
-             <div class="hero-overlay">
-                 <div class="hero-meta-wrapper">
-                     <span class="category-tag ${cls(a.categorie)}">${a.categorie}</span>
-                     <span class="hero-meta-tag"><i class="far fa-calendar-alt"></i> ${a.date}</span>
-                     <span class="hero-meta-tag"><i class="far fa-clock"></i> ${a.heure}</span>
-                 </div>
-                 <h2>${a.titre}</h2>
-             </div>
-         </div>`;
+        html += `<div onclick="openArticle('${a.id}')"><img src="${a.image}" alt="${a.titre}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Indisponible'"><div class="hero-overlay"><div class="hero-meta-wrapper"><span class="category-tag ${cls(a.categorie)}">${a.categorie}</span><span class="hero-meta-tag"><i class="far fa-calendar-alt"></i> ${a.date}</span><span class="hero-meta-tag"><i class="far fa-clock"></i> ${a.heure}</span></div><h2>${a.titre}</h2></div></div>`;
     });
-
     html += '</div>';
     grid.innerHTML = html;
 }
-
 function renderGrid(arts) {
     const grid = document.getElementById('newsGrid');
     if (!grid) return;
-    
     if (!arts || arts.length === 0) {
         grid.innerHTML = '<p style="text-align:center; padding:20px;">Aucun résultat.</p>';
         return;
     }
-
     grid.innerHTML = arts.map((a, i) => `<div class="news-card" style="animation-delay:${i*0.1}s" onclick="openArticle('${a.id}')">
-         <div class="news-card-img">
-             <img src="${a.image}" alt="${a.titre}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Indisponible'">
-             <span class="category-tag ${cls(a.categorie)}">${a.categorie}</span>
-         </div>
-         <div class="news-card-body">
-             <h3>${a.titre}</h3>
-             <p>${a.extrait}</p>
-             <div class="card-meta">
-                 <span><i class="far fa-calendar"></i> ${a.date}</span>
-                 <span><i class="far fa-clock"></i> ${a.heure}</span>
-                 <span><i class="far fa-eye"></i> ${a.views}</span>
-             </div>
-         </div>
-     </div>`).join('');
+ <div class="news-card-img"><img src="${a.image}" alt="${a.titre}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Indisponible'"><span class="category-tag ${cls(a.categorie)}">${a.categorie}</span></div>
+ <div class="news-card-body"><h3>${a.titre}</h3><p>${a.extrait}</p>
+ <div class="card-meta"><span><i class="far fa-calendar"></i> ${a.date}</span><span><i class="far fa-clock"></i> ${a.heure}</span><span><i class="far fa-eye"></i> ${a.views}</span></div></div></div>`).join('');
 }
-
 function renderTicker(arts) {
     if (!arts) return;
     const html = arts.map(a => `<span class="ticker-item">${a.titre}</span>`).join('');
@@ -205,71 +154,32 @@ function renderTicker(arts) {
 window.openArticle = function(id) {
     const art = allArticles.find(a => a.id == id);
     if (!art) return;
-    
     currentEditingId = id;
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) {
         adminBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
         adminBtn.title = "Modifier cet article";
     }
-    
     art.views++;
     articleViews[id] = art.views;
     localStorage.setItem('articleViews', JSON.stringify(articleViews));
-
-    // Gestion des vues
-    document.getElementById('mainContent').style.display = 'none'; 
+    document.getElementById('mainContent').style.display = 'none';
     document.getElementById('articlePage').style.display = 'block';
     window.scrollTo({top:0, behavior:'smooth'});
-
-    let html = `
-     <img src="${art.image}" alt="${art.titre}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Indisponible'">
-     <div class="article-body">
-         <div class="article-meta">
-             <span class="category-tag ${cls(art.categorie)}">${art.categorie}</span>
-             <span><i class="far fa-calendar"></i> ${art.date}</span>
-             <span><i class="far fa-clock"></i> ${art.heure}</span>
-             <span class="reading-time"><i class="fas fa-book-open"></i> ${art.readingTime} min</span>
-             <span><i class="far fa-eye"></i> ${art.views} vues</span>
-             <button class="meta-audio-btn" onclick="triggerAudio()"><i class="fas fa-volume-up"></i> Écouter</button>
-         </div>
-         <h1>${art.titre}</h1>
-         <div class="article-text">${art.contenu}</div>`;
-
+    let html = `<img src="${art.image}" alt="${art.titre}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Indisponible'"><div class="article-body"><div class="article-meta"><span class="category-tag ${cls(art.categorie)}">${art.categorie}</span><span><i class="far fa-calendar"></i> ${art.date}</span><span><i class="far fa-clock"></i> ${art.heure}</span><span class="reading-time"><i class="fas fa-book-open"></i> ${art.readingTime} min</span><span><i class="far fa-eye"></i> ${art.views} vues</span><button class="meta-audio-btn" onclick="triggerAudio()"><i class="fas fa-volume-up"></i> Écouter</button></div><h1>${art.titre}</h1><div class="article-text">${art.contenu}</div>`;
     if (art.tags && art.tags.length) {
-        html += `
-         <div style="margin:30px 0;padding-top:20px;border-top:1px solid var(--border)">
-             <strong>Tags: </strong> 
-            ${art.tags.map(t => `<span class="tag-filter" style="margin-left:8px" onclick="filterByTag('${t}');goHome()">${t}</span>`).join('')}
-         </div>`;
+        html += `<div style="margin:30px 0;padding-top:20px;border-top:1px solid var(--border)"><strong>Tags:</strong> ${art.tags.map(t => `<span class="tag-filter" style="margin-left:8px" onclick="filterByTag('${t}');goHome()">${t}</span>`).join('')}</div>`;
     }
-
-    html += `
-     <div class="share-buttons">
-         <button class="share-btn facebook" onclick="share('facebook')"><i class="fab fa-facebook-f"></i> Facebook</button>
-         <button class="share-btn twitter" onclick="share('twitter')"><i class="fab fa-twitter"></i> Twitter</button>
-         <button class="share-btn whatsapp" onclick="share('whatsapp')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-         <button class="share-btn linkedin" onclick="share('linkedin')"><i class="fab fa-linkedin-in"></i> LinkedIn</button>
-         <button class="share-btn copy" onclick="copyLink()"><i class="fas fa-link"></i> Copier</button>
-     </div>`;
-
+    html += `<div class="share-buttons"><button class="share-btn facebook" onclick="share('facebook')"><i class="fab fa-facebook-f"></i> Facebook</button><button class="share-btn twitter" onclick="share('twitter')"><i class="fab fa-twitter"></i> Twitter</button><button class="share-btn whatsapp" onclick="share('whatsapp')"><i class="fab fa-whatsapp"></i> WhatsApp</button><button class="share-btn linkedin" onclick="share('linkedin')"><i class="fab fa-linkedin-in"></i> LinkedIn</button><button class="share-btn copy" onclick="copyLink()"><i class="fas fa-link"></i> Copier</button></div>`;
     document.getElementById('articleContent').innerHTML = html;
-    initAudioReader(art.titre + ".   " + art.rawContent);
-
+    initAudioReader(art.titre + ". " + art.rawContent);
     const rel = allArticles.filter(a => a.id != id && a.categorie === art.categorie).slice(0, 3);
     const relBox = document.getElementById('relatedArticles');
     const relGrid = document.getElementById('relatedGrid');
-
     if (rel.length > 0 && relBox && relGrid) {
         relBox.style.display = 'block';
-        relGrid.innerHTML = rel.map(a => `
-         <div class="related-card" onclick="openArticle('${a.id}')">
-             <img src="${a.image}" onerror="this.src='https://via.placeholder.com/400x200?text=Indisponible'">
-             <h4>${a.titre}</h4>
-         </div>`).join('');
-    } else if (relBox) {
-        relBox.style.display = 'none';
-    }
+        relGrid.innerHTML = rel.map(a => `<div class="related-card" onclick="openArticle('${a.id}')"><img src="${a.image}" onerror="this.src='https://via.placeholder.com/400x200?text=Indisponible'"><h4>${a.titre}</h4></div>`).join('');
+    } else if (relBox) { relBox.style.display = 'none'; }
 };
 
 // ===== LOGIQUE AUDIO =====
@@ -278,78 +188,71 @@ function initAudioReader(textToRead) {
     const stopBtn = document.getElementById('stopBtn');
     const stickyContainer = document.getElementById('stickyAudio');
     const cleanText = textToRead.replace(/<[^>]*>/g, '').replace(/\n/g, ' ').trim();
-    
     function resetAudioUI() {
         if(playBtn) playBtn.style.display = 'flex';
         if(stopBtn) stopBtn.style.display = 'none';
         if(stickyContainer) stickyContainer.classList.remove('playing');
     }
-
     window.triggerAudio = () => {
-        if (synth.speaking) {
-            synth.cancel();
-            resetAudioUI();
-        } else {
-            startReading();
-        }
+        if (synth.speaking) { synth.cancel(); resetAudioUI(); } else { startReading(); }
     };
-
     function startReading() {
         synth.cancel();
         currentUtterance = new SpeechSynthesisUtterance(cleanText);
         currentUtterance.lang = 'fr-FR';
-        
         currentUtterance.onstart = () => {
             if(playBtn) playBtn.style.display = 'none';
             if(stopBtn) stopBtn.style.display = 'flex';
             if(stickyContainer) stickyContainer.classList.add('playing');
         };
-
         currentUtterance.onend = resetAudioUI;
         currentUtterance.onerror = resetAudioUI;
-
         synth.speak(currentUtterance);
     }
-
     if(playBtn) playBtn.onclick = startReading;
     if(stopBtn) stopBtn.onclick = () => { synth.cancel(); resetAudioUI(); };
 }
 
-// ===== RETOUR ACCUEIL (CORRIGÉ) =====
+// ===== RETOUR ACCUEIL =====
 window.goHome = function() {
     if (synth) synth.cancel();
     currentEditingId = null;
-    currentFilter = 'all'; 
+    currentFilter = 'all';
     currentPage = 1;
-    
     const searchInput = document.getElementById('searchInput');
     if(searchInput) searchInput.value = '';
-
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) adminBtn.innerHTML = '<i class="fas fa-plus"></i>';
-
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('articlePage').style.display = 'none';
     document.getElementById('heroSection').classList.remove('hidden');
-
     renderGrid(allArticles.slice(0, ITEMS_PER_PAGE));
     renderPagination(allArticles);
+    window.scrollTo({top: 0, behavior: 'smooth'});
+};
 
+// ===== NAVIGATION VEILLE =====
+window.showVeille = function() {
+    if (synth) synth.cancel();
+    currentFilter = 'all';
+    currentPage = 1;
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('articlePage').style.display = 'none';
+    document.getElementById('veilleSection').style.display = 'block';
+    
+    document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'));
+    document.getElementById('nav-veille').classList.add('active');
+    
+    loadVeille();
     window.scrollTo({top: 0, behavior: 'smooth'});
 };
 
 // ===== PAGINATION ET FILTRES =====
 function renderPagination(arts) {
-    if(!arts || arts.length === 0) {
-        const pag = document.getElementById('pagination');
-        if(pag) pag.innerHTML = '';
-        return;
-    }
-    
+    if(!arts || arts.length === 0) { const pag = document.getElementById('pagination'); if(pag) pag.innerHTML = ''; return; }
     const total = Math.ceil(arts.length / ITEMS_PER_PAGE);
     const pag = document.getElementById('pagination');
     if(!pag) return;
-    
     pag.innerHTML = '';
     for (let i = 1; i <= total; i++) {
         const btn = document.createElement('button');
@@ -365,27 +268,25 @@ function renderPagination(arts) {
         pag.appendChild(btn);
     }
 }
-
 window.filterByCategory = function(cat, ev) {
     if(ev) ev.preventDefault();
     currentFilter = cat;
     currentPage = 1;
-    
-    // Retourner au mainContent si on est sur un article
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('articlePage').style.display = 'none';
-    
+    document.getElementById('veilleSection').style.display = 'none';
     document.getElementById('heroSection').classList.add('hidden');
+    document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'));
+    if(cat === 'all') document.querySelector('.main-nav a:first-child').classList.add('active');
     const filtered = cat === 'all' ? allArticles : allArticles.filter(a => a.categorie === cat);
     renderGrid(filtered.slice(0, ITEMS_PER_PAGE));
     renderPagination(filtered);
 };
-
 window.filterByTag = function(tag) {
     currentTag = tag;
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('articlePage').style.display = 'none';
-    
+    document.getElementById('veilleSection').style.display = 'none';
     document.getElementById('heroSection').classList.add('hidden');
     const filtered = allArticles.filter(a => a.tags && a.tags.includes(tag));
     renderGrid(filtered.slice(0, ITEMS_PER_PAGE));
@@ -396,25 +297,14 @@ window.filterByTag = function(tag) {
 function renderTrending() {
     const sorted = [...allArticles].sort((a,b) => b.views - a.views).slice(0, 5);
     const list = document.getElementById('trendingList');
-    if(list) {
-        list.innerHTML = sorted.map((a,i) => `<li class="trending-item" onclick="openArticle('${a.id}')">
-             <span class="trending-number">${i+1}</span>
-             <div class="trending-content">
-                 <h4>${a.titre}</h4>
-                 <span>${a.views} vues</span>
-             </div>
-         </li>`).join('');
-    }
+    if(list) list.innerHTML = sorted.map((a,i) => `<li class="trending-item" onclick="openArticle('${a.id}')"><span class="trending-number">${i+1}</span><div class="trending-content"><h4>${a.titre}</h4><span>${a.views} vues</span></div></li>`).join('');
 }
-
 function renderTags() {
     const counts = {};
     allArticles.forEach(a => a.tags?.forEach(t => counts[t] = (counts[t] || 0) + 1));
     const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 10);
     const cloud = document.getElementById('tagCloud');
-    if(cloud) {
-        cloud.innerHTML = sorted.map(([t,c]) => `<span class="tag-cloud-item" onclick="filterByTag('${t}')">${t} (${c})</span>`).join('');
-    }
+    if(cloud) cloud.innerHTML = sorted.map(([t,c]) => `<span class="tag-cloud-item" onclick="filterByTag('${t}')">${t} (${c})</span>`).join('');
 }
 
 // ===== THEME ET SCROLL =====
@@ -422,11 +312,7 @@ window.toggleTheme = () => {
     document.body.classList.toggle('dark-mode');
     localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
 };
-
-function loadTheme() {
-    if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
-}
-
+function loadTheme() { if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
 window.addEventListener('scroll', () => {
     if (document.getElementById('articlePage').style.display !== 'none') {
         const h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -436,30 +322,14 @@ window.addEventListener('scroll', () => {
     const btt = document.getElementById('backToTop');
     if(btt) btt.classList.toggle('visible', window.scrollY > 500);
 });
-
-function showToast(msg) {
-    const t = document.getElementById('toast');
-    if (!t) return;
-    t.textContent = msg; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-function cls(c) {
-    const maps = { 'Algérie':'tag-algerie','Télécoms':'tag-telecoms','Mobile':'tag-mobile','Startups':'tag-startups','Innovation':'tag-innovation' };
-    return maps[c] || 'tag-telecoms';
-}
-
+function showToast(msg) { const t = document.getElementById('toast'); if (!t) return; t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+function cls(c) { const maps = { 'Algérie':'tag-algerie','Télécoms':'tag-telecoms','Mobile':'tag-mobile','Startups':'tag-startups','Innovation':'tag-innovation' }; return maps[c] || 'tag-telecoms'; }
 function initCounters() {
     const obs = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const el = entry.target; const target = +el.dataset.target;
-                let cur = 0;
-                const up = () => {
-                    cur += target/100;
-                    if(cur < target) { el.textContent = Math.floor(cur); requestAnimationFrame(up); }
-                    else { el.textContent = target; }
-                };
+                const el = entry.target; const target = +el.dataset.target; let cur = 0;
+                const up = () => { cur += target/100; if(cur < target) { el.textContent = Math.floor(cur); requestAnimationFrame(up); } else { el.textContent = target; } };
                 up(); obs.unobserve(el);
             }
         });
@@ -469,12 +339,10 @@ function initCounters() {
 
 // ===== GESTION ADMIN =====
 window.toggleAdminPanel = function() {
-    const pass = prompt('🔒 Mot de passe Admin:');
+    const pass = prompt('Mot de passe Admin:');
     if (pass !== ADMIN_PASSWORD) return showToast('❌ Accès refusé');
-    
     const modal = document.getElementById('adminModal');
     modal.classList.add('show');
-    
     if (currentEditingId) {
         const art = allArticles.find(a => a.id == currentEditingId);
         document.getElementById('titre').value = art.titre;
@@ -484,31 +352,20 @@ window.toggleAdminPanel = function() {
         document.getElementById('extrait').value = art.extrait;
         document.getElementById('tags').value = art.tags.join(', ');
         document.getElementById('contenu').value = art.rawContent;
-        
         if (document.getElementById('imagePreview')) {
-            document.getElementById('imagePreview').innerHTML = `<p style="font-size:0.8rem;margin-bottom:5px;">Image actuelle : </p><img src="${art.image}" style="max-width:100%; border-radius:8px;">`;
+            document.getElementById('imagePreview').innerHTML = `<p style="font-size:0.8rem;margin-bottom:5px;">Image actuelle:</p><img src="${art.image}" style="max-width:100%; border-radius:8px;">`;
         }
-        
         if(!document.getElementById('delBtn')) {
             const delBtn = document.createElement('button');
-            delBtn.id = 'delBtn';
-            delBtn.type = 'button';
-            delBtn.className = 'btn-secondary';
-            delBtn.style.background = '#D21034';
-            delBtn.style.color = 'white';
+            delBtn.id = 'delBtn'; delBtn.type = 'button'; delBtn.className = 'btn-secondary';
+            delBtn.style.background = '#D21034'; delBtn.style.color = 'white';
             delBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer';
             delBtn.onclick = deleteArticle;
             document.querySelector('.form-actions').prepend(delBtn);
         }
     }
 };
-
-window.closeAdminPanel = () => {
-    document.getElementById('adminModal').classList.remove('show');
-    document.getElementById('delBtn')?.remove();
-    document.getElementById('imagePreview').innerHTML = '';
-};
-
+window.closeAdminPanel = () => { document.getElementById('adminModal').classList.remove('show'); document.getElementById('delBtn')?.remove(); document.getElementById('imagePreview').innerHTML = ''; };
 window.submitArticle = async function(e) {
     e.preventDefault();
     const formData = new FormData();
@@ -519,65 +376,41 @@ window.submitArticle = async function(e) {
     formData.append('extrait', document.getElementById('extrait').value);
     formData.append('tags', document.getElementById('tags').value);
     formData.append('contenu', document.getElementById('contenu').value);
-    
     const imgFile = document.getElementById('image').files[0];
-    if (imgFile) {
-        formData.append('image', imgFile);
-    } else if (currentEditingId) {
+    if (imgFile) formData.append('image', imgFile);
+    else if (currentEditingId) {
         const art = allArticles.find(a => a.id == currentEditingId);
         formData.append('existingImage', art.image);
     }
-    
     if (currentEditingId) formData.append('id', currentEditingId);
-
     try {
         showToast('⏳ Envoi au serveur...');
         const response = await fetch(`${API_BASE}/api/create-article`, { method: 'POST', body: formData });
-        if (response.ok) { 
-            showToast('✅ Article enregistré !'); 
-            setTimeout(() => window.location.reload(), 2000); 
-        }
+        if (response.ok) { showToast('✅ Article enregistré !'); setTimeout(() => window.location.reload(), 2000); }
     } catch (error) { showToast('❌ Erreur réseau'); }
 };
-
 async function deleteArticle() {
     if (!confirm("⚠️ Supprimer définitivement cet article ?")) return;
     try {
         showToast('⏳ Suppression...');
         const response = await fetch(`${API_BASE}/api/delete-article/${currentEditingId}`, { method: 'DELETE' });
-        if (response.ok) {
-            showToast('✅ Supprimé !');
-            setTimeout(() => window.location.reload(), 2000);
-        }
+        if (response.ok) { showToast('✅ Supprimé !'); setTimeout(() => window.location.reload(), 2000); }
     } catch (e) { showToast('❌ Erreur réseau'); }
 }
-
 window.previewImage = function(e) {
     const file = e.target.files[0];
     if (file) {
         const reader = new FileReader();
-        reader.onload = (ev) => {
-            document.getElementById('imagePreview').innerHTML = `<p style="font-size:0.8rem;margin-bottom:5px;">Nouvelle image :</p><img src="${ev.target.result}" style="max-width:100%; border-radius:8px;">`;
-        };
+        reader.onload = (ev) => { document.getElementById('imagePreview').innerHTML = `<p style="font-size:0.8rem;margin-bottom:5px;">Nouvelle image:</p><img src="${ev.target.result}" style="max-width:100%; border-radius:8px;">`; };
         reader.readAsDataURL(file);
     }
 };
-
 window.share = (p) => {
-    const u = encodeURIComponent(window.location.href);
-    const t = encodeURIComponent(document.title);
-    const urls = {
-        facebook: `https://www.facebook.com/sharer/sharer.php?u=${u}`,
-        twitter: `https://twitter.com/intent/tweet?text=${t}&url=${u}`,
-        whatsapp: `https://wa.me/?text=${t}%20${u}`
-    };
+    const u = encodeURIComponent(window.location.href); const t = encodeURIComponent(document.title);
+    const urls = { facebook: `https://www.facebook.com/sharer/sharer.php?u=${u}`, twitter: `https://twitter.com/intent/tweet?text=${t}&url=${u}`, whatsapp: `https://wa.me/?text=${t}%20${u}` };
     if(urls[p]) window.open(urls[p], '_blank');
 };
-
-window.copyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    showToast('Lien copié !');
-};
+window.copyLink = () => { navigator.clipboard.writeText(window.location.href); showToast('Lien copié !'); };
 
 // ===== MÉTÉO =====
 async function updateWeather() {
@@ -586,50 +419,102 @@ async function updateWeather() {
     try {
         const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=36.7525&longitude=3.04197&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m');
         const data = await response.json();
-        const temp = Math.round(data.current.temperature_2m);
-        const code = data.current.weather_code;
-        const hum = data.current.relative_humidity_2m;
-        const wind = data.current.wind_speed_10m;
-        
-        let icon = 'fa-sun'; 
-        let color = '#fbbf24';
-        
+        const temp = Math.round(data.current.temperature_2m); const code = data.current.weather_code;
+        let icon = 'fa-sun'; let color = '#fbbf24';
         if (code >= 1 && code <= 3) { icon = 'fa-cloud-sun'; color = '#94a3b8'; }
         if (code >= 45 && code <= 48) { icon = 'fa-smog'; color = '#64748b'; }
         if (code >= 51 && code <= 67) { icon = 'fa-cloud-rain'; color = '#60a5fa'; }
         if (code >= 71 && code <= 77) { icon = 'fa-snowflake'; color = '#bae6fd'; }
         if (code >= 80 && code <= 82) { icon = 'fa-cloud-showers-heavy'; color = '#2563eb'; }
         if (code >= 95) { icon = 'fa-bolt'; color = '#ef4444'; }
-
         widget.innerHTML = `<i class="fas ${icon}" style="color:${color}; margin-right:5px;"></i> ${temp}°C`;
-        widget.title = `Météo Alger - Humidité: ${hum}% | Vent: ${wind} km/h`;
-    } catch (e) {
-        widget.innerHTML = `<i class="fas fa-sun" style="color:#fbbf24"></i> 22°C`;
-    }
+        widget.title = `Météo Alger - Humidité: ${data.current.relative_humidity_2m}% | Vent: ${data.current.wind_speed_10m} km/h`;
+    } catch (e) { widget.innerHTML = `<i class="fas fa-sun" style="color:#fbbf24"></i> 22°C`; }
 }
 
-// ===== BARRE DE RECHERCHE INSTANTANÉE =====
+// ===== BARRE DE RECHERCHE =====
 const searchInput = document.getElementById('searchInput');
 if (searchInput) {
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase().trim();
-        
-        // S'assurer qu'on est sur la page principale
         document.getElementById('mainContent').style.display = 'block';
         document.getElementById('articlePage').style.display = 'none';
+        document.getElementById('veilleSection').style.display = 'none';
         document.getElementById('heroSection').classList.add('hidden');
-
-        if (query === '') {
-            goHome();
-        } else {
+        if (query === '') { goHome(); } else {
             currentPage = 1;
-            const filtered = allArticles.filter(a =>
-                a.titre.toLowerCase().includes(query) ||
-                a.extrait.toLowerCase().includes(query) ||
-                (a.tags && a.tags.some(t => t.toLowerCase().includes(query)))
-            );
+            const filtered = allArticles.filter(a => a.titre.toLowerCase().includes(query) || a.extrait.toLowerCase().includes(query) || (a.tags && a.tags.some(t => t.toLowerCase().includes(query))));
             renderGrid(filtered.slice(0, ITEMS_PER_PAGE));
             renderPagination(filtered);
         }
     });
 }
+
+// ==========================================
+// [VEILLE] LOGIQUE FRONTEND
+// ==========================================
+let veilleData = { manual: [], feed: [] };
+async function loadVeille() {
+    const loader = document.getElementById('veilleLoading');
+    if(loader) loader.style.display = 'block';
+    try {
+        const res = await fetch(`${API_BASE}/api/veille`);
+        if(!res.ok) throw new Error('Erreur chargement veille');
+        veilleData = await res.json();
+        renderVeilleTable();
+        if(loader) loader.style.display = 'none';
+    } catch(e) { console.error(e); if(loader) loader.textContent = '⚠️ Impossible de synchroniser la veille.'; }
+}
+function renderVeilleTable() {
+    const tbody = document.getElementById('veilleBody');
+    if(!tbody) return;
+    const all = [...veilleData.feed, ...veilleData.manual].sort((a,b) => new Date(b.date) - new Date(a.date));
+    tbody.innerHTML = all.map(a => {
+        const date = new Date(a.date).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+        const tagsHtml = (a.tags || []).map(t => `<span class="veille-tag">${t}</span>`).join('');
+        const actionsHtml = a.isManual ? `<button class="veille-btn edit" title="Modifier" onclick="openVeilleModal('edit', '${a.id}')"><i class="fas fa-pencil-alt"></i></button><button class="veille-btn delete" title="Supprimer" onclick="deleteVeilleArticle('${a.id}')"><i class="fas fa-trash"></i></button>` : `<button class="veille-btn" title="Ouvrir la source" onclick="window.open('${a.url}', '_blank')"><i class="fas fa-external-link-alt"></i></button>`;
+        return `<tr><td style="white-space:nowrap; font-size:0.8rem; color:var(--text-light);">${date}</td><td><a href="${a.url}" target="_blank">${a.title}</a></td><td>${tagsHtml}</td><td><span class="veille-source">${a.source}</span></td><td><div class="veille-actions">${actionsHtml}</div></td></tr>`;
+    }).join('');
+}
+window.openVeilleModal = function(mode = 'add', id = null) {
+    const modal = document.getElementById('veilleModal');
+    const form = document.getElementById('veilleForm');
+    const titleEl = document.getElementById('veilleModalTitle');
+    modal.classList.add('show');
+    form.reset();
+    document.getElementById('veilleEditId').value = '';
+    if (mode === 'edit' && id) {
+        const art = veilleData.manual.find(a => a.id === id);
+        if (art) {
+            titleEl.innerHTML = '<i class="fas fa-pencil-alt"></i> Modifier l\'article';
+            document.getElementById('veilleEditId').value = art.id;
+            document.getElementById('veilleTitle').value = art.title;
+            document.getElementById('veilleUrl').value = art.url;
+            document.getElementById('veilleTags').value = art.tags.join(', ');
+        }
+    } else {
+        titleEl.innerHTML = '<i class="fas fa-plus"></i> Ajouter un article de veille';
+    }
+};
+window.closeVeilleModal = () => document.getElementById('veilleModal').classList.remove('show');
+window.handleVeilleSubmit = async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('veilleEditId').value;
+    const title = document.getElementById('veilleTitle').value;
+    const url = document.getElementById('veilleUrl').value;
+    const tag = document.getElementById('veilleTags').value;
+    const method = id ? 'PUT' : 'POST';
+    const endpoint = id ? `${API_BASE}/api/veille/${id}` : `${API_BASE}/api/veille`;
+    try {
+        const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, url, tag }) });
+        if(res.ok) { showToast(id ? '✅ Article modifié !' : '✅ Article ajouté !'); closeVeilleModal(); loadVeille(); }
+    } catch(err) { showToast('❌ Erreur réseau'); }
+};
+window.deleteVeilleArticle = async (id) => {
+    if(!confirm('Supprimer définitivement cet article ?')) return;
+    try {
+        const res = await fetch(`${API_BASE}/api/veille/${id}`, { method: 'DELETE' });
+        if(res.ok) { showToast('✅ Supprimé !'); loadVeille(); }
+    } catch(e) { showToast('❌ Erreur'); }
+};
+setInterval(loadVeille, 60000);
