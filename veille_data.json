@@ -3,6 +3,66 @@
   "feed": [
     {
       "id": "aHR0cHM6Ly93d3cu",
+      "title": "Sous le capot de l'IA d'entreprise : le CTO IA d'Atlassian décrypte la \"mémoire\" utilisée par les agents d'IA",
+      "url": "https://www.zdnet.fr/actualites/sous-le-capot-de-lia-dentreprise-le-cto-ia-datlassian-decrypte-la-memoire-utilisee-par-les-agents-dia-494686.htm?utm_source=rss_feed&utm_medium=link&utm_campaign=unknown",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-08 10:00:30",
+      "source": "zdnet.fr",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Algérie – France : Macron veut « sécuriser » la relation avant 2027",
+      "url": "https://www.tsa-algerie.com/algerie-france-macron-veut-securiser-la-relation-avant-2027/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-08 08:38:02",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Algérie – France : Tebboune fustige les partisans des bienfaits de la colonisation",
+      "url": "https://www.tsa-algerie.com/algerie-france-tebboune-fustige-les-partisans-des-bienfaits-de-la-colonisation/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-08 08:08:42",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Algérie : Stéphane Romatet, ambassadeur de France, de retour à Alger",
+      "url": "https://www.tsa-algerie.com/algerie-stephane-romatet-ambassadeur-de-france-de-retour-a-alger/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-08 07:16:44",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Maroc : une opposante dénonce un plan de « judaïsation » du royaume",
+      "url": "https://www.tsa-algerie.com/maroc-une-opposante-denonce-un-plan-de-judaisation-du-royaume/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-08 06:46:32",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
       "title": "Algérie – Turquie : atteindre 10 milliards d’échanges en 2030",
       "url": "https://www.tsa-algerie.com/algerie-turquie-atteindre-10-milliards-dechanges-en-2030/",
       "tags": [
@@ -518,5 +578,5 @@
       "isManual": false
     }
   ],
-  "lastUpdated": "2026-05-08T03:02:26.496Z"
+  "lastUpdated": "2026-05-08T13:30:00.444Z"
 }

@@ -40,14 +40,44 @@ setInterval(updateLiveClock, 1000);
 
 // ===== CHARGEMENT DES ARTICLES =====
 async function loadArticles() {
+    // Affiche d'abord les articles en cache (si disponibles) pour UX immédiate
+    if (allArticles.length > 0) {
+        renderHero(allArticles);
+        renderGrid(allArticles.slice(0, ITEMS_PER_PAGE));
+        renderTicker(allArticles);
+        renderTrending();
+        renderTags(); 
+        renderPagination(allArticles);
+        initCounters();
+    } else {
+        const grid = document.getElementById('newsGrid');
+        if (grid) grid.innerHTML = '<p style="text-align:center; padding:20px;">Chargement des derniers articles…</p>';
+    }
+
+    // Fonction utilitaire avec timeout et retry
+    const fetchWithTimeout = async (url, options = {}, timeout = 8000, retries = 1) => {
+        for (let i = 0; i <= retries; i++) {
+            try {
+                const controller = new AbortController();
+                const id = setTimeout(() => controller.abort(), timeout);
+                const res = await fetch(url, { ...options, signal: controller.signal });
+                clearTimeout(id);
+                return res;
+            } catch (err) {
+                if (i === retries) throw err;
+                await new Promise(r => setTimeout(r, 1000)); // pause avant retry
+            }
+        }
+    };
+
     try {
-        const listResponse = await fetch(`${API_BASE}/api/articles`);
-        if (!listResponse.ok) throw new Error('Impossible de charger la liste');
+        const listResponse = await fetchWithTimeout(`${API_BASE}/api/articles`, {}, 8000, 1);
+        if (!listResponse.ok) throw new Error(`HTTP ${listResponse.status}: ${listResponse.statusText}`);
         const articleFiles = await listResponse.json();
         allArticles = [];
         const articlePromises = articleFiles.map(async (fileName) => {
             try {
-                const res = await fetch(`${API_BASE}/api/article-content/${fileName}`);
+                const res = await fetchWithTimeout(`${API_BASE}/api/article-content/${fileName}`, {}, 8000, 1);
                 if (res.ok) {
                     const text = await res.text();
                     const art = parseMarkdownFile(text);
@@ -59,7 +89,7 @@ async function loadArticles() {
                     return art;
                 }
             } catch (err) {
-                console.error("Erreur chargement article: ", fileName, err);
+                console.warn("Article non chargé (timeout/retry échoué): ", fileName, err);
             }
             return null;
         });
@@ -69,12 +99,13 @@ async function loadArticles() {
         allArticles.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         if (allArticles.length === 0) {
-            console.warn("Aucun article trouvé.");
+            console.warn("Aucun article trouvé après appel API.");
             const grid = document.getElementById('newsGrid');
             if (grid) grid.innerHTML = '<p style="text-align:center; padding:20px;">Aucun article disponible pour le moment.</p>';
             return;
         }
 
+        // Rafraîchit l'affichage avec les nouveaux articles
         renderHero(allArticles);
         renderGrid(allArticles.slice(0, ITEMS_PER_PAGE));
         renderTicker(allArticles);
@@ -83,9 +114,12 @@ async function loadArticles() {
         renderPagination(allArticles);
         initCounters();
     } catch (e) {
-        console.error('Erreur critique de chargement:', e);
-        const grid = document.getElementById('newsGrid');
-        if (grid) grid.innerHTML = `<div style="text-align:center; padding:20px; color: red;"><h3>Erreur de connexion au serveur</h3><p>Vérifiez que le serveur (server.js) est lancé.</p><p>${e.message}</p></div>`;
+        console.error('Erreur critique de chargement (API indisponible):', e);
+        // Garde les articles en cache affichés → pas de page blanche
+        if (allArticles.length === 0) {
+            const grid = document.getElementById('newsGrid');
+            if (grid) grid.innerHTML = `<div style="text-align:center; padding:20px; color: #d97706;"><h3>⚠️ Connexion lente ou temporaire</h3><p>Les articles récents sont toujours visibles. Le serveur se réveille…</p></div>`;
+        }
     }
 }
 

@@ -8,9 +8,18 @@ const cors = require('cors');
 const https = require('https'); // Pour les appels API gratuits
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(cors());
+app.use(cors({
+    origin: [
+        'https://algeria-tech.pages.dev',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000'
+    ],
+    credentials: true
+}));
 const isCloud = !!process.env.GITHUB_TOKEN;
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+const octokit = process.env.GITHUB_TOKEN 
+  ? new Octokit({ auth: process.env.GITHUB_TOKEN }) 
+  : null;
 const OWNER = "bastaps";
 const REPO = "algeria-tech";
 const storage = isCloud ? multer.memoryStorage() : multer.diskStorage({
@@ -24,10 +33,14 @@ app.use(express.static('.'));
 // --- ROUTES ARTICLES (CORRIGÉES) ---
 app.get('/api/articles', async (req, res) => {
     try {
-        if (isCloud) {
+        if (isCloud && octokit) {
             const { data } = await octokit.repos.getContent({ owner: OWNER, repo: REPO, path: 'articles' });
             const files = data.filter(f => f.name.endsWith('.md')).map(f => f.name);
             res.json(files);
+        } else if (isCloud && !octokit) {
+            console.warn('[API] GITHUB_TOKEN non défini → mode local forcé pour /api/articles');
+            const files = await fs.readdir('articles');
+            res.json(files.filter(f => f.endsWith('.md')));
         } else {
             const files = await fs.readdir('articles');
             res.json(files.filter(f => f.endsWith('.md')));
@@ -37,9 +50,13 @@ app.get('/api/articles', async (req, res) => {
 app.get('/api/article-content/:file', async (req, res) => {
     try {
         const fileName = req.params.file;
-        if (isCloud) {
+        if (isCloud && octokit) {
             const { data } = await octokit.repos.getContent({ owner: OWNER, repo: REPO, path: `articles/${fileName}` });
             const content = Buffer.from(data.content, 'base64').toString('utf-8');
+            res.send(content);
+        } else if (isCloud && !octokit) {
+            console.warn('[API] GITHUB_TOKEN non défini → mode local forcé pour /api/article-content');
+            const content = await fs.readFile(path.join('articles', fileName), 'utf-8');
             res.send(content);
         } else {
             const content = await fs.readFile(path.join('articles', fileName), 'utf-8');
@@ -202,5 +219,7 @@ app.delete('/api/veille/:id', (req, res) => {
     res.json({ success: true });
 });
 // FIN [VEILLE] BACKEND
+
+app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() }));
 
 app.listen(PORT, () => console.log(`🚀 Serveur actif sur port ${PORT}`));
