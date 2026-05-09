@@ -12,6 +12,8 @@ const isLocal = window.location.hostname === 'localhost' || window.location.host
 const REMOTE_API = 'https://dz-tech-press-api.onrender.com';
 const API_BASE = isLocal ? '' : REMOTE_API;
 const ADMIN_PASSWORD = 'admin2026';
+const YOUTUBE_API_KEY = 'AIzaSyDw_grxmStmAgZ6-WUWHNLPa5ozKIgVMiA'; 
+const YOUTUBE_CHANNEL_ID = 'UCyIYnT60oAg8iVZKoz8seAA'; 
 
 // ===== INITIALISATION AU CHARGEMENT =====
 window.addEventListener('load', () => {
@@ -143,6 +145,7 @@ function parseMarkdownFile(text) {
         heure: get('heure'),
         categorie: get('categorie'),
         image: get('image'),
+        video: get('video'),
         extrait: get('extrait'),
         contenu: marked.parse(content, { breaks: true, gfm: true }),
         rawContent: content.trim(),
@@ -158,9 +161,17 @@ function renderHero(arts) {
     const s = arts.slice(1, 3);
     const grid = document.getElementById('heroGrid');
     if (!grid || !h) return;
-    let html = `<div class="hero-main" onclick="openArticle('${h.id}')"><img src="${h.image}" alt="${h.titre}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Indisponible'"><div class="hero-overlay"><div class="hero-meta-wrapper"><span class="category-tag ${cls(h.categorie)}">${h.categorie}</span><span class="hero-meta-tag"><i class="far fa-calendar-alt"></i> ${h.date}</span><span class="hero-meta-tag"><i class="far fa-clock"></i> ${h.heure}</span></div><h2>${h.titre}</h2><p>${h.extrait}</p></div></div><div class="hero-side-card">`;
+
+    const getT = (art) => {
+        const hasImg = art.image && art.image.trim() !== "" && !art.image.includes('%20%20') && !art.image.endsWith('  ');
+        if (hasImg) return art.image;
+        const vMatch = art.video ? art.video.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]{11})/) : null;
+        return vMatch ? `https://img.youtube.com/vi/${vMatch[1]}/hqdefault.jpg` : 'https://via.placeholder.com/800x400?text=Image+Indisponible';
+    };
+
+    let html = `<div class="hero-main" onclick="openArticle('${h.id}')"><img src="${getT(h)}" alt="${h.titre}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Indisponible'">${h.video ? '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(210,16,52,0.8);color:#fff;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;z-index:2;pointer-events:none;"><i class="fas fa-play"></i></div>' : ''}<div class="hero-overlay"><div class="hero-meta-wrapper"><span class="category-tag ${cls(h.categorie)}">${h.categorie}</span><span class="hero-meta-tag"><i class="far fa-calendar-alt"></i> ${h.date}</span><span class="hero-meta-tag"><i class="far fa-clock"></i> ${h.heure}</span></div><h2>${h.titre}</h2><p>${h.extrait}</p></div></div><div class="hero-side-card">`;
     s.forEach(a => {
-        html += `<div onclick="openArticle('${a.id}')"><img src="${a.image}" alt="${a.titre}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Indisponible'"><div class="hero-overlay"><div class="hero-meta-wrapper"><span class="category-tag ${cls(a.categorie)}">${a.categorie}</span><span class="hero-meta-tag"><i class="far fa-calendar-alt"></i> ${a.date}</span><span class="hero-meta-tag"><i class="far fa-clock"></i> ${a.heure}</span></div><h2>${a.titre}</h2></div></div>`;
+        html += `<div onclick="openArticle('${a.id}')" style="position:relative;"><img src="${getT(a)}" alt="${a.titre}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Indisponible'">${a.video ? '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(210,16,52,0.8);color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;z-index:2;pointer-events:none;"><i class="fas fa-play"></i></div>' : ''}<div class="hero-overlay"><div class="hero-meta-wrapper"><span class="category-tag ${cls(a.categorie)}">${a.categorie}</span><span class="hero-meta-tag"><i class="far fa-calendar-alt"></i> ${a.date}</span><span class="hero-meta-tag"><i class="far fa-clock"></i> ${a.heure}</span></div><h2>${a.titre}</h2></div></div>`;
     });
     html += '</div>';
     grid.innerHTML = html;
@@ -172,8 +183,16 @@ function renderGrid(arts) {
         grid.innerHTML = '<p style="text-align:center; padding:20px;">Aucun résultat.</p>';
         return;
     }
+
+    const getT = (art) => {
+        const hasImg = art.image && art.image.trim() !== "" && !art.image.includes('%20%20') && !art.image.endsWith('  ');
+        if (hasImg) return art.image;
+        const vMatch = art.video ? art.video.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]{11})/) : null;
+        return vMatch ? `https://img.youtube.com/vi/${vMatch[1]}/hqdefault.jpg` : 'https://via.placeholder.com/400x200?text=Image+Indisponible';
+    };
+
     grid.innerHTML = arts.map((a, i) => `<div class="news-card" style="animation-delay:${i*0.1}s" onclick="openArticle('${a.id}')">
- <div class="news-card-img"><img src="${a.image}" alt="${a.titre}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Indisponible'"><span class="category-tag ${cls(a.categorie)}">${a.categorie}</span></div>
+ <div class="news-card-img" style="position:relative;"><img src="${getT(a)}" alt="${a.titre}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Indisponible'">${a.video ? '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(210,16,52,0.8);color:#fff;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;z-index:2;pointer-events:none;"><i class="fas fa-play"></i></div>' : ''}<span class="category-tag ${cls(a.categorie)}">${a.categorie}</span></div>
  <div class="news-card-body"><h3>${a.titre}</h3><p>${a.extrait}</p>
  <div class="card-meta"><span><i class="far fa-calendar"></i> ${a.date}</span><span><i class="far fa-clock"></i> ${a.heure}</span><span><i class="far fa-eye"></i> ${a.views}</span></div></div></div>`).join('');
 }
@@ -200,7 +219,22 @@ window.openArticle = function(id) {
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('articlePage').style.display = 'block';
     window.scrollTo({top:0, behavior:'smooth'});
-    let html = `<img src="${art.image}" alt="${art.titre}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Indisponible'"><div class="article-body"><div class="article-meta"><span class="category-tag ${cls(art.categorie)}">${art.categorie}</span><span><i class="far fa-calendar"></i> ${art.date}</span><span><i class="far fa-clock"></i> ${art.heure}</span><span class="reading-time"><i class="fas fa-book-open"></i> ${art.readingTime} min</span><span><i class="far fa-eye"></i> ${art.views} vues</span><button class="meta-audio-btn" onclick="triggerAudio()"><i class="fas fa-volume-up"></i> Écouter</button></div><h1>${art.titre}</h1><div class="article-text">${art.contenu}</div>`;
+
+    let mediaHeader = '';
+    let bodyImage = '';
+    if (art.video && art.video.trim() !== "") {
+        const vId = art.video.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]{11})/)?.[1];
+        if (vId) {
+            mediaHeader = `<div class="video-container" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; margin-bottom:20px; border-radius:12px; background:#000;"><iframe src="https://www.youtube-nocookie.com/embed/${vId}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe></div>`;
+        }
+        if (art.image && art.image.trim() !== "") {
+            bodyImage = `<img src="${art.image}" alt="${art.titre}" style="max-width:350px; width:100%; float:right; margin:0 0 20px 20px; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">`;
+        }
+    } else if (art.image && art.image.trim() !== "") {
+        mediaHeader = `<img src="${art.image}" alt="${art.titre}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Indisponible'" style="width:100%; border-radius:15px; margin-bottom:25px;">`;
+    }
+
+    let html = `${mediaHeader}<div class="article-body"><div class="article-meta"><span class="category-tag ${cls(art.categorie)}">${art.categorie}</span><span><i class="far fa-calendar"></i> ${art.date}</span><span><i class="far fa-clock"></i> ${art.heure}</span><span class="reading-time"><i class="fas fa-book-open"></i> ${art.readingTime} min</span><span><i class="far fa-eye"></i> ${art.views} vues</span><button class="meta-audio-btn" onclick="triggerAudio()"><i class="fas fa-volume-up"></i> Écouter</button></div><h1>${art.titre}</h1><div class="article-text">${bodyImage}${art.contenu}</div>`;
     if (art.tags && art.tags.length) {
         html += `<div style="margin:30px 0;padding-top:20px;border-top:1px solid var(--border)"><strong>Tags:</strong> ${art.tags.map(t => `<span class="tag-filter" style="margin-left:8px" onclick="filterByTag('${t}');goHome()">${t}</span>`).join('')}</div>`;
     }
@@ -253,12 +287,19 @@ window.goHome = function() {
     currentEditingId = null;
     currentFilter = 'all';
     currentPage = 1;
+
+    // Réinitialiser la navigation active
+    document.querySelectorAll('.main-nav a').forEach(a => {
+        a.classList.toggle('active', a.innerText.trim() === 'Accueil');
+    });
+
     const searchInput = document.getElementById('searchInput');
     if(searchInput) searchInput.value = '';
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) adminBtn.innerHTML = '<i class="fas fa-plus"></i>';
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('articlePage').style.display = 'none';
+    document.getElementById('veilleSection').style.display = 'none';
     document.getElementById('heroSection').classList.remove('hidden');
     renderGrid(allArticles.slice(0, ITEMS_PER_PAGE));
     renderPagination(allArticles);
@@ -271,6 +312,7 @@ window.showVeille = function() {
     currentFilter = 'all';
     currentPage = 1;
     document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('heroSection').classList.add('hidden');
     document.getElementById('articlePage').style.display = 'none';
     document.getElementById('veilleSection').style.display = 'block';
     
@@ -304,14 +346,28 @@ function renderPagination(arts) {
 }
 window.filterByCategory = function(cat, ev) {
     if(ev) ev.preventDefault();
-    currentFilter = cat;
-    currentPage = 1;
+
+    // Préparation de l'affichage : on affiche le bloc principal et on cache l'article ou la veille
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('articlePage').style.display = 'none';
     document.getElementById('veilleSection').style.display = 'none';
-    document.getElementById('heroSection').classList.add('hidden');
-    document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'));
-    if(cat === 'all') document.querySelector('.main-nav a:first-child').classList.add('active');
+
+    // Mise à jour de l'onglet actif dans la navigation
+    document.querySelectorAll('.main-nav a').forEach(a => {
+        const text = a.innerText.trim();
+        a.classList.toggle('active', text === cat || (cat === 'all' && text === 'Accueil'));
+    });
+
+    if (cat === 'Vidéo') {
+        document.getElementById('heroSection').classList.add('hidden');
+        loadYouTubeVideos();
+        return;
+    }
+
+    currentFilter = cat;
+    currentPage = 1;
+    // On affiche le Hero (grandes images) uniquement sur l'Accueil, on le cache ailleurs
+    document.getElementById('heroSection').classList.toggle('hidden', cat !== 'all');
     const filtered = cat === 'all' ? allArticles : allArticles.filter(a => a.categorie === cat);
     renderGrid(filtered.slice(0, ITEMS_PER_PAGE));
     renderPagination(filtered);
@@ -357,7 +413,10 @@ window.addEventListener('scroll', () => {
     if(btt) btt.classList.toggle('visible', window.scrollY > 500);
 });
 function showToast(msg) { const t = document.getElementById('toast'); if (!t) return; t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
-function cls(c) { const maps = { 'Algérie':'tag-algerie','Télécoms':'tag-telecoms','Mobile':'tag-mobile','Startups':'tag-startups','Innovation':'tag-innovation' }; return maps[c] || 'tag-telecoms'; }
+function cls(c) { 
+    const maps = { 'Algérie':'tag-algerie','Télécoms':'tag-telecoms','Mobile':'tag-mobile','Startups':'tag-startups','Innovation':'tag-innovation','Entreprises':'tag-startups' }; 
+    return maps[c] || 'tag-telecoms'; 
+}
 function initCounters() {
     const obs = new IntersectionObserver(entries => {
         entries.forEach(entry => {
@@ -384,6 +443,7 @@ window.toggleAdminPanel = function() {
         document.getElementById('date').value = art.date;
         document.getElementById('heure').value = art.heure;
         document.getElementById('extrait').value = art.extrait;
+        document.getElementById('video').value = art.video || '';
         document.getElementById('tags').value = art.tags.join(', ');
         document.getElementById('contenu').value = art.rawContent;
         if (document.getElementById('imagePreview')) {
@@ -410,6 +470,7 @@ window.submitArticle = async function(e) {
     formData.append('extrait', document.getElementById('extrait').value);
     formData.append('tags', document.getElementById('tags').value);
     formData.append('contenu', document.getElementById('contenu').value);
+    formData.append('video', document.getElementById('video').value);
     const imgFile = document.getElementById('image').files[0];
     if (imgFile) formData.append('image', imgFile);
     else if (currentEditingId) {
@@ -551,4 +612,65 @@ window.deleteVeilleArticle = async (id) => {
         if(res.ok) { showToast('✅ Supprimé !'); loadVeille(); }
     } catch(e) { showToast('❌ Erreur'); }
 };
+
+// ==========================================
+// [YOUTUBE] RÉCUPÉRATION DYNAMIQUE
+// ==========================================
+async function loadYouTubeVideos() {
+    const grid = document.getElementById('newsGrid');
+    const hero = document.getElementById('heroSection');
+    if(hero) hero.classList.add('hidden');
+    if(grid) grid.innerHTML = '<div class="loader">Chargement des vidéos Algeria Tech...</div>';
+
+    try {
+        const url = `https://www.googleapis.com/youtube/v3/search?key=${YOUTUBE_API_KEY}&channelId=${YOUTUBE_CHANNEL_ID}&part=snippet,id&order=date&maxResults=12&type=video`;
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        if (data.items && data.items.length > 0) {
+            renderYouTubeGrid(data.items);
+            document.getElementById('pagination').innerHTML = ''; // Pas de pagination locale pour YouTube
+        } else if (data.error) {
+            let msg = data.error.message;
+            if (data.error.code === 403) {
+                msg = "L'accès à l'API YouTube est bloqué. Vérifiez que 'YouTube Data API v3' est bien activée dans votre console Google Cloud.";
+            }
+            grid.innerHTML = `<p style="text-align:center; padding:20px; color:red;">⚠️ ${msg} (Code: ${data.error.code})</p>`;
+        } else {
+            grid.innerHTML = '<p style="text-align:center; padding:20px;">Aucune vidéo trouvée sur YouTube.</p>';
+        }
+    } catch (e) {
+        grid.innerHTML = '<p style="text-align:center; padding:20px; color:red;">Erreur de connexion avec YouTube.</p>';
+    }
+}
+
+function renderYouTubeGrid(videos) {
+    const grid = document.getElementById('newsGrid');
+    if(!grid) return;
+    grid.innerHTML = videos.map((v, i) => {
+        const vId = v.id.videoId;
+        const title = v.snippet.title;
+        const thumb = v.snippet.thumbnails.high.url;
+        const date = new Date(v.snippet.publishedAt).toLocaleDateString('fr-FR');
+        return `<div class="news-card" style="animation-delay:${i*0.1}s" onclick="playYouTubeVideo('${vId}')">
+ <div class="news-card-img"><img src="${thumb}" alt="${title}"><span class="category-tag tag-video"><i class="fab fa-youtube"></i> Vidéo</span></div>
+ <div class="news-card-body"><h3>${title}</h3><div class="card-meta"><span><i class="far fa-calendar"></i> ${date}</span> <span style="color:var(--primary);margin-left:auto">Regarder <i class="fas fa-play-circle"></i></span></div></div></div>`;
+    }).join('');
+}
+
+window.playYouTubeVideo = function(vId) {
+    let modal = document.getElementById('videoModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'videoModal';
+        modal.className = 'admin-modal';
+        modal.innerHTML = `<div class="modal-content" style="max-width:850px; padding:0; background:#000; position:relative;">
+            <button onclick="document.getElementById('videoModal').classList.remove('show'); document.getElementById('ytPlayer').src='';" style="position:absolute; right:10px; top:10px; z-index:10; background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:30px; height:30px; cursor:pointer;">&times;</button>
+            <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;"><iframe id="ytPlayer" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div></div>`;
+        document.body.appendChild(modal);
+    }
+    document.getElementById('ytPlayer').src = `https://www.youtube-nocookie.com/embed/${vId}?autoplay=1&rel=0`;
+    modal.classList.add('show');
+};
+
 setInterval(loadVeille, 60000);

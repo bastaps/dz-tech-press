@@ -74,13 +74,13 @@ async function generateArticlesList() {
 }
 app.post('/api/create-article', upload.single('image'), async (req, res) => {
     try {
-        const { id, titre, categorie, date, heure, extrait, tags, contenu } = req.body;
+        const { id, titre, categorie, date, heure, extrait, tags, contenu, video } = req.body;
         let fileName = (id && id !== "null") ? `${id}.md` : `${Date.now()}.md`;
         let tagsFormatted =  "  ";
         if (tags) { tagsFormatted = tags.split(',').map(t => t.trim().replace(/"/g, '')).filter(t => t).map(t => `"${t}"`).join(', '); }
         let imagePath = req.body.existingImage ||  "  ";
         if (req.file) { imagePath = isCloud ? `images/${Date.now()}-${req.file.originalname}` : `images/${req.file.filename}`; }
-        const frontMatter = `---\ntitre: "${titre.replace(/"/g, '\\"')}"\ncategorie: ${categorie}\ndate: ${date}\nheure: ${heure}\nimage: ${imagePath}\nextrait: "${extrait.replace(/"/g, '\\"')}"\ntags: [${tagsFormatted}]\n---\n\n${contenu}\n`;
+        const frontMatter = `---\ntitre: "${titre.replace(/"/g, '\\"')}"\ncategorie: ${categorie}\ndate: ${date}\nheure: ${heure}\nimage: ${imagePath}\nvideo: "${video || ''}"\nextrait: "${extrait.replace(/"/g, '\\"')}"\ntags: [${tagsFormatted}]\n---\n\n${contenu}\n`;
         if (isCloud) {
             if (req.file) await pushToGithub(imagePath, req.file.buffer, "Upload image", true);
             await pushToGithub(`articles/${fileName}`, frontMatter, `MAJ Article: ${titre}`);

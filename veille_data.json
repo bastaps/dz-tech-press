@@ -3,6 +3,78 @@
   "feed": [
     {
       "id": "aHR0cHM6Ly93d3cu",
+      "title": "Fraude à l’export : comment l’Algérie peut-elle lutter ? Un économiste répond",
+      "url": "https://www.tsa-algerie.com/fraude-a-lexport-comment-lalgerie-peut-elle-lutter-un-economiste-repond/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-09 09:40:36",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Vous avez une TV Hisense ? Je vous conseille de modifier ces réglages pour améliorer la qualité de l'image",
+      "url": "https://www.zdnet.fr/pratique/vous-avez-une-tv-hisense-je-vous-conseille-de-modifier-ces-reglages-pour-ameliorer-la-qualite-de-limage-494785.htm?utm_source=rss_feed&utm_medium=link&utm_campaign=unknown",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-09 08:22:55",
+      "source": "zdnet.fr",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Foyers d’accueil, famille… le modèle algérien de prise en charge des seniors",
+      "url": "https://www.tsa-algerie.com/foyers-daccueil-famille-le-modele-algerien-de-prise-en-charge-des-seniors/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-09 07:10:41",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "France : grave dérapage islamophobe de l’historien Richard Haddad",
+      "url": "https://www.tsa-algerie.com/france-grave-derapage-islamophobe-de-lhistorien-richard-haddad/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-08 19:16:18",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Air Algérie : le calvaire des passagers du vol Nice – Constantine",
+      "url": "https://www.tsa-algerie.com/air-algerie-le-calvaire-des-passagers-du-vol-nice-constantine/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-08 16:14:31",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "De retour en Algérie, l’ambassadeur Romatet évoque un « grand moment d’émotion »",
+      "url": "https://www.tsa-algerie.com/de-retour-en-algerie-lambassadeur-romatet-evoque-un-grand-moment-demotion/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-08 14:15:53",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
       "title": "Sous le capot de l'IA d'entreprise : le CTO IA d'Atlassian décrypte la \"mémoire\" utilisée par les agents d'IA",
       "url": "https://www.zdnet.fr/actualites/sous-le-capot-de-lia-dentreprise-le-cto-ia-datlassian-decrypte-la-memoire-utilisee-par-les-agents-dia-494686.htm?utm_source=rss_feed&utm_medium=link&utm_campaign=unknown",
       "tags": [
@@ -578,5 +650,5 @@
       "isManual": false
     }
   ],
-  "lastUpdated": "2026-05-08T13:30:00.444Z"
+  "lastUpdated": "2026-05-09T11:46:14.427Z"
 }
