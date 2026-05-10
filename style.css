@@ -46,7 +46,8 @@ body.dark-mode .top-bar { background: #020617; }
 .top-bar-right { display: flex; gap: 10px; }
 .top-bar-right a { color: #fff; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.1); transition: var(--transition); }
 .top-bar-right a:hover { background: var(--secondary); transform: translateY(-2px); }
-.header { background: var(--bg-white); box-shadow: var(--shadow-sm); position: sticky; top: 0; z-index: 100; }
+header { display: contents; }
+.header { background: var(--bg-white); box-shadow: var(--shadow-sm); position: sticky; top: 0; z-index: 1000; }
 .header-content { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; gap: 20px; }
 .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
 .logo-icon { width: 48px; height: 48px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; font-size: 1.4rem; }
@@ -99,6 +100,7 @@ padding: 0 15px; width: 220px; border: 1px solid var(--border); transition: var(
 .tag-mobile { background: #f59e0b; }
 .tag-startups { background: #8b5cf6; }
 .tag-innovation { background: #10b981; }
+.tag-video { background: #ec4899; }
 .hero-overlay h2 { font-size: 1.8rem; font-weight: 800; line-height: 1.2; margin-bottom: 8px; }
 .hero-side-card .hero-overlay h2 { font-size: 1.1rem; }
 .hero-overlay p { font-size: 0.95rem; opacity: 0.9; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -193,6 +195,7 @@ padding: 0 15px; width: 220px; border: 1px solid var(--border); transition: var(
 .share-btn.twitter { background: #1da1f2; }
 .share-btn.whatsapp { background: #25d366; }
 .share-btn.linkedin { background: #0077b5; }
+.share-btn.youtube { background: #D21034; }
 .share-btn.copy { background: var(--bg); color: var(--text-dark); }
 .share-btn:hover { transform: translateY(-2px); opacity: 0.9; }
 .related-articles { max-width: 800px; margin: 50px auto 0; }

@@ -3,6 +3,90 @@
   "feed": [
     {
       "id": "aHR0cHM6Ly93d3cu",
+      "title": "Algérie : le pointage biométrique au travail est-il légal ?",
+      "url": "https://www.tsa-algerie.com/algerie-le-pointage-biometrique-au-travail-est-il-legal/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-10 06:19:19",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Sabrina Sebaihi : « Les binationaux ne comprenaient pas le silence » de Macron sur l’Algérie",
+      "url": "https://www.tsa-algerie.com/sabrina-sebaihi-les-binationaux-ne-comprenaient-pas-le-silence-de-macron-sur-lalgerie/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-09 20:37:44",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Décès de Abdelhalim Kadri : l’Algérie perd un pilier de l’industrie nationale",
+      "url": "https://www.tsa-algerie.com/deces-de-abdelhalim-kadri-lalgerie-perd-un-pilier-de-lindustrie-nationale/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-09 18:43:03",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Chanegriha reçoit Alice Rufo et appelle à dépasser le passé colonial sans l’oublier",
+      "url": "https://www.tsa-algerie.com/chanegriha-recoit-alice-rufo-et-appelle-a-depasser-le-passe-colonial-sans-loublier/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-09 17:51:36",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "« Prétendre divorcer entre l’Algérie et la France est une illusion »",
+      "url": "https://www.tsa-algerie.com/pretendre-divorcer-entre-lalgerie-et-la-france-est-une-illusion/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-09 15:35:13",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Algérie – France : Alice Rufo remet à Tebboune un message de Macron",
+      "url": "https://www.tsa-algerie.com/algerie-france-alice-rufo-remet-a-tebboune-un-message-de-macron/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-09 15:05:24",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Algérie – France : pourquoi Alice Rufo est à Alger",
+      "url": "https://www.tsa-algerie.com/algerie-france-pourquoi-alice-rufo-est-a-alger/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-09 13:55:07",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
       "title": "Fraude à l’export : comment l’Algérie peut-elle lutter ? Un économiste répond",
       "url": "https://www.tsa-algerie.com/fraude-a-lexport-comment-lalgerie-peut-elle-lutter-un-economiste-repond/",
       "tags": [
@@ -650,5 +734,5 @@
       "isManual": false
     }
   ],
-  "lastUpdated": "2026-05-09T11:46:14.427Z"
+  "lastUpdated": "2026-05-10T08:27:32.832Z"
 }

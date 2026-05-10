@@ -163,10 +163,10 @@ function renderHero(arts) {
     if (!grid || !h) return;
 
     const getT = (art) => {
-        const hasImg = art.image && art.image.trim() !== "" && !art.image.includes('%20%20') && !art.image.endsWith('  ');
+        const vMatch = art.video ? art.video.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([^&?]{11})/) : null;
+        if (vMatch) return `https://img.youtube.com/vi/${vMatch[1]}/hqdefault.jpg`;
+        const hasImg = art.image && art.image.trim() !== "" && !art.image.includes('%20%20') && !art.image.endsWith('/') && !art.image.endsWith('  ');
         if (hasImg) return art.image;
-        const vMatch = art.video ? art.video.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]{11})/) : null;
-        return vMatch ? `https://img.youtube.com/vi/${vMatch[1]}/hqdefault.jpg` : 'https://via.placeholder.com/800x400?text=Image+Indisponible';
     };
 
     let html = `<div class="hero-main" onclick="openArticle('${h.id}')"><img src="${getT(h)}" alt="${h.titre}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Indisponible'">${h.video ? '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(210,16,52,0.8);color:#fff;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;z-index:2;pointer-events:none;"><i class="fas fa-play"></i></div>' : ''}<div class="hero-overlay"><div class="hero-meta-wrapper"><span class="category-tag ${cls(h.categorie)}">${h.categorie}</span><span class="hero-meta-tag"><i class="far fa-calendar-alt"></i> ${h.date}</span><span class="hero-meta-tag"><i class="far fa-clock"></i> ${h.heure}</span></div><h2>${h.titre}</h2><p>${h.extrait}</p></div></div><div class="hero-side-card">`;
@@ -185,10 +185,10 @@ function renderGrid(arts) {
     }
 
     const getT = (art) => {
-        const hasImg = art.image && art.image.trim() !== "" && !art.image.includes('%20%20') && !art.image.endsWith('  ');
+        const vMatch = art.video ? art.video.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([^&?]{11})/) : null;
+        if (vMatch) return `https://img.youtube.com/vi/${vMatch[1]}/hqdefault.jpg`;
+        const hasImg = art.image && art.image.trim() !== "" && !art.image.includes('%20%20') && !art.image.endsWith('/') && !art.image.endsWith('  ');
         if (hasImg) return art.image;
-        const vMatch = art.video ? art.video.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]{11})/) : null;
-        return vMatch ? `https://img.youtube.com/vi/${vMatch[1]}/hqdefault.jpg` : 'https://via.placeholder.com/400x200?text=Image+Indisponible';
     };
 
     grid.innerHTML = arts.map((a, i) => `<div class="news-card" style="animation-delay:${i*0.1}s" onclick="openArticle('${a.id}')">
@@ -246,7 +246,11 @@ window.openArticle = function(id) {
     const relGrid = document.getElementById('relatedGrid');
     if (rel.length > 0 && relBox && relGrid) {
         relBox.style.display = 'block';
-        relGrid.innerHTML = rel.map(a => `<div class="related-card" onclick="openArticle('${a.id}')"><img src="${a.image}" onerror="this.src='https://via.placeholder.com/400x200?text=Indisponible'"><h4>${a.titre}</h4></div>`).join('');
+        relGrid.innerHTML = rel.map(a => {
+            const vMatch = a.video ? a.video.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([^&?]{11})/) : null;
+            const thumb = vMatch ? `https://img.youtube.com/vi/${vMatch[1]}/hqdefault.jpg` : (a.image || 'https://via.placeholder.com/400x200?text=Indisponible');
+            return `<div class="related-card" onclick="openArticle('${a.id}')"><img src="${thumb}" onerror="this.src='https://via.placeholder.com/400x200?text=Indisponible'"><h4>${a.titre}</h4></div>`;
+        }).join('');
     } else if (relBox) { relBox.style.display = 'none'; }
 };
 
