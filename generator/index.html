@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="nuit">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algeria Tech Generator — Infographies</title>
+  <meta name="description" content="Transformez vos documents en infographies interactives époustouflantes">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,400&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Canvas Three.js background -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- ========================================================
+       ÉCRAN 1 — UPLOAD
+  ======================================================== -->
+  <div id="screen-upload" class="screen active">
+
+    <header class="gen-header">
+      <a href="../index.html" class="gen-logo">
+        <span class="logo-mark">✦</span>
+        <span class="logo-text">Algeria<em>Tech</em> <span class="logo-gen">Generator</span></span>
+      </a>
+
+      <div class="theme-picker">
+        <span class="theme-label">Thème</span>
+        <div class="theme-dots">
+          <button class="theme-dot active" data-theme="nuit"      title="Nuit Algérienne"></button>
+          <button class="theme-dot"        data-theme="desert"    title="Désert Solaire"></button>
+          <button class="theme-dot"        data-theme="emeraude"  title="Émeraude"></button>
+          <button class="theme-dot"        data-theme="ocean"     title="Océan Profond"></button>
+          <button class="theme-dot"        data-theme="corporate" title="Corporate Pro"></button>
+        </div>
+      </div>
+    </header>
+
+    <main class="upload-main">
+
+      <div class="hero-block">
+        <div class="hero-tag">✦ Outil IA · Algeria Tech</div>
+        <h1 class="hero-title">
+          Vos documents,<br>
+          <span class="hero-accent">transformés</span><br>
+          en infographies
+        </h1>
+        <p class="hero-sub">PDF · PowerPoint · Word · Articles de presse</p>
+      </div>
+
+      <!-- Drop Zone -->
+      <div id="drop-zone" class="drop-zone">
+        <div class="drop-inner">
+          <div class="drop-icon-wrap">
+            <svg class="drop-icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="40" cy="40" r="38" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 4" class="drop-circle"/>
+              <path d="M40 20V52" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M28 40L40 52L52 40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 60H58" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p class="drop-title">Glissez vos fichiers ici</p>
+          <p class="drop-sub">ou <button class="link-btn" id="browse-btn">parcourez vos fichiers</button></p>
+          <div class="drop-formats">
+            <span class="fmt">📄 PDF</span>
+            <span class="fmt">📊 PPTX</span>
+            <span class="fmt">📝 Word</span>
+            <span class="fmt">📰 TXT</span>
+          </div>
+        </div>
+        <input type="file" id="file-input" accept=".pdf,.ppt,.pptx,.doc,.docx,.txt" hidden>
+      </div>
+
+      <!-- Files list -->
+      <div id="file-list" class="file-list" hidden></div>
+
+      <!-- Options -->
+      <div class="options-row">
+        <div class="option-group">
+          <label class="option-lbl">Type de rapport</label>
+          <div class="pills">
+            <button class="pill active" data-type="auto">🤖 Auto</button>
+            <button class="pill" data-type="telecom">📡 Télécoms</button>
+            <button class="pill" data-type="startup">🚀 Startup</button>
+            <button class="pill" data-type="rapport">📋 Rapport</button>
+            <button class="pill" data-type="presse">📰 Presse</button>
+          </div>
+        </div>
+      </div>
+
+      <button id="generate-btn" class="generate-btn" disabled>
+        <span class="gen-btn-glow"></span>
+        <span class="gen-btn-inner">
+          <span class="gen-btn-icon">✦</span>
+          Générer l'infographie
+        </span>
+      </button>
+
+    </main>
+  </div>
+
+  <!-- ========================================================
+       ÉCRAN 2 — CHARGEMENT
+  ======================================================== -->
+  <div id="screen-loading" class="screen" hidden>
+    <div class="loading-center">
+      <div class="loading-orb">
+        <div class="orb-ring r1"></div>
+        <div class="orb-ring r2"></div>
+        <div class="orb-ring r3"></div>
+        <div class="orb-core">✦</div>
+      </div>
+      <div class="loading-title">Analyse en cours…</div>
+      <div id="loading-step" class="loading-step">Lecture du document</div>
+      <div class="loading-track">
+        <div id="loading-bar" class="loading-bar"></div>
+      </div>
+      <div class="loading-hint">Extraction des données · Génération des visualisations</div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       ÉCRAN 3 — RÉSULTAT (injecté dynamiquement par app.js)
+  ======================================================== -->
+  <div id="screen-result" class="screen" hidden></div>
+
+  <!-- ========================================================
+       LIBRAIRIES
+  ======================================================== -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script type="module" src="app.js"></script>
+
+</body>
+</html>
