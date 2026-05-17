@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+</script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Observatoire du Marché de l'Internet en Algérie — T3 2025</title>
+  <meta name="description" content="Synthèse interactive des indicateurs clés du marché de l'internet en Algérie au 3ème trimestre 2025 — données ARPCE.">
+  <meta name="theme-color" content="#0a0e1a">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Observatoire du Marché de l'Internet en Algérie — T3 2025">
+  <meta property="og:description" content="60,46 millions d'abonnés, +7,07% de croissance — analyse interactive des données ARPCE.">
+  <meta property="og:image" content="thumbnail.jpg">
+  <meta property="og:type" content="website">
+
+  <!-- Fonts (Google Fonts — gratuit, pas de clé API) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/css/styles.css">
+
+  <!-- Libs CDN (toutes open-source, pas de clé API) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
+</head>
+<body>
+
+<!-- ============== LOADER ============== -->
+<div id="loader" role="status" aria-label="Chargement">
+  <div class="loader-content">
+    <div class="loader-mark"></div>
+    <div class="loader-text">Observatoire ARPCE</div>
+    <div class="loader-bar"></div>
+  </div>
+</div>
+
+<!-- ============== TOPBAR ============== -->
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a href="#hero" class="brand">
+      <span class="brand-mark">A</span>
+      <span><em>Observatoire</em> · Internet Algérie</span>
+    </a>
+
+    <nav aria-label="Sections">
+      <ul class="section-nav">
+        <li><a href="#vue-ensemble">Vue d'ensemble</a></li>
+        <li><a href="#evolution">Évolution</a></li>
+        <li><a href="#fixe">Fixe</a></li>
+        <li><a href="#mobile">Mobile</a></li>
+        <li><a href="#trafic">Trafic</a></li>
+        <li><a href="#m2m">M2M</a></li>
+        <li><a href="#synthese">Synthèse</a></li>
+      </ul>
+    </nav>
+
+    <div class="topbar-actions">
+      <button id="btn-share" class="btn btn-ghost" aria-label="Partager">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        <span class="sr-only-mobile">Partager</span>
+      </button>
+      <button id="btn-export-pdf" class="btn btn-gold">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        PDF
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============== HERO ============== -->
+<section class="section hero" id="hero">
+  <div class="container hero" style="padding-top:0;">
+
+    <div class="hero-content reveal">
+      <span class="eyebrow">Source · ARPCE — T3 2025</span>
+      <h1 class="display-1">
+        Observatoire<br>
+        du <span class="gold">Marché</span> de<br>
+        l'Internet en <em>Algérie</em>
+      </h1>
+      <p class="lead">
+        Synthèse interactive des indicateurs clés du 3<sup>ème</sup> trimestre 2025,
+        établie à partir du rapport de l'Autorité de Régulation de la Poste et des
+        Communications Électroniques. Données chiffrées, visualisations, scène 3D
+        et exports prêts à l'usage.
+      </p>
+
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Période</span>
+          <span class="hero-meta-value">T3 2025</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Abonnés totaux</span>
+          <span class="hero-meta-value"><span class="counter" data-target="60.46" data-decimals="2" data-suffix=" M">0</span></span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Croissance annuelle</span>
+          <span class="hero-meta-value" style="color:var(--emerald-400)">+<span class="counter" data-target="7.07" data-decimals="2" data-suffix="%">0</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-3d reveal" style="transition-delay:.2s">
+      <div id="scene3d" aria-label="Scène 3D interactive — Constellation des données du marché"></div>
+      <div class="scene-hint">Glisser · zoomer · survoler les orbes</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== VUE D'ENSEMBLE — KPI ============== -->
+<section class="section" id="vue-ensemble">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">01 · Vue d'ensemble</span>
+      <h2 class="display-2">Le marché en chiffres</h2>
+      <p class="lead">
+        À la fin du 3<sup>ème</sup> trimestre 2025, le parc global des abonnés
+        internet en Algérie a atteint 60,46 millions, démontrant une forte
+        pénétration du marché. La téléphonie mobile reste le principal vecteur
+        d'accès à internet.
+      </p>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi reveal">
+        <div class="kpi-label">Abonnés Internet</div>
+        <div class="kpi-value"><span class="counter" data-target="60.46" data-decimals="2">0</span><span class="unit">M</span></div>
+        <div class="kpi-trend">▲ +7,07% en un an</div>
+      </div>
+      <div class="kpi reveal" style="transition-delay:.1s">
+        <div class="kpi-label">Internet Mobile</div>
+        <div class="kpi-value"><span class="counter" data-target="88.72" data-decimals="2">0</span><span class="unit">%</span></div>
+        <div class="kpi-trend">53,64 M abonnés</div>
+      </div>
+      <div class="kpi reveal" style="transition-delay:.2s">
+        <div class="kpi-label">Internet Fixe</div>
+        <div class="kpi-value"><span class="counter" data-target="11.28" data-decimals="2">0</span><span class="unit">%</span></div>
+        <div class="kpi-trend">6,82 M abonnés</div>
+      </div>
+      <div class="kpi reveal" style="transition-delay:.3s">
+        <div class="kpi-label">Vecteur principal</div>
+        <div class="kpi-value" style="font-size:1.75rem;">Téléphonie<br>Mobile</div>
+        <div class="kpi-trend">Forte pénétration</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============== EVOLUTION TRIMESTRIELLE ============== -->
+<section class="section" id="evolution">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">02 · Évolution</span>
+      <h2 class="display-2">Croissance trimestrielle (T3 2024 → T3 2025)</h2>
+      <p class="lead">
+        Le marché a connu une croissance annuelle de <strong style="color:var(--emerald-400)">+7,07%</strong>,
+        passant de 56,54 millions à 60,44 millions d'abonnés en un an. Cette dynamique
+        est principalement portée par le segment mobile.
+      </p>
+    </div>
+
+    <div class="data-block reveal">
+      <div class="data-block-title">
+        <h3>Parc total d'abonnés par segment</h3>
+        <button class="btn btn-ghost" data-export-csv="evolution">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          CSV
+        </button>
+      </div>
+      <div class="chart-container tall">
+        <canvas id="chart-evolution"></canvas>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Trimestre</th>
+              <th>Mobile (M)</th>
+              <th>Fixe (M)</th>
+              <th>Total (M)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>T3 2024</td><td class="num">50,63</td><td class="num">5,91</td><td class="num">56,54</td></tr>
+            <tr><td>T4 2024</td><td class="num">51,32</td><td class="num">6,22</td><td class="num">57,54</td></tr>
+            <tr><td>T1 2025</td><td class="num">51,69</td><td class="num">6,40</td><td class="num">58,09</td></tr>
+            <tr><td>T2 2025</td><td class="num">52,42</td><td class="num">6,60</td><td class="num">59,02</td></tr>
+            <tr><td>T3 2025</td><td class="num">53,64</td><td class="num">6,80</td><td class="num">60,44</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============== INTERNET FIXE ============== -->
+<section class="section" id="fixe">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">03 · Internet Fixe</span>
+      <h2 class="display-2">Technologies & profils du fixe</h2>
+      <p class="lead">
+        Le parc fixe, avec ses <strong>6,82 millions d'abonnés</strong>, est en pleine
+        mutation. La fibre optique (FTTH) devient la technologie dominante,
+        dépassant l'ADSL. Le marché reste très majoritairement résidentiel.
+      </p>
+    </div>
+
+    <div class="split-grid">
+      <div class="data-block reveal">
+        <div class="data-block-title">
+          <h3>Répartition par technologie</h3>
+          <button class="btn btn-ghost" data-export-csv="fixeTechno">CSV</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-fixe-techno"></canvas>
+        </div>
+        <p style="margin-top:1rem;color:var(--gold-300);font-family:var(--font-mono);font-size:0.8rem;text-align:center;letter-spacing:0.05em;">
+          ▲ LA FIBRE DÉPASSE L'ADSL
+        </p>
+      </div>
+
+      <div class="data-block reveal" style="transition-delay:.1s">
+        <div class="data-block-title">
+          <h3>Répartition des offres</h3>
+          <button class="btn btn-ghost" data-export-csv="fixeSegment">CSV</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-fixe-segment"></canvas>
+        </div>
+        <p style="margin-top:1rem;color:var(--gold-300);font-family:var(--font-mono);font-size:0.8rem;text-align:center;letter-spacing:0.05em;">
+          ▲ UN MARCHÉ PRÉDOMINANTEMENT RÉSIDENTIEL
+        </p>
+      </div>
+    </div>
+
+    <div class="data-block reveal" style="margin-top:2rem;transition-delay:.2s">
+      <div class="data-block-title">
+        <h3>Analyse des débits sur le réseau fixe</h3>
+        <button class="btn btn-ghost" data-export-csv="debits">CSV</button>
+      </div>
+      <p class="lead" style="margin-bottom:1.5rem;font-size:0.95rem;">
+        La majorité des abonnés (57,14%) bénéficient désormais de débits compris entre
+        10 et 20 Mbps, reflétant la montée en gamme des offres et l'impact de la
+        modernisation du réseau.
+      </p>
+      <div class="chart-container">
+        <canvas id="chart-debits"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============== INTERNET MOBILE ============== -->
+<section class="section" id="mobile">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">04 · Internet Mobile</span>
+      <h2 class="display-2">Technologies & usages mobiles</h2>
+      <p class="lead">
+        Avec <strong>53,64 millions de souscripteurs</strong>, le mobile est le pilier
+        de l'internet en Algérie. La 4G est quasi-hégémonique, et le modèle prépayé
+        domine largement le marché.
+      </p>
+    </div>
+
+    <div class="split-grid">
+      <div class="data-block reveal">
+        <div class="data-block-title">
+          <h3>Répartition par technologie</h3>
+          <button class="btn btn-ghost" data-export-csv="mobileTechno">CSV</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-mobile-techno"></canvas>
+        </div>
+        <div class="legend-inline">
+          <div class="legend-item">
+            <span class="legend-swatch" style="background:#2d8a5f"></span>
+            <span><strong>50,10 M</strong> abonnés 4G (93,43%)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-swatch" style="background:#d4a437"></span>
+            <span><strong>3,53 M</strong> abonnés 3G (6,57%)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="data-block reveal" style="transition-delay:.1s">
+        <div class="data-block-title">
+          <h3>Répartition par modèle de paiement</h3>
+          <button class="btn btn-ghost" data-export-csv="mobilePaiement">CSV</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-mobile-paiement"></canvas>
+        </div>
+        <div class="legend-inline">
+          <div class="legend-item">
+            <span class="legend-swatch" style="background:#2d8a5f"></span>
+            <span><strong>95,59%</strong> Prépayé (majorité écrasante)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-swatch" style="background:#d4a437"></span>
+            <span><strong>4,41%</strong> Postpayé (minorité)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============== TRAFIC ============== -->
+<section class="section" id="trafic">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">05 · Trafic de données</span>
+      <h2 class="display-2">Croissance spectaculaire des usages</h2>
+      <p class="lead">
+        Le volume de données consommées a connu une croissance spectaculaire en un an,
+        avec une hausse de <strong style="color:var(--emerald-400)">+32,55%</strong> sur le fixe
+        et <strong style="color:var(--gold-300)">+23,16%</strong> sur le mobile,
+        témoignant d'une intensification des usages numériques.
+      </p>
+    </div>
+
+    <div class="split-grid">
+      <div class="data-block reveal">
+        <div class="data-block-title">
+          <h3>Trafic Fixe <small style="font-family:var(--font-mono);color:var(--slate-400);font-size:0.7rem;">(millions de Go)</small></h3>
+          <button class="btn btn-ghost" data-export-csv="traficFixe">CSV</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-trafic-fixe"></canvas>
+        </div>
+        <div style="margin-top:1rem;text-align:center;">
+          <div style="font-family:var(--font-display);font-size:2rem;color:var(--gold-300);">+32,55% ↗</div>
+          <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--slate-300);text-transform:uppercase;letter-spacing:0.1em;">Croissance Annuelle</div>
+        </div>
+      </div>
+
+      <div class="data-block reveal" style="transition-delay:.1s">
+        <div class="data-block-title">
+          <h3>Trafic Mobile <small style="font-family:var(--font-mono);color:var(--slate-400);font-size:0.7rem;">(millions de Go)</small></h3>
+          <button class="btn btn-ghost" data-export-csv="traficMobile">CSV</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-trafic-mobile"></canvas>
+        </div>
+        <div style="margin-top:1rem;text-align:center;">
+          <div style="font-family:var(--font-display);font-size:2rem;color:var(--emerald-400);">+23,16% ↗</div>
+          <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--slate-300);text-transform:uppercase;letter-spacing:0.1em;">Croissance Annuelle</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============== M2M ============== -->
+<section class="section" id="m2m">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">06 · Marché Émergent</span>
+      <h2 class="display-2">Le marché M2M (Machine-to-Machine)</h2>
+      <p class="lead">
+        Le segment de l'Internet des Objets (IoT), représenté par les cartes SIM M2M,
+        atteint <strong>286 035 unités</strong> au T3 2025. Bien que modeste, ce marché
+        présente un fort potentiel de croissance pour les applications industrielles,
+        logistiques et de services.
+      </p>
+    </div>
+
+    <div class="data-block reveal">
+      <div class="data-block-title">
+        <h3>Parts de marché — Unités SIM M2M par opérateur</h3>
+        <button class="btn btn-ghost" data-export-csv="m2m">CSV</button>
+      </div>
+      <div class="chart-container">
+        <canvas id="chart-m2m"></canvas>
+      </div>
+
+      <div class="kpi-grid" style="margin-top:2rem;">
+        <div class="kpi" style="border-left:3px solid #2d8a5f">
+          <div class="kpi-label">Mobilis</div>
+          <div class="kpi-value" style="color:#45a877;font-size:2.25rem;">44,7<span class="unit">%</span></div>
+          <div class="kpi-trend" style="color:var(--slate-300)">Algérie Telecom Mobile · 127 765 unités</div>
+        </div>
+        <div class="kpi" style="border-left:3px solid #d4a437">
+          <div class="kpi-label">Ooredoo</div>
+          <div class="kpi-value" style="font-size:2.25rem;">39,1<span class="unit">%</span></div>
+          <div class="kpi-trend" style="color:var(--slate-300)">Wataniya Telecom Algérie · 111 754 unités</div>
+        </div>
+        <div class="kpi" style="border-left:3px solid #b85042">
+          <div class="kpi-label">Djezzy</div>
+          <div class="kpi-value" style="color:var(--crimson-400);font-size:2.25rem;">16,2<span class="unit">%</span></div>
+          <div class="kpi-trend" style="color:var(--slate-300)">Optimum Telecom Algérie · 46 516 unités</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============== SYNTHESE ============== -->
+<section class="section" id="synthese">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">07 · Synthèse</span>
+      <h2 class="display-2">Points clés à retenir</h2>
+      <p class="lead">
+        Trois enseignements majeurs caractérisent le marché de l'internet en Algérie
+        au 3<sup>ème</sup> trimestre 2025.
+      </p>
+    </div>
+
+    <div class="synthese-grid">
+      <div class="synthese-card reveal">
+        <div class="synthese-title">Croissance Robuste et Continue</div>
+        <div class="synthese-figure"><span class="counter" data-target="60.5" data-decimals="1">0</span> M</div>
+        <div class="synthese-context">d'abonnés · +7,07% annuel</div>
+        <p class="synthese-desc">
+          Le parc global a progressé de +7,07% sur un an pour atteindre 60,5 millions
+          d'abonnés, confirmant la vitalité du secteur.
+        </p>
+      </div>
+
+      <div class="synthese-card reveal" style="transition-delay:.1s">
+        <div class="synthese-title">Hégémonie du Mobile</div>
+        <div class="synthese-figure"><span class="counter" data-target="89" data-decimals="0">0</span>%</div>
+        <div class="synthese-context">de part de marché mobile</div>
+        <p class="synthese-desc">
+          L'internet mobile représente près de 89% du marché total et constitue le
+          principal accès au numérique pour la population algérienne.
+        </p>
+      </div>
+
+      <div class="synthese-card reveal" style="transition-delay:.2s">
+        <div class="synthese-title">Transition du Fixe vers la Fibre</div>
+        <div class="synthese-figure" style="font-size:2.5rem;">FTTH</div>
+        <div class="synthese-context">1<sup>re</sup> technologie d'accès fixe · ~27,6%</div>
+        <p class="synthese-desc">
+          Le FTTH (Fibre To The Home) est désormais la première technologie d'accès
+          fixe, dépassant l'ADSL avec 37,62% du parc fixe.
+        </p>
+      </div>
+    </div>
+
+    <!-- Pré du footer : exports globaux -->
+    <div class="reveal" style="margin-top:4rem;text-align:center;padding:2rem;background:linear-gradient(180deg,rgba(212,164,55,0.05),rgba(212,164,55,0.02));border:1px solid rgba(212,164,55,0.15);border-radius:var(--radius-xl);">
+      <span class="eyebrow">Exports & téléchargements</span>
+      <h3 style="margin-top:1rem;margin-bottom:0.5rem;font-size:1.5rem;">Récupérez toutes les données</h3>
+      <p class="lead" style="margin:0.5rem auto 1.5rem;font-size:0.95rem;">
+        Format CSV (Excel/LibreOffice), JSON ou PDF — usage libre dans le respect
+        de la source ARPCE.
+      </p>
+      <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+        <button id="btn-export-all" class="btn btn-gold">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          CSV complet
+        </button>
+        <button id="btn-export-json" class="btn btn-ghost">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          JSON
+        </button>
+        <button id="btn-export-pdf" class="btn btn-ghost">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          PDF
+        </button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<!-- ============== FOOTER ============== -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-title">À propos</div>
+        <p class="footer-text">
+          Cette synthèse interactive est basée sur le rapport public de l'Autorité
+          de Régulation de la Poste et des Communications Électroniques (ARPCE) sur
+          le marché de l'internet en Algérie au 3<sup>ème</sup> trimestre 2025.
+        </p>
+      </div>
+      <div>
+        <div class="footer-title">Méthodologie</div>
+        <p class="footer-text">
+          Données chiffrées extraites du rapport officiel.<br>
+          Visualisations propulsées par Chart.js et Three.js.
+        </p>
+      </div>
+      <div>
+        <div class="footer-title">Navigation</div>
+        <p class="footer-text">
+          ↑↓ pour naviguer entre sections<br>
+          F pour le mode plein écran
+        </p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 · Source : ARPCE — T3 2025</span>
+      <span>Conçu pour la section infographie</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============== FAB ============== -->
+<div class="fab-stack" aria-label="Actions rapides">
+  <button id="fab-fullscreen" class="fab" title="Mode plein écran (F)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+  </button>
+  <button id="fab-top" class="fab" title="Retour en haut">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
+</div>
+
+<!-- ============== SCRIPTS ============== -->
+<script type="module" src="assets/js/main.js"></script>
+
+<noscript>
+  <div style="padding:2rem;background:#b85042;color:white;text-align:center;font-family:monospace;">
+    Ce rapport interactif nécessite JavaScript activé. Une version PDF est disponible sur demande.
+  </div>
+</noscript>
+
+</body>
+</html>

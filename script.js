@@ -12,8 +12,8 @@ const isLocal = window.location.hostname === 'localhost' || window.location.host
 const REMOTE_API = 'https://dz-tech-press-api.onrender.com';
 const API_BASE = isLocal ? '' : REMOTE_API;
 const ADMIN_PASSWORD = 'admin2026';
-const YOUTUBE_API_KEY = 'AIzaSyDw_grxmStmAgZ6-WUWHNLPa5ozKIgVMiA'; 
-const YOUTUBE_CHANNEL_ID = 'UCyIYnT60oAg8iVZKoz8seAA'; 
+const YOUTUBE_API_KEY = 'AIzaSyDw_grxmStmAgZ6-WUWHNLPa5ozKIgVMiA';
+const YOUTUBE_CHANNEL_ID = 'UCyIYnT60oAg8iVZKoz8seAA';
 
 // ===== INITIALISATION AU CHARGEMENT =====
 window.addEventListener('load', () => {
@@ -48,7 +48,7 @@ async function loadArticles() {
         renderGrid(allArticles.slice(0, ITEMS_PER_PAGE));
         renderTicker(allArticles);
         renderTrending();
-        renderTags(); 
+        renderTags();
         renderPagination(allArticles);
         initCounters();
     } else {
@@ -95,13 +95,12 @@ async function loadArticles() {
             }
             return null;
         });
-
         const results = await Promise.all(articlePromises);
         allArticles = results.filter(a => a !== null);
         allArticles.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         if (allArticles.length === 0) {
-            console.warn("Aucun article trouvé après appel API.");
+            console.warn("Aucun article trouvé après appel API. ");
             const grid = document.getElementById('newsGrid');
             if (grid) grid.innerHTML = '<p style="text-align:center; padding:20px;">Aucun article disponible pour le moment.</p>';
             return;
@@ -112,7 +111,7 @@ async function loadArticles() {
         renderGrid(allArticles.slice(0, ITEMS_PER_PAGE));
         renderTicker(allArticles);
         renderTrending();
-        renderTags(); 
+        renderTags();
         renderPagination(allArticles);
         initCounters();
     } catch (e) {
@@ -146,6 +145,7 @@ function parseMarkdownFile(text) {
         categorie: get('categorie'),
         image: get('image'),
         video: get('video'),
+        pdf: get('pdf'),
         extrait: get('extrait'),
         contenu: marked.parse(content, { breaks: true, gfm: true }),
         rawContent: content.trim(),
@@ -161,14 +161,12 @@ function renderHero(arts) {
     const s = arts.slice(1, 3);
     const grid = document.getElementById('heroGrid');
     if (!grid || !h) return;
-
     const getT = (art) => {
-        const vMatch = art.video ? art.video.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([^&?]{11})/) : null;
+        const vMatch = art.video ? art.video.match(/(?:youtu.be\/|youtube.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([^&?]{11})/) : null;
         if (vMatch) return `https://img.youtube.com/vi/${vMatch[1]}/hqdefault.jpg`;
         const hasImg = art.image && art.image.trim() !== "" && !art.image.includes('%20%20') && !art.image.endsWith('/') && !art.image.endsWith('  ');
         if (hasImg) return art.image;
     };
-
     let html = `<div class="hero-main" onclick="openArticle('${h.id}')"><img src="${getT(h)}" alt="${h.titre}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Indisponible'">${h.video ? '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(210,16,52,0.8);color:#fff;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;z-index:2;pointer-events:none;"><i class="fas fa-play"></i></div>' : ''}<div class="hero-overlay"><div class="hero-meta-wrapper"><span class="category-tag ${cls(h.categorie)}">${h.categorie}</span><span class="hero-meta-tag"><i class="far fa-calendar-alt"></i> ${h.date}</span><span class="hero-meta-tag"><i class="far fa-clock"></i> ${h.heure}</span></div><h2>${h.titre}</h2><p>${h.extrait}</p></div></div><div class="hero-side-card">`;
     s.forEach(a => {
         html += `<div onclick="openArticle('${a.id}')" style="position:relative;"><img src="${getT(a)}" alt="${a.titre}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Indisponible'">${a.video ? '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(210,16,52,0.8);color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;z-index:2;pointer-events:none;"><i class="fas fa-play"></i></div>' : ''}<div class="hero-overlay"><div class="hero-meta-wrapper"><span class="category-tag ${cls(a.categorie)}">${a.categorie}</span><span class="hero-meta-tag"><i class="far fa-calendar-alt"></i> ${a.date}</span><span class="hero-meta-tag"><i class="far fa-clock"></i> ${a.heure}</span></div><h2>${a.titre}</h2></div></div>`;
@@ -176,6 +174,7 @@ function renderHero(arts) {
     html += '</div>';
     grid.innerHTML = html;
 }
+
 function renderGrid(arts) {
     const grid = document.getElementById('newsGrid');
     if (!grid) return;
@@ -183,19 +182,18 @@ function renderGrid(arts) {
         grid.innerHTML = '<p style="text-align:center; padding:20px;">Aucun résultat.</p>';
         return;
     }
-
     const getT = (art) => {
-        const vMatch = art.video ? art.video.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([^&?]{11})/) : null;
+        const vMatch = art.video ? art.video.match(/(?:youtu.be\/|youtube.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([^&?]{11})/) : null;
         if (vMatch) return `https://img.youtube.com/vi/${vMatch[1]}/hqdefault.jpg`;
         const hasImg = art.image && art.image.trim() !== "" && !art.image.includes('%20%20') && !art.image.endsWith('/') && !art.image.endsWith('  ');
         if (hasImg) return art.image;
     };
-
     grid.innerHTML = arts.map((a, i) => `<div class="news-card" style="animation-delay:${i*0.1}s" onclick="openArticle('${a.id}')">
- <div class="news-card-img" style="position:relative;"><img src="${getT(a)}" alt="${a.titre}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Indisponible'">${a.video ? '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(210,16,52,0.8);color:#fff;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;z-index:2;pointer-events:none;"><i class="fas fa-play"></i></div>' : ''}<span class="category-tag ${cls(a.categorie)}">${a.categorie}</span></div>
- <div class="news-card-body"><h3>${a.titre}</h3><p>${a.extrait}</p>
- <div class="card-meta"><span><i class="far fa-calendar"></i> ${a.date}</span><span><i class="far fa-clock"></i> ${a.heure}</span><span><i class="far fa-eye"></i> ${a.views}</span></div></div></div>`).join('');
+<div class="news-card-img" style="position:relative;"><img src="${getT(a)}" alt="${a.titre}" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Indisponible'">${a.video ? '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(210,16,52,0.8);color:#fff;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;z-index:2;pointer-events:none;"><i class="fas fa-play"></i></div>' : ''}<span class="category-tag ${cls(a.categorie)}">${a.categorie}</span></div>
+<div class="news-card-body"><h3>${a.titre}</h3><p>${a.extrait}</p>
+<div class="card-meta"><span><i class="far fa-calendar"></i> ${a.date}</span><span><i class="far fa-clock"></i> ${a.heure}</span><span><i class="far fa-eye"></i> ${a.views}</span></div></div></div>`).join('');
 }
+
 function renderTicker(arts) {
     if (!arts) return;
     const html = arts.map(a => `<span class="ticker-item">${a.titre}</span>`).join('');
@@ -219,35 +217,34 @@ window.openArticle = function(id) {
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('articlePage').style.display = 'block';
     window.scrollTo({top:0, behavior:'smooth'});
-
     let mediaHeader = '';
     let bodyImage = '';
-    if (art.video && art.video.trim() !== "") {
+    if (art.video && art.video.trim() !== "  ") {
         const vId = art.video.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]{11})/)?.[1];
         if (vId) {
             mediaHeader = `<div class="video-container" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; margin-bottom:20px; border-radius:12px; background:#000;"><iframe src="https://www.youtube-nocookie.com/embed/${vId}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe></div>`;
         }
-        if (art.image && art.image.trim() !== "") {
+        if (art.image && art.image.trim() !== "  ") {
             bodyImage = `<img src="${art.image}" alt="${art.titre}" style="max-width:350px; width:100%; float:right; margin:0 0 20px 20px; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">`;
         }
-    } else if (art.image && art.image.trim() !== "") {
+    } else if (art.image && art.image.trim() !== "  ") {
         mediaHeader = `<img src="${art.image}" alt="${art.titre}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Indisponible'" style="width:100%; border-radius:15px; margin-bottom:25px;">`;
     }
-
-    let html = `${mediaHeader}<div class="article-body"><div class="article-meta"><span class="category-tag ${cls(art.categorie)}">${art.categorie}</span><span><i class="far fa-calendar"></i> ${art.date}</span><span><i class="far fa-clock"></i> ${art.heure}</span><span class="reading-time"><i class="fas fa-book-open"></i> ${art.readingTime} min</span><span><i class="far fa-eye"></i> ${art.views} vues</span><button class="meta-audio-btn" onclick="triggerAudio()"><i class="fas fa-volume-up"></i> Écouter</button></div><h1>${art.titre}</h1><div class="article-text">${bodyImage}${art.contenu}</div>`;
+    let pdfLink = art.pdf ? `<div style="margin: 20px 0; padding: 15px; background: var(--bg-light); border-radius: 10px; display: flex; align-items: center; gap: 15px;"><i class="fas fa-file-pdf" style="font-size: 2rem; color: #D21034;"></i><div><p style="margin:0; font-weight:600;">Document d'accompagnement</p><a href="${art.pdf}" target="_blank" class="tag-filter" style="display:inline-block; margin-top:5px; text-decoration:none;"><i class="fas fa-download"></i> Télécharger le PDF</a></div></div>` : '';
+    let html = `${mediaHeader}<div class="article-body"><div class="article-meta"><span class="category-tag ${cls(art.categorie)}">${art.categorie}</span><span><i class="far fa-calendar"></i> ${art.date}</span><span><i class="far fa-clock"></i> ${art.heure}</span><span class="reading-time"><i class="fas fa-book-open"></i> ${art.readingTime} min</span><span><i class="far fa-eye"></i> ${art.views} vues</span><button class="meta-audio-btn" onclick="triggerAudio()"><i class="fas fa-volume-up"></i> Écouter</button></div><h1>${art.titre}</h1><div class="article-text">${bodyImage}${art.contenu}${pdfLink}</div>`;
     if (art.tags && art.tags.length) {
-        html += `<div style="margin:30px 0;padding-top:20px;border-top:1px solid var(--border)"><strong>Tags:</strong> ${art.tags.map(t => `<span class="tag-filter" style="margin-left:8px" onclick="filterByTag('${t}');goHome()">${t}</span>`).join('')}</div>`;
+        html += `<div style="margin:30px 0;padding-top:20px;border-top:1px solid var(--border)"><strong>Tags: </strong>${art.tags.map(t => `<span class="tag-filter" style="margin-left:8px" onclick="filterByTag('${t}');goHome()">${t}</span>`).join('')}</div>`;
     }
     html += `<div class="share-buttons"><button class="share-btn facebook" onclick="share('facebook')"><i class="fab fa-facebook-f"></i> Facebook</button><button class="share-btn twitter" onclick="share('twitter')"><i class="fab fa-twitter"></i> Twitter</button><button class="share-btn whatsapp" onclick="share('whatsapp')"><i class="fab fa-whatsapp"></i> WhatsApp</button><button class="share-btn linkedin" onclick="share('linkedin')"><i class="fab fa-linkedin-in"></i> LinkedIn</button><button class="share-btn copy" onclick="copyLink()"><i class="fas fa-link"></i> Copier</button></div>`;
     document.getElementById('articleContent').innerHTML = html;
-    initAudioReader(art.titre + ". " + art.rawContent);
+    initAudioReader(art.titre + ".  " + art.rawContent);
     const rel = allArticles.filter(a => a.id != id && a.categorie === art.categorie).slice(0, 3);
     const relBox = document.getElementById('relatedArticles');
     const relGrid = document.getElementById('relatedGrid');
     if (rel.length > 0 && relBox && relGrid) {
         relBox.style.display = 'block';
         relGrid.innerHTML = rel.map(a => {
-            const vMatch = a.video ? a.video.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([^&?]{11})/) : null;
+            const vMatch = a.video ? a.video.match(/(?:youtu.be\/|youtube.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([^&?]{11})/) : null;
             const thumb = vMatch ? `https://img.youtube.com/vi/${vMatch[1]}/hqdefault.jpg` : (a.image || 'https://via.placeholder.com/400x200?text=Indisponible');
             return `<div class="related-card" onclick="openArticle('${a.id}')"><img src="${thumb}" onerror="this.src='https://via.placeholder.com/400x200?text=Indisponible'"><h4>${a.titre}</h4></div>`;
         }).join('');
@@ -291,12 +288,10 @@ window.goHome = function() {
     currentEditingId = null;
     currentFilter = 'all';
     currentPage = 1;
-
     // Réinitialiser la navigation active
     document.querySelectorAll('.main-nav a').forEach(a => {
         a.classList.toggle('active', a.innerText.trim() === 'Accueil');
     });
-
     const searchInput = document.getElementById('searchInput');
     if(searchInput) searchInput.value = '';
     const adminBtn = document.getElementById('adminBtn');
@@ -319,10 +314,8 @@ window.showVeille = function() {
     document.getElementById('heroSection').classList.add('hidden');
     document.getElementById('articlePage').style.display = 'none';
     document.getElementById('veilleSection').style.display = 'block';
-    
     document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'));
     document.getElementById('nav-veille').classList.add('active');
-    
     loadVeille();
     window.scrollTo({top: 0, behavior: 'smooth'});
 };
@@ -348,26 +341,23 @@ function renderPagination(arts) {
         pag.appendChild(btn);
     }
 }
+
 window.filterByCategory = function(cat, ev) {
     if(ev) ev.preventDefault();
-
     // Préparation de l'affichage : on affiche le bloc principal et on cache l'article ou la veille
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('articlePage').style.display = 'none';
     document.getElementById('veilleSection').style.display = 'none';
-
     // Mise à jour de l'onglet actif dans la navigation
     document.querySelectorAll('.main-nav a').forEach(a => {
         const text = a.innerText.trim();
         a.classList.toggle('active', text === cat || (cat === 'all' && text === 'Accueil'));
     });
-
     if (cat === 'Vidéo') {
         document.getElementById('heroSection').classList.add('hidden');
         loadYouTubeVideos();
         return;
     }
-
     currentFilter = cat;
     currentPage = 1;
     // On affiche le Hero (grandes images) uniquement sur l'Accueil, on le cache ailleurs
@@ -376,6 +366,7 @@ window.filterByCategory = function(cat, ev) {
     renderGrid(filtered.slice(0, ITEMS_PER_PAGE));
     renderPagination(filtered);
 };
+
 window.filterByTag = function(tag) {
     currentTag = tag;
     document.getElementById('mainContent').style.display = 'block';
@@ -393,6 +384,7 @@ function renderTrending() {
     const list = document.getElementById('trendingList');
     if(list) list.innerHTML = sorted.map((a,i) => `<li class="trending-item" onclick="openArticle('${a.id}')"><span class="trending-number">${i+1}</span><div class="trending-content"><h4>${a.titre}</h4><span>${a.views} vues</span></div></li>`).join('');
 }
+
 function renderTags() {
     const counts = {};
     allArticles.forEach(a => a.tags?.forEach(t => counts[t] = (counts[t] || 0) + 1));
@@ -406,7 +398,9 @@ window.toggleTheme = () => {
     document.body.classList.toggle('dark-mode');
     localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
 };
+
 function loadTheme() { if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
+
 window.addEventListener('scroll', () => {
     if (document.getElementById('articlePage').style.display !== 'none') {
         const h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -416,11 +410,14 @@ window.addEventListener('scroll', () => {
     const btt = document.getElementById('backToTop');
     if(btt) btt.classList.toggle('visible', window.scrollY > 500);
 });
+
 function showToast(msg) { const t = document.getElementById('toast'); if (!t) return; t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
-function cls(c) { 
-    const maps = { 'Algérie':'tag-algerie','Télécoms':'tag-telecoms','Mobile':'tag-mobile','Startups':'tag-startups','Innovation':'tag-innovation','Entreprises':'tag-startups' }; 
-    return maps[c] || 'tag-telecoms'; 
+
+function cls(c) {
+    const maps = { 'Algérie':'tag-algerie','Télécoms':'tag-telecoms','Mobile':'tag-mobile','Startups':'tag-startups','Innovation':'tag-innovation','Infographies':'tag-video','Vidéo':'tag-video','Entreprises':'tag-startups' };
+    return maps[c] || 'tag-telecoms';
 }
+
 function initCounters() {
     const obs = new IntersectionObserver(entries => {
         entries.forEach(entry => {
@@ -437,7 +434,7 @@ function initCounters() {
 // ===== GESTION ADMIN =====
 window.toggleAdminPanel = function() {
     const pass = prompt('Mot de passe Admin:');
-    if (pass !== ADMIN_PASSWORD) return showToast('❌ Accès refusé');
+    if (pass !== ADMIN_PASSWORD) return showToast('  Accès refusé');
     const modal = document.getElementById('adminModal');
     modal.classList.add('show');
     if (currentEditingId) {
@@ -463,39 +460,67 @@ window.toggleAdminPanel = function() {
         }
     }
 };
+
 window.closeAdminPanel = () => { document.getElementById('adminModal').classList.remove('show'); document.getElementById('delBtn')?.remove(); document.getElementById('imagePreview').innerHTML = ''; };
+
+// Correction de la fonction submitArticle
 window.submitArticle = async function(e) {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append('titre', document.getElementById('titre').value);
-    formData.append('categorie', document.getElementById('categorie').value);
-    formData.append('date', document.getElementById('date').value);
-    formData.append('heure', document.getElementById('heure').value);
-    formData.append('extrait', document.getElementById('extrait').value);
-    formData.append('tags', document.getElementById('tags').value);
-    formData.append('contenu', document.getElementById('contenu').value);
-    formData.append('video', document.getElementById('video').value);
-    const imgFile = document.getElementById('image').files[0];
-    if (imgFile) formData.append('image', imgFile);
-    else if (currentEditingId) {
-        const art = allArticles.find(a => a.id == currentEditingId);
-        formData.append('existingImage', art.image);
-    }
-    if (currentEditingId) formData.append('id', currentEditingId);
+    if (e) e.preventDefault();
     try {
+        const formData = new FormData();
+        formData.append('titre', document.getElementById('titre').value);
+        formData.append('categorie', document.getElementById('categorie').value); // Correction: suppression de l'espace après 'categorie'
+        formData.append('date', document.getElementById('date').value);
+        formData.append('heure', document.getElementById('heure').value);
+        formData.append('extrait', document.getElementById('extrait').value);
+        formData.append('tags', document.getElementById('tags').value);
+        formData.append('contenu', document.getElementById('contenu').value);
+        formData.append('video', document.getElementById('video').value);
+
+        // Correction: Accès sécurisé aux fichiers pour éviter les crashes si l'input est manquant
+        const imgInput = document.getElementById('image');
+        if (imgInput && imgInput.files.length > 0) {
+            formData.append('image', imgInput.files[0]);
+        }
+
+        const pdfInput = document.getElementById('pdfFile');
+        if (pdfInput && pdfInput.files.length > 0) {
+            formData.append('pdf', pdfInput.files[0]);
+        }
+
+        if (currentEditingId) {
+            const art = allArticles.find(a => a.id == currentEditingId);
+            if (art) { // Correction: vérification que l'article existe
+                formData.append('existingImage', art.image);
+                if (art.pdf) formData.append('existingPdf', art.pdf);
+                formData.append('id', currentEditingId);
+            }
+        }
+
         showToast('⏳ Envoi au serveur...');
         const response = await fetch(`${API_BASE}/api/create-article`, { method: 'POST', body: formData });
-        if (response.ok) { showToast('✅ Article enregistré !'); setTimeout(() => window.location.reload(), 2000); }
-    } catch (error) { showToast('❌ Erreur réseau'); }
+        if (response.ok) {
+            showToast('✅ Article enregistré !');
+            setTimeout(() => window.location.reload(), 2000);
+        } else {
+            const errText = await response.text();
+            showToast('❌ Erreur serveur: ' + errText);
+        }
+    } catch (error) {
+        console.error("Erreur submitArticle:", error);
+        showToast('❌ Erreur: ' + error.message);
+    }
 };
+
 async function deleteArticle() {
-    if (!confirm("⚠️ Supprimer définitivement cet article ?")) return;
+    if (!confirm("⚠️ Supprimer définitivement cet article ?  ")) return;
     try {
         showToast('⏳ Suppression...');
         const response = await fetch(`${API_BASE}/api/delete-article/${currentEditingId}`, { method: 'DELETE' });
         if (response.ok) { showToast('✅ Supprimé !'); setTimeout(() => window.location.reload(), 2000); }
     } catch (e) { showToast('❌ Erreur réseau'); }
 }
+
 window.previewImage = function(e) {
     const file = e.target.files[0];
     if (file) {
@@ -504,11 +529,13 @@ window.previewImage = function(e) {
         reader.readAsDataURL(file);
     }
 };
+
 window.share = (p) => {
     const u = encodeURIComponent(window.location.href); const t = encodeURIComponent(document.title);
     const urls = { facebook: `https://www.facebook.com/sharer/sharer.php?u=${u}`, twitter: `https://twitter.com/intent/tweet?text=${t}&url=${u}`, whatsapp: `https://wa.me/?text=${t}%20${u}` };
     if(urls[p]) window.open(urls[p], '_blank');
 };
+
 window.copyLink = () => { navigator.clipboard.writeText(window.location.href); showToast('Lien copié !'); };
 
 // ===== MÉTÉO =====
@@ -564,6 +591,7 @@ async function loadVeille() {
         if(loader) loader.style.display = 'none';
     } catch(e) { console.error(e); if(loader) loader.textContent = '⚠️ Impossible de synchroniser la veille.'; }
 }
+
 function renderVeilleTable() {
     const tbody = document.getElementById('veilleBody');
     if(!tbody) return;
@@ -572,9 +600,10 @@ function renderVeilleTable() {
         const date = new Date(a.date).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
         const tagsHtml = (a.tags || []).map(t => `<span class="veille-tag">${t}</span>`).join('');
         const actionsHtml = a.isManual ? `<button class="veille-btn edit" title="Modifier" onclick="openVeilleModal('edit', '${a.id}')"><i class="fas fa-pencil-alt"></i></button><button class="veille-btn delete" title="Supprimer" onclick="deleteVeilleArticle('${a.id}')"><i class="fas fa-trash"></i></button>` : `<button class="veille-btn" title="Ouvrir la source" onclick="window.open('${a.url}', '_blank')"><i class="fas fa-external-link-alt"></i></button>`;
-        return `<tr><td style="white-space:nowrap; font-size:0.8rem; color:var(--text-light);">${date}</td><td><a href="${a.url}" target="_blank">${a.title}</a></td><td>${tagsHtml}</td><td><span class="veille-source">${a.source}</span></td><td><div class="veille-actions">${actionsHtml}</div></td></tr>`;
+        return `<tr><td style="white-space:nowrap; font-size:0.8rem; color:var(--text-light);">${date}</td><td><a href="${a.url}" target="_blank" rel="noopener noreferrer">${a.title}</a></td><td>${tagsHtml}</td><td><span class="veille-source">${a.source}</span></td><td><div class="veille-actions">${actionsHtml}</div></td></tr>`;
     }).join('');
 }
+
 window.openVeilleModal = function(mode = 'add', id = null) {
     const modal = document.getElementById('veilleModal');
     const form = document.getElementById('veilleForm');
@@ -595,7 +624,9 @@ window.openVeilleModal = function(mode = 'add', id = null) {
         titleEl.innerHTML = '<i class="fas fa-plus"></i> Ajouter un article de veille';
     }
 };
+
 window.closeVeilleModal = () => document.getElementById('veilleModal').classList.remove('show');
+
 window.handleVeilleSubmit = async (e) => {
     e.preventDefault();
     const id = document.getElementById('veilleEditId').value;
@@ -609,6 +640,7 @@ window.handleVeilleSubmit = async (e) => {
         if(res.ok) { showToast(id ? '✅ Article modifié !' : '✅ Article ajouté !'); closeVeilleModal(); loadVeille(); }
     } catch(err) { showToast('❌ Erreur réseau'); }
 };
+
 window.deleteVeilleArticle = async (id) => {
     if(!confirm('Supprimer définitivement cet article ?')) return;
     try {
@@ -625,17 +657,15 @@ async function loadYouTubeVideos() {
     const hero = document.getElementById('heroSection');
     if(hero) hero.classList.add('hidden');
     if(grid) grid.innerHTML = '<div class="loader">Chargement des vidéos Algeria Tech...</div>';
-
     try {
         const url = `https://www.googleapis.com/youtube/v3/search?key=${YOUTUBE_API_KEY}&channelId=${YOUTUBE_CHANNEL_ID}&part=snippet,id&order=date&maxResults=12&type=video`;
         const res = await fetch(url);
         const data = await res.json();
-        
         if (data.items && data.items.length > 0) {
             renderYouTubeGrid(data.items);
             document.getElementById('pagination').innerHTML = ''; // Pas de pagination locale pour YouTube
         } else if (data.error) {
-            let msg = data.error.message;
+             let msg = data.error.message;
             if (data.error.code === 403) {
                 msg = "L'accès à l'API YouTube est bloqué. Vérifiez que 'YouTube Data API v3' est bien activée dans votre console Google Cloud.";
             }
@@ -657,8 +687,8 @@ function renderYouTubeGrid(videos) {
         const thumb = v.snippet.thumbnails.high.url;
         const date = new Date(v.snippet.publishedAt).toLocaleDateString('fr-FR');
         return `<div class="news-card" style="animation-delay:${i*0.1}s" onclick="playYouTubeVideo('${vId}')">
- <div class="news-card-img"><img src="${thumb}" alt="${title}"><span class="category-tag tag-video"><i class="fab fa-youtube"></i> Vidéo</span></div>
- <div class="news-card-body"><h3>${title}</h3><div class="card-meta"><span><i class="far fa-calendar"></i> ${date}</span> <span style="color:var(--primary);margin-left:auto">Regarder <i class="fas fa-play-circle"></i></span></div></div></div>`;
+<div class="news-card-img"><img src="${thumb}" alt="${title}"><span class="category-tag tag-video"><i class="fab fa-youtube"></i> Vidéo</span></div>
+<div class="news-card-body"><h3>${title}</h3><div class="card-meta"><span><i class="far fa-calendar"></i> ${date}</span><span style="color:var(--primary);margin-left:auto">Regarder <i class="fas fa-play-circle"></i></span></div></div></div>`;
     }).join('');
 }
 
@@ -668,9 +698,7 @@ window.playYouTubeVideo = function(vId) {
         modal = document.createElement('div');
         modal.id = 'videoModal';
         modal.className = 'admin-modal';
-        modal.innerHTML = `<div class="modal-content" style="max-width:850px; padding:0; background:#000; position:relative;">
-            <button onclick="document.getElementById('videoModal').classList.remove('show'); document.getElementById('ytPlayer').src='';" style="position:absolute; right:10px; top:10px; z-index:10; background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:30px; height:30px; cursor:pointer;">&times;</button>
-            <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;"><iframe id="ytPlayer" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div></div>`;
+        modal.innerHTML = `<div class="modal-content" style="max-width:850px; padding:0; background:#000; position:relative;"><button onclick="document.getElementById('videoModal').classList.remove('show'); document.getElementById('ytPlayer').src='';" style="position:absolute; right:10px; top:10px; z-index:10; background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:50%; width:30px; height:30px; cursor:pointer;">&times;</button><div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;"><iframe id="ytPlayer" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div></div>`;
         document.body.appendChild(modal);
     }
     document.getElementById('ytPlayer').src = `https://www.youtube-nocookie.com/embed/${vId}?autoplay=1&rel=0`;

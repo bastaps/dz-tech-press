@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infographies & Médias - Algeria Tech</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0f172a;
+            --secondary: #1e293b;
+            --accent: #3b82f6;
+            --accent-glow: #60a5fa;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --card-bg: #1e293b;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e27;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* Background animé */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(139, 92, 246, 0.2) 0%, transparent 50%);
+            filter: blur(80px);
+        }
+
+        /* Layout principal */
+        .main-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar gauche fixe */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            border-right: 1px solid var(--border);
+            padding: 30px 0;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .sidebar-logo {
+            padding: 0 25px 30px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 25px;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+        }
+
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .logo-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-left: 65px;
+        }
+
+        .nav-section {
+            margin-bottom: 30px;
+        }
+
+        .nav-title {
+            padding: 0 25px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            padding: 14px 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-left-color: var(--accent);
+            color: var(--text);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, transparent 100%);
+            border-left-color: var(--accent);
+            color: var(--accent-glow);
+            font-weight: 600;
+        }
+
+        .nav-item i {
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--accent);
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* Header supérieur fixe */
+        .top-header {
+            position: fixed;
+            top: 0;
+            left: 280px;
+            right: 0;
+            height: 90px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 999;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+        }
+
+        .header-center {
+            flex: 1;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .header-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff 0%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .search-bar {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px 12px 50px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            color: var(--text);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-link {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .social-link:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .social-link.facebook:hover { background: #1877f2; border-color: #1877f2; }
+        .social-link.twitter:hover { background: #1da1f2; border-color: #1da1f2; }
+        .social-link.instagram:hover { background: #e4405f; border-color: #e4405f; }
+        .social-link.youtube:hover { background: #ff0000; border-color: #ff0000; }
+
+        /* Contenu principal */
+        .main-content {
+            margin-left: 280px;
+            margin-top: 90px;
+            padding: 40px;
+            min-height: calc(100vh - 90px);
+        }
+
+        /* Filtres */
+        .filters-wrapper {
+            margin-bottom: 35px;
+        }
+
+        .filters-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 10px 22px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-chip:hover {
+            border-color: var(--accent);
+            color: var(--text);
+            transform: translateY(-2px);
+        }
+
+        .filter-chip.active {
+            background: var(--gradient-3);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .filter-chip .count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+
+        /* Sections */
+        .content-section {
+            margin-bottom: 50px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .section-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: #fff;
+        }
+
+        .section-icon.interactive { background: var(--gradient-1); }
+        .section-icon.files { background: var(--gradient-2); }
+        .section-icon.pdf { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+        .section-icon.pptx { background: linear-gradient(135deg, #ff9a56, #ff6b35); }
+        .section-icon.image { background: var(--gradient-3); }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .section-count {
+            margin-left: auto;
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent-glow);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Grille */
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        /* Cartes */
+        .media-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .media-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(59, 130, 246, 0.3);
+        }
+
+        .media-preview {
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .media-preview.interactive-folder {
+            background: var(--gradient-1);
+        }
+
+        .media-preview.pdf {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+
+        .media-preview.pptx,
+        .media-preview.presentation {
+            background: linear-gradient(135deg, #ff9a56, #ff6b35);
+        }
+
+        .media-preview.image {
+            background: var(--gradient-3);
+        }
+
+        .media-preview img.thumbnail-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .media-card:hover .media-preview img.thumbnail-img {
+            transform: scale(1.08);
+        }
+
+        .media-preview .icon {
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.9);
+            z-index: 2;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .media-preview .badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            z-index: 3;
+            backdrop-filter: blur(10px);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .badge-interactive { background: rgba(102, 126, 234, 0.9); color: #fff; }
+        .badge-pdf { background: rgba(255, 107, 107, 0.9); color: #fff; }
+        .badge-pptx { background: rgba(255, 154, 86, 0.9); color: #fff; }
+        .badge-image { background: rgba(79, 172, 254, 0.9); color: #fff; }
+
+        .preview-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.5) 100%);
+            z-index: 1;
+        }
+
+        .media-body {
+            padding: 20px;
+        }
+
+        .media-body h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        .media-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .media-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .media-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .media-btn {
+            flex: 1;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .media-btn.view {
+            background: var(--gradient-3);
+            color: #fff;
+        }
+
+        .media-btn.view:hover {
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .media-empty {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-muted);
+            grid-column: 1 / -1;
+        }
+
+        .media-empty i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+            opacity: 0.3;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .top-header {
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .media-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-header {
+                padding: 0 20px;
+                height: auto;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .header-title {
+                font-size: 1.3rem;
+            }
+
+            .main-content {
+                margin-top: 140px;
+                padding: 25px;
+            }
+
+            .media-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .social-links {
+                display: none;
+            }
+        }
+
+        /* Scrollbar personnalisée */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* Animation de chargement */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        .loading {
+            animation: shimmer 2s infinite linear;
+            background: linear-gradient(90deg, var(--card-bg) 4%, var(--border) 25%, var(--card-bg) 36%);
+            background-size: 1000px 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background animé -->
+    <div class="bg-animation"></div>
+
+    <div class="main-layout">
+        <!-- Sidebar gauche -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-wrapper">
+                    <div class="logo-icon">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <div class="logo-text">Algeria Tech</div>
+                </div>
+                <div class="logo-subtitle">By Basta</div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">Navigation</div>
+                <a href="../index.html" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Accueil</span>
+                </a>
+                <a href="#" class="nav-item active" id="nav-all">
+                    <i class="fas fa-th"></i>
+                    <span>Tous les médias</span>
+                    <span class="nav-badge" id="badge-all">0</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">Catégories</div>
+                <a href="#" class="nav-item" id="nav-interactive" data-filter="interactive-folder">
+                    <i class="fas fa-laptop-code"></i>
+                    <span>Interactifs</span>
+                    <span class="nav-badge" id="badge-interactive">0</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-pdf" data-filter="pdf">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Documents PDF</span>
+                    <span class="nav-badge" id="badge-pdf">0</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-pptx" data-filter="pptx">
+                    <i class="fas fa-file-powerpoint"></i>
+                    <span>Présentations</span>
+                    <span class="nav-badge" id="badge-pptx">0</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-image" data-filter="image">
+                    <i class="fas fa-image"></i>
+                    <span>Images</span>
+                    <span class="nav-badge" id="badge-image">0</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">Ressources</div>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cloud"></i>
+                    <span>Cloud & Data</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-network-wired"></i>
+                    <span>Télécoms</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-rocket"></i>
+                    <span>Startups</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Header supérieur -->
+        <header class="top-header">
+            <div class="header-center">
+                <h1 class="header-title">
+                    <i class="fas fa-chart-line" style="margin-right: 10px;"></i>
+                    Infographies & Médias
+                </h1>
+                <div class="search-bar">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Rechercher un document, une présentation...">
+                </div>
+            </div>
+            <div class="social-links">
+                <a href="https://facebook.com/algeriatech" target="_blank" class="social-link facebook" title="Facebook">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="https://twitter.com/algeriatech" target="_blank" class="social-link twitter" title="Twitter">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="https://instagram.com/algeriatech" target="_blank" class="social-link instagram" title="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://youtube.com/algeriatech" target="_blank" class="social-link youtube" title="YouTube">
+                    <i class="fab fa-youtube"></i>
+                </a>
+            </div>
+        </header>
+
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <!-- Filtres rapides -->
+            <div class="filters-wrapper">
+                <div class="filters-title">Filtres rapides</div>
+                <div class="filter-chips" id="filterBar">
+                    <div class="filter-chip active" data-filter="all">
+                        <i class="fas fa-th"></i>
+                        <span>Tous</span>
+                        <span class="count" id="countAll">0</span>
+                    </div>
+                    <div class="filter-chip" data-filter="interactive-folder">
+                        <i class="fas fa-laptop-code"></i>
+                        <span>Interactifs</span>
+                        <span class="count" id="countInteractive">0</span>
+                    </div>
+                    <div class="filter-chip" data-filter="pdf">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>PDF</span>
+                        <span class="count" id="countPdf">0</span>
+                    </div>
+                    <div class="filter-chip" data-filter="pptx">
+                        <i class="fas fa-file-powerpoint"></i>
+                        <span>PPTX</span>
+                        <span class="count" id="countPptx">0</span>
+                    </div>
+                    <div class="filter-chip" data-filter="image">
+                        <i class="fas fa-image"></i>
+                        <span>Images</span>
+                        <span class="count" id="countImage">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Présentations Interactives -->
+            <div class="content-section" id="interactiveSection">
+                <div class="section-header">
+                    <div class="section-icon interactive">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <h2 class="section-title">Présentations Interactives</h2>
+                    <span class="section-count" id="interactiveCount">0 éléments</span>
+                </div>
+                <div class="media-grid" id="interactive-folders"></div>
+            </div>
+
+            <!-- Section Fichiers Médias -->
+            <div class="content-section" id="filesSection">
+                <div class="section-header">
+                    <div class="section-icon files">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h2 class="section-title">Fichiers & Documents</h2>
+                    <span class="section-count" id="filesCount">0 fichiers</span>
+                </div>
+                <div class="media-grid" id="media-files"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const foldersContainer = document.getElementById('interactive-folders');
+            const filesContainer = document.getElementById('media-files');
+            const interactiveSection = document.getElementById('interactiveSection');
+            const filesSection = document.getElementById('filesSection');
+            const filterChips = document.querySelectorAll('.filter-chip');
+            const navItems = document.querySelectorAll('.nav-item[data-filter]');
+            const searchInput = document.getElementById('searchInput');
+            
+            let currentFilter = 'all';
+            let allFolders = [];
+            let allFiles = [];
+            let searchTerm = '';
+
+            // Compteurs
+            const countAll = document.getElementById('countAll');
+            const countInteractive = document.getElementById('countInteractive');
+            const countPdf = document.getElementById('countPdf');
+            const countPptx = document.getElementById('countPptx');
+            const countImage = document.getElementById('countImage');
+
+            const badgeAll = document.getElementById('badge-all');
+            const badgeInteractive = document.getElementById('badge-interactive');
+            const badgePdf = document.getElementById('badge-pdf');
+            const badgePptx = document.getElementById('badge-pptx');
+            const badgeImage = document.getElementById('badge-image');
+
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+            // Gestion de la recherche
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    searchTerm = e.target.value.toLowerCase();
+                    filterAndRender();
+                });
+            }
+
+            // Navigation sidebar
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const filter = this.getAttribute('data-filter');
+                    if (filter) {
+                        setActiveFilter(filter);
+                    }
+                });
+            });
+
+            // Filtres chips
+            filterChips.forEach(chip => {
+                chip.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    setActiveFilter(filter);
+                });
+            });
+
+            function setActiveFilter(filter) {
+                currentFilter = filter;
+                
+                // Mise à jour UI chips
+                filterChips.forEach(c => {
+                    c.classList.toggle('active', c.getAttribute('data-filter') === filter);
+                });
+
+                // Mise à jour UI sidebar
+                navItems.forEach(item => {
+                    item.classList.toggle('active', item.getAttribute('data-filter') === filter);
+                });
+
+                if (filter === 'all') {
+                    document.getElementById('nav-all').classList.add('active');
+                }
+
+                filterAndRender();
+            }
+
+            function filterAndRender() {
+                renderFolders();
+                renderFiles();
+            }
+
+            async function loadData() {
+                await Promise.all([loadInteractiveFolders(), loadMediaFiles()]);
+                updateStats();
+            }
+
+            async function loadInteractiveFolders() {
+                try {
+                    let url = isLocal ? '/api/infographies/interactifs' : '/infographies/interactifs-list.json';
+                    if (!isLocal) {
+                        try {
+                            const res = await fetch(url);
+                            if (res.ok) { allFolders = await res.json(); renderFolders(); return; }
+                        } catch (e) { console.log('Fallback API interactifs'); }
+                    }
+                    const res = await fetch('/api/infographies/interactifs');
+                    if (!res.ok) throw new Error('Échec');
+                    allFolders = await res.json();
+                    renderFolders();
+                } catch (e) {
+                    console.error('Erreur interactifs:', e);
+                    if (foldersContainer) foldersContainer.innerHTML = '<div class="media-empty"><i class="fas fa-laptop-code"></i><p>Aucune présentation interactive disponible.</p></div>';
+                }
+            }
+
+            async function loadMediaFiles() {
+                try {
+                    let url = isLocal ? '/api/infographies/media' : '/infographies/media-list.json';
+                    if (!isLocal) {
+                        try {
+                            const res = await fetch(url);
+                            if (res.ok) { allFiles = await res.json(); renderFiles(); return; }
+                        } catch (e) { console.log('Fallback API médias'); }
+                    }
+                    const res = await fetch('/api/infographies/media');
+                    if (!res.ok) throw new Error('Échec');
+                    allFiles = await res.json();
+                    renderFiles();
+                } catch (e) {
+                    console.error('Erreur médias:', e);
+                    if (filesContainer) filesContainer.innerHTML = '<div class="media-empty"><i class="fas fa-folder-open"></i><p>Aucun fichier média disponible.</p></div>';
+                }
+            }
+
+            function getIcon(type) {
+                const icons = {
+                    'interactive-folder': 'fa-laptop-code',
+                    'pdf': 'fa-file-pdf',
+                    'pptx': 'fa-file-powerpoint',
+                    'image': 'fa-image',
+                    'presentation': 'fa-file-powerpoint',
+                    'text': 'fa-file-alt',
+                    'interactive': 'fa-globe',
+                    'file': 'fa-file'
+                };
+                return icons[type] || 'fa-file';
+            }
+
+            function getBadgeClass(type) {
+                if (type === 'interactive-folder') return 'badge-interactive';
+                if (type === 'pdf') return 'badge-pdf';
+                if (type === 'pptx' || type === 'presentation') return 'badge-pptx';
+                if (type === 'image') return 'badge-image';
+                return 'badge-text';
+            }
+
+            function formatSize(bytes) {
+                if (!bytes || bytes < 1024) return (bytes || 0) + ' o';
+                if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' Ko';
+                return (bytes / 1048576).toFixed(1) + ' Mo';
+            }
+
+            function updateStats() {
+                const totalFiles = allFiles.length;
+                const totalFolders = allFolders.length;
+                const total = totalFiles + totalFolders;
+
+                // Mise à jour compteurs chips
+                if (countAll) countAll.textContent = total;
+                if (countInteractive) countInteractive.textContent = totalFolders;
+                if (countPdf) countPdf.textContent = allFiles.filter(f => f.type === 'pdf').length;
+                if (countPptx) countPptx.textContent = allFiles.filter(f => f.type === 'pptx' || f.type === 'presentation').length;
+                if (countImage) countImage.textContent = allFiles.filter(f => f.type === 'image').length;
+
+                // Mise à jour badges sidebar
+                if (badgeAll) badgeAll.textContent = total;
+                if (badgeInteractive) badgeInteractive.textContent = totalFolders;
+                if (badgePdf) badgePdf.textContent = allFiles.filter(f => f.type === 'pdf').length;
+                if (badgePptx) badgePptx.textContent = allFiles.filter(f => f.type === 'pptx' || f.type === 'presentation').length;
+                if (badgeImage) badgeImage.textContent = allFiles.filter(f => f.type === 'image').length;
+
+                // Compteurs sections
+                if (document.getElementById('interactiveCount'))
+                    document.getElementById('interactiveCount').textContent = totalFolders + ' élément' + (totalFolders > 1 ? 's' : '');
+                if (document.getElementById('filesCount'))
+                    document.getElementById('filesCount').textContent = totalFiles + ' fichier' + (totalFiles > 1 ? 's' : '');
+            }
+
+            function filterItems(items) {
+                let filtered = items;
+
+                // Filtre par catégorie
+                if (currentFilter !== 'all') {
+                    if (currentFilter === 'pptx') {
+                        filtered = filtered.filter(f => f.type === 'pptx' || f.type === 'presentation');
+                    } else {
+                        filtered = filtered.filter(f => f.type === currentFilter);
+                    }
+                }
+
+                // Filtre par recherche
+                if (searchTerm) {
+                    filtered = filtered.filter(f => 
+                        (f.name && f.name.toLowerCase().includes(searchTerm)) ||
+                        (f.title && f.title.toLowerCase().includes(searchTerm))
+                    );
+                }
+
+                return filtered;
+            }
+
+            function createFolderCard(f) {
+                const card = document.createElement('div');
+                card.className = 'media-card';
+
+                const preview = document.createElement('div');
+                preview.className = 'media-preview interactive-folder';
+
+                if (f.thumbnail) {
+                    const img = document.createElement('img');
+                    img.className = 'thumbnail-img';
+                    img.src = f.thumbnail;
+                    img.alt = f.title;
+                    img.loading = 'lazy';
+                    img.onerror = function() {
+                        this.style.display = 'none';
+                        const icon = document.createElement('i');
+                        icon.className = 'fas fa-laptop-code icon';
+                        preview.appendChild(icon);
+                    };
+                    const overlay = document.createElement('div');
+                    overlay.className = 'preview-overlay';
+                    preview.appendChild(img);
+                    preview.appendChild(overlay);
+                } else {
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-laptop-code icon';
+                    preview.appendChild(icon);
+                }
+
+                const badge = document.createElement('span');
+                badge.className = 'badge badge-interactive';
+                badge.textContent = 'Interactif';
+                preview.appendChild(badge);
+
+                const body = document.createElement('div');
+                body.className = 'media-body';
+                const title = document.createElement('h3');
+                title.textContent = f.title;
+                title.title = f.title;
+                const meta = document.createElement('div');
+                meta.className = 'media-meta';
+                const dateSpan = document.createElement('span');
+                dateSpan.innerHTML = '<i class="fas fa-calendar-alt"></i> ' + new Date(f.modified).toLocaleDateString('fr-FR');
+                meta.appendChild(dateSpan);
+                const actions = document.createElement('div');
+                actions.className = 'media-actions';
+                const btn = document.createElement('a');
+                btn.href = f.url;
+                btn.target = '_blank';
+                btn.className = 'media-btn view';
+                btn.innerHTML = '<i class="fas fa-external-link-alt"></i> Ouvrir';
+                btn.onclick = (e) => e.stopPropagation();
+                actions.appendChild(btn);
+
+                body.appendChild(title);
+                body.appendChild(meta);
+                body.appendChild(actions);
+                card.appendChild(preview);
+                card.appendChild(body);
+                card.addEventListener('click', () => window.open(f.url, '_blank'));
+                return card;
+            }
+
+            function createFileCard(f) {
+                const card = document.createElement('div');
+                card.className = 'media-card';
+
+                const displayType = (f.type === 'pptx' || f.type === 'presentation') ? 'pptx' : f.type;
+                const preview = document.createElement('div');
+                preview.className = 'media-preview ' + displayType;
+
+                if (f.thumbnail) {
+                    const img = document.createElement('img');
+                    img.className = 'thumbnail-img';
+                    img.src = f.thumbnail;
+                    img.alt = f.name;
+                    img.loading = 'lazy';
+                    img.onerror = function() {
+                        this.style.display = 'none';
+                        const icon = document.createElement('i');
+                        icon.className = 'fas ' + getIcon(f.type) + ' icon';
+                        preview.appendChild(icon);
+                    };
+                    const overlay = document.createElement('div');
+                    overlay.className = 'preview-overlay';
+                    preview.appendChild(img);
+                    preview.appendChild(overlay);
+                } else {
+                    const icon = document.createElement('i');
+                    icon.className = 'fas ' + getIcon(f.type) + ' icon';
+                    preview.appendChild(icon);
+                }
+
+                const extLabel = f.ext ? f.ext.replace('.', '').toUpperCase() : f.type.toUpperCase();
+                const badge = document.createElement('span');
+                badge.className = 'badge ' + getBadgeClass(f.type);
+                badge.textContent = extLabel;
+                preview.appendChild(badge);
+
+                const body = document.createElement('div');
+                body.className = 'media-body';
+                const title = document.createElement('h3');
+                title.textContent = f.name;
+                title.title = f.name;
+                const meta = document.createElement('div');
+                meta.className = 'media-meta';
+                const sizeSpan = document.createElement('span');
+                sizeSpan.innerHTML = '<i class="fas fa-weight-hanging"></i> ' + formatSize(f.size);
+                meta.appendChild(sizeSpan);
+                const dateSpan = document.createElement('span');
+                dateSpan.innerHTML = '<i class="fas fa-calendar-alt"></i> ' + new Date(f.modified).toLocaleDateString('fr-FR');
+                meta.appendChild(dateSpan);
+                const actions = document.createElement('div');
+                actions.className = 'media-actions';
+                const viewBtn = document.createElement('a');
+                viewBtn.href = f.url;
+                viewBtn.target = '_blank';
+                viewBtn.className = 'media-btn view';
+                viewBtn.innerHTML = '<i class="fas fa-eye"></i> Voir';
+                viewBtn.onclick = (e) => e.stopPropagation();
+                actions.appendChild(viewBtn);
+
+                body.appendChild(title);
+                body.appendChild(meta);
+                body.appendChild(actions);
+                card.appendChild(preview);
+                card.appendChild(body);
+                card.addEventListener('click', () => window.open(f.url, '_blank'));
+                return card;
+            }
+
+            function renderFolders() {
+                if (!foldersContainer) return;
+                foldersContainer.innerHTML = '';
+                const filtered = filterItems(allFolders);
+                
+                if (filtered.length === 0 && currentFilter !== 'all') {
+                    foldersContainer.innerHTML = '<div class="media-empty"><i class="fas fa-laptop-code"></i><p>Aucune présentation interactive trouvée.</p></div>';
+                    return;
+                }
+                if (filtered.length === 0 && currentFilter === 'all') {
+                    foldersContainer.innerHTML = '<div class="media-empty"><i class="fas fa-laptop-code"></i><p>Aucune présentation interactive disponible.</p></div>';
+                } else {
+                    filtered.forEach(f => foldersContainer.appendChild(createFolderCard(f)));
+                }
+            }
+
+            function renderFiles() {
+                if (!filesContainer) return;
+                filesContainer.innerHTML = '';
+                const filtered = filterItems(allFiles);
+                
+                if (filtered.length === 0) {
+                    filesContainer.innerHTML = '<div class="media-empty"><i class="fas fa-folder-open"></i><p>Aucun fichier trouvé.</p></div>';
+                    return;
+                }
+                filtered.forEach(f => filesContainer.appendChild(createFileCard(f)));
+            }
+
+            function updateSectionsVisibility() {
+                if (currentFilter === 'interactive-folder') {
+                    interactiveSection.style.display = 'block';
+                    filesSection.style.display = 'none';
+                } else if (['pdf', 'pptx', 'image'].indexOf(currentFilter) !== -1) {
+                    interactiveSection.style.display = 'none';
+                    filesSection.style.display = 'block';
+                } else {
+                    interactiveSection.style.display = 'block';
+                    filesSection.style.display = 'block';
+                }
+            }
+
+            // Override pour prendre en compte la recherche
+            const originalSetActiveFilter = setActiveFilter;
+            setActiveFilter = function(filter) {
+                originalSetActiveFilter(filter);
+                updateSectionsVisibility();
+            };
+
+            loadData();
+            updateSectionsVisibility();
+        });
+    </script>
+</body>
+</html>

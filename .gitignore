@@ -4,3 +4,14 @@ node_modules/
 .env.local
 *.log
 .vscode/settings.json
+--- Ajouts pour régler l'erreur Cloudflare 25MB ---
+venv/
+vidéos/
+backup_local_*/
+backup_conflicts/
+Ancien_Outil_Backup/
+documents/
+infographies/media/
+*.mp4
+*.zip
+*.exe

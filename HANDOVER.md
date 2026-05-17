@@ -1,12 +1,12 @@
-# 📋 Transmission du Projet DZ Tech Press
+# 📋 Transmission du Projet Algeria Tech
 
 **Document destiné aux autres IAs et développeurs prenant en charge ce projet.**
 
 ---
 
-## 🎯 Vue d'ensemble du projet
+## 🎯 Vue d'ensemble du projet Algeria Tech
 
-**Nom:** DZ Tech Press  
+**Nom:** Algeria Tech  
 **Description:** Plateforme de news technologiques pour l'Algérie avec système d'administration automatisé  
 **Type:** Application web full-stack (Node.js + HTML/CSS/JS)  
 **Objectif principal:** Publier automatiquement des articles avec gestion Git et déploiement continu
@@ -16,20 +16,20 @@
 ## 📍 Localisations du Projet
 
 ### 1. **Local - Disque E:**
-- **Chemin:** `E:\dz-tech-press\`
+- **Chemin:** `E:\algeria-tech\`
 - **Usage:** Développement, tests locaux
 - **Accès:** Répertoire personnel Windows
 - **Dossier actif:** Contient `.git` et `node_modules`
 
 ### 2. **GitHub Repository**
-- **URL:** `https://github.com/bastaps/dz-tech-press`
+- **URL:** `https://github.com/bastaps/algeria-tech`
 - **Owner:** bastaps
 - **Accès:** Git SSH configuré sur la machine
 - **Usage:** Versioning, source of truth, collaboration
 
 ### 3. **Cloudflare Pages**
-- **Project Name:** dz-tech-press
-- **Domain:** `dz-tech-press.pages.dev`
+- **Project Name:** algeria-tech
+- **Domain:** `algeria-tech.pages.dev`
 - **Usage:** Production hosting, déploiement continu via GitHub
 - **Configuration:** Automatique lors du push sur GitHub
 
@@ -55,6 +55,9 @@ E:\dz-tech-press\
 ├── 📁 images/              # Stockage des images uploadées
 │   ├── image1.png
 │   └── ...
+
+├── 📁 vidéos/              # Vidéos MP4 générées par l'outil Python
+│   └── video_XXXXXXXXXX.mp4
 │
 ├── 📁 node_modules/        # Dépendances installées (ne pas commiter)
 ├── 📁 .git/                # Repository Git local
