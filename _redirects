@@ -1,0 +1,5 @@
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.onrender.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; connect-src 'self' https://*.onrender.com https://api.open-meteo.com https://*.cloudflare.com; img-src 'self' data: https: blob:; style-src 'self' 'unsafe-inline' https:; font-src 'self' https: data:; object-src 'self' blob:; frame-src 'self'; media-src 'self' blob:;
+/infographies/observatoire-internet-algerie/* /infographies/observatoire-internet-algerie/index.html 200
+/infographies/observatoire-telephonie-mobile-algerie/* /infographies/observatoire-telephonie-mobile-algerie/index.html 200
+/infographies/* /infographies/index.html 200
