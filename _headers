@@ -1,2 +1,7 @@
+<<<<<<< HEAD
 /*
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.onrender.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; connect-src 'self' https://*.onrender.com https://api.open-meteo.com https://*.cloudflare.com; img-src 'self' data: https: blob:; style-src 'self' 'unsafe-inline' https:; font-src 'self' https: data:; object-src 'self' blob:; frame-src 'self'; media-src 'self' blob:;
+=======
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.onrender.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; connect-src 'self' https://*.onrender.com https://api.open-meteo.com https://*.cloudflare.com; img-src 'self' data: https: blob:; style-src 'self' 'unsafe-inline' https:; font-src 'self' https: data:; object-src 'self' blob:; frame-src 'self'; media-src 'self' blob:;
+>>>>>>> 884cec7b606edb3946a15f4e20810f89520c21de
