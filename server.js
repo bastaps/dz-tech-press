@@ -357,7 +357,7 @@ async function updateVeilleFeeds() {
     let newItems = [];
     
     for (const url of feeds) {
-        try {updateVeilleFeeds()
+        try {
             const jsonStr = await httpsGet(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
             const json = JSON.parse(jsonStr);
             if (json.status === 'ok' && json.items) {
