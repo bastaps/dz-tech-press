@@ -342,11 +342,22 @@ function httpsGet(url) {
 
 async function updateVeilleFeeds() {
     const data = loadVeilleData();
-    const feeds = ['https://www.tsa-algerie.com/feed/', 'https://www.silicon.fr/feed', 'https://www.zdnet.fr/feed/'];
+    const feeds = [
+    'https://www.tsa-algerie.dz/feed/',
+    'https://lesenjeuxeco.dz/category/tic/feed/',
+    'https://www.algerie360.com/category/high-tech/feed/',
+    'https://www.aps.dz/fr/algerie/education-et-technologie?format=feed&type=rss',
+    'https://itmag.dz/feed/',
+    'https://www.silicon.fr/feed',
+    'https://www.zdnet.fr/feed/',
+    'https://techcrunch.com/feed/',
+    'https://www.lemonde.fr/pixels/rss_full.xml',
+    'https://www.wired.com/feed/rss'
+];
     let newItems = [];
     
     for (const url of feeds) {
-        try {
+        try {updateVeilleFeeds()
             const jsonStr = await httpsGet(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
             const json = JSON.parse(jsonStr);
             if (json.status === 'ok' && json.items) {
