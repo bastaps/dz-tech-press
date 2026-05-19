@@ -2,8 +2,8 @@ name: Génération Revue de Presse IA
 
 on:
   schedule:
-    - cron: '0 5 * * *' # 5h00 UTC = 6h00 en Algérie
-  workflow_dispatch: # Pour lancer le test manuellement
+    - cron: '0 5 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -24,6 +24,10 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add revue_presse.json
-          git commit -m "Automatique: Nouvelle Revue de Presse IA" || echo "Pas de changements"
-          git push
+          if [ -f revue_presse.json ]; then
+            git add revue_presse.json
+            git commit -m "Automatique: Nouvelle Revue de Presse IA" || echo "Pas de changements"
+            git push
+          else
+            echo "Le fichier revue_presse.json n'a pas été généré."
+          fi
