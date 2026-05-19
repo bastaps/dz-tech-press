@@ -2,41 +2,28 @@ const fs = require('fs');
 const https = require('https');
 const path = require('path');
 
-// --- CONFIGURATION ---
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const SERPER_API_KEY = process.env.SERPER_API_KEY;
 const OUTPUT_FILE = path.join(__dirname, 'revue_presse.json');
 
-// Liste élargie de la presse algérienne (.dz)
-const SOURCES = [
-    'https://www.aps.dz/fr/algerie/education-et-technologie?format=feed&type=rss',
-    'https://www.tsa-algerie.dz/feed/',
-    'https://itmag.dz/feed/',
-    'https://lesenjeuxeco.dz/category/tic/feed/',
-    'https://dz-tech.news/fr/feed/',
-    'https://www.algerie-eco.com/category/actualite/high-tech/feed/',
-    'https://www.lesoirdalgerie.com/rss',
-    'http://www.elmoudjahid.com/fr/rss',
-    'https://www.elwatan-dz.com/feed',
-    'https://www.lexpressiondz.com/rubriques/nationale/rss',
-    'https://www.horizons.dz/?format=feed&type=rss',
-    'https://www.algerie360.com/category/high-tech/feed/',
-    'https://www.elkhabar.com/press/rss/14/', 
-    'https://www.echoroukonline.com/dz-news/feed'
-];
-
-async function httpsGet(url) {
+// Fonction pour fouiller tout le web .DZ via Serper (Google Search API)
+async function searchWebDZ(query) {
     return new Promise((resolve, reject) => {
-        // Utilisation du service public rss2json (sans clé pour le test)
-        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
-        const request = https.get(apiUrl, { timeout: 15000 }, (res) => {
-            let data = '';
-            res.on('data', (chunk) => data += chunk);
-            res.on('end', () => {
-                try { resolve(JSON.parse(data)); } catch (e) { reject(new Error("Erreur JSON")); }
-            });
+        const data = JSON.stringify({ "q": `${query} site:.dz`, "gl": "dz", "hl": "fr", "autocorrect": true });
+        const options = {
+            hostname: 'google.serper.dev',
+            path: '/search',
+            method: 'POST',
+            headers: { 'X-API-KEY': SERPER_API_KEY, 'Content-Type': 'application/json' }
+        };
+        const req = https.request(options, res => {
+            let result = '';
+            res.on('data', chunk => result += chunk);
+            res.on('end', () => resolve(JSON.parse(result)));
         });
-        request.on('error', reject);
-        request.on('timeout', () => { request.destroy(); reject(new Error("Timeout")); });
+        req.on('error', reject);
+        req.write(data);
+        req.end();
     });
 }
 
@@ -46,14 +33,11 @@ async function callGemini(prompt) {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { response_mime_type: "application/json" }
     });
-
     return new Promise((resolve, reject) => {
-        const req = https.request(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } }, (res) => {
+        const req = https.request(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } }, res => {
             let data = '';
-            res.on('data', (chunk) => data += chunk);
-            res.on('end', () => {
-                try { resolve(JSON.parse(data)); } catch (e) { reject(e); }
-            });
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => resolve(JSON.parse(data)));
         });
         req.on('error', reject);
         req.write(payload);
@@ -61,55 +45,45 @@ async function callGemini(prompt) {
     });
 }
 
-async function startFouille() {
-    console.log("🚀 L'IA commence la fouille de la presse nationale .DZ...");
-    let allNews = [];
+async function startFouilleProfonde() {
+    console.log("🔍 Fouille profonde de la presse algérienne lancée...");
+    
+    try {
+        // On lance 3 recherches simultanées pour ratisser large
+        const results = await Promise.all([
+            searchWebDZ("TIC télécom Algérie news"),
+            searchWebDZ("Startup numérique Algérie"),
+            searchWebDZ("الرقمنة الجزائر") // Recherche en arabe pour ne rien rater
+        ]);
 
-    for (const url of SOURCES) {
-        try {
-            const res = await httpsGet(url);
-            if (res && res.status === 'ok') {
-                res.items.forEach(item => {
-                    allNews.push({
-                        title: item.title,
-                        desc: (item.description || '').replace(/<[^>]*>/g, '').substring(0, 300),
-                        link: item.link,
-                        date: item.pubDate
-                    });
+        let allFound = [];
+        results.forEach(res => {
+            if (res.organic) {
+                res.organic.forEach(item => {
+                    allFound.push({ title: item.title, snippet: item.snippet, link: item.link });
                 });
             }
-        } catch (e) { console.log(`⚠️ Source ignorée : ${url.substring(0, 30)}...`); }
-    }
+        });
 
-    // Création d'un contenu par défaut si rien n'est trouvé
-    if (allNews.length === 0) {
-        console.log("❌ Aucun article trouvé aujourd'hui.");
-        const emptyResult = {
-            "date": new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }),
-            "synthese": "Aucune actualité technologique majeure n'a été détectée dans la presse nationale ces dernières 24 heures.",
-            "articles": []
-        };
-        fs.writeFileSync(OUTPUT_FILE, JSON.stringify(emptyResult, null, 2));
-        return;
-    }
+        const prompt = `Tu es le rédacteur en chef d'Algeria Tech. Analyse ces résultats de recherche du web algérien : ${JSON.stringify(allFound.slice(0, 40))}
+        Rédige une revue de presse structurée sur les TIC et le numérique en Algérie.
+        1. Synthèse globale de 3-4 phrases (champ "synthese").
+        2. Sélectionne les 5 faits les plus pertinents (champ "articles").
+        3. Traduis les infos arabes en français pro.
+        Format JSON : { "date": "${new Date().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'})}", "synthese": "...", "articles": [{"titre": "...", "resume": "...", "categorie": "...", "url": "..."}] }`;
 
-    const prompt = `Analyse ces articles algériens : ${JSON.stringify(allNews.slice(0, 50))}. 
-    Rédige une revue de presse (synthese + 5 articles max) sur les TIC et le numérique en Algérie. 
-    Format JSON : { "date": "...", "synthese": "...", "articles": [{"titre": "...", "resume": "...", "categorie": "...", "url": "..."}] }`;
-
-    try {
         const aiResponse = await callGemini(prompt);
-        if (aiResponse.candidates && aiResponse.candidates[0].content) {
-            let resultText = aiResponse.candidates[0].content.parts[0].text;
-            // Nettoyage au cas où l'IA ajoute des balises markdown
-            resultText = resultText.replace(/```json/g, '').replace(/```/g, '').trim();
-            fs.writeFileSync(OUTPUT_FILE, resultText);
-            console.log("✅ Revue de presse générée !");
-        }
+        let resultText = aiResponse.candidates[0].content.parts[0].text;
+        resultText = resultText.replace(/```json/g, '').replace(/```/g, '').trim();
+        
+        fs.writeFileSync(OUTPUT_FILE, resultText);
+        console.log("✅ Revue de presse profonde générée avec succès !");
+
     } catch (e) {
-        console.error("❌ Erreur IA, création d'un fichier de secours.");
-        fs.writeFileSync(OUTPUT_FILE, JSON.stringify({ "date": "Erreur", "synthese": "Service temporairement indisponible", "articles": [] }));
+        console.error("❌ Erreur:", e.message);
+        // Secours
+        fs.writeFileSync(OUTPUT_FILE, JSON.stringify({ "date": "Aujourd'hui", "synthese": "Actualisation en cours...", "articles": [] }));
     }
 }
 
-startFouille();
+startFouilleProfonde();

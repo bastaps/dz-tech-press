@@ -20,6 +20,7 @@ jobs:
         run: node generate_revue.js
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
       - name: Sauvegarder sur GitHub
         run: |
           git config --local user.email "action@github.com"
