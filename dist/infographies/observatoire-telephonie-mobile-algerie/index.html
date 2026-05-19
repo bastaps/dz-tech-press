@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+</script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Observatoire du Marché de la Téléphonie Mobile en Algérie — T3 2025</title>
+  <meta name="description" content="Synthèse interactive des indicateurs clés du marché de la téléphonie mobile en Algérie au 3ème trimestre 2025 — données ARPCE.">
+  <meta name="theme-color" content="#0a0e1a">
+
+  <meta property="og:title" content="Observatoire du Marché de la Téléphonie Mobile en Algérie — T3 2025">
+  <meta property="og:description" content="55,94 millions d'abonnés, +4,65%/an — analyse interactive des données ARPCE.">
+  <meta property="og:image" content="thumbnail.jpg">
+  <meta property="og:type" content="website">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/styles.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader" role="status" aria-label="Chargement">
+  <div class="loader-content">
+    <div class="loader-mark"></div>
+    <div class="loader-text">Observatoire ARPCE · Mobile</div>
+    <div class="loader-bar"></div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a href="#hero" class="brand">
+      <span class="brand-mark">A</span>
+      <span><em>Observatoire</em> · Téléphonie Mobile</span>
+    </a>
+
+    <nav aria-label="Sections">
+      <ul class="section-nav">
+        <li><a href="#vue-ensemble">Vue d'ensemble</a></li>
+        <li><a href="#operateurs">Opérateurs</a></li>
+        <li><a href="#technologies">Technologies</a></li>
+        <li><a href="#abonnements">Abonnements</a></li>
+        <li><a href="#voix">Voix</a></li>
+        <li><a href="#sms">SMS</a></li>
+        <li><a href="#synthese">Synthèse</a></li>
+      </ul>
+    </nav>
+
+    <div class="topbar-actions">
+      <button id="btn-share" class="btn btn-ghost" aria-label="Partager">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      </button>
+      <button id="btn-export-pdf" class="btn btn-gold">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        PDF
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- HERO -->
+<section class="section hero" id="hero">
+  <div class="container hero" style="padding-top:0;">
+
+    <div class="hero-content reveal">
+      <span class="eyebrow">Source · ARPCE — T3 2025</span>
+      <h1 class="display-1">
+        Observatoire<br>
+        de la <span class="gold">Téléphonie</span><br>
+        <em>Mobile en Algérie</em>
+      </h1>
+      <p class="lead">
+        Synthèse interactive des indicateurs clés du 3<sup>ème</sup> trimestre 2025
+        sur le marché de la téléphonie mobile algérien : parts opérateurs, technologies,
+        prépayé/postpayé, trafic voix et SMS. Données ARPCE, visualisations 3D et
+        exports prêts à l'usage.
+      </p>
+
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Période</span>
+          <span class="hero-meta-value">T3 2025</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Abonnés mobiles</span>
+          <span class="hero-meta-value"><span class="counter" data-target="55.94" data-decimals="2" data-suffix=" M">0</span></span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Croissance annuelle</span>
+          <span class="hero-meta-value" style="color:var(--emerald-400)">+<span class="counter" data-target="4.65" data-decimals="2" data-suffix="%">0</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-3d reveal" style="transition-delay:.2s">
+      <div id="scene3d" aria-label="Scène 3D interactive — Champ de signaux des opérateurs"></div>
+      <div class="scene-hint">Glisser · zoomer · survoler les antennes</div>
+    </div>
+  </div>
+</section>
+
+<!-- VUE D'ENSEMBLE -->
+<section class="section" id="vue-ensemble">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">01 · Vue d'ensemble</span>
+      <h2 class="display-2">Le marché en chiffres</h2>
+      <p class="lead">
+        À la fin du 3<sup>ème</sup> trimestre 2025, le parc des abonnés à la téléphonie
+        mobile (GSM, 3G & 4G) a atteint 55,94 millions, en hausse de +1,94% sur le
+        trimestre et +4,65% sur un an. La 4G domine désormais largement le marché.
+      </p>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi reveal">
+        <div class="kpi-label">Abonnés mobiles</div>
+        <div class="kpi-value"><span class="counter" data-target="55.94" data-decimals="2">0</span><span class="unit">M</span></div>
+        <div class="kpi-trend">▲ +4,65% en un an</div>
+      </div>
+      <div class="kpi reveal" style="transition-delay:.1s">
+        <div class="kpi-label">Part de la 4G</div>
+        <div class="kpi-value"><span class="counter" data-target="89.56" data-decimals="2">0</span><span class="unit">%</span></div>
+        <div class="kpi-trend">50,10 M abonnés 4G</div>
+      </div>
+      <div class="kpi reveal" style="transition-delay:.2s">
+        <div class="kpi-label">Prépayé</div>
+        <div class="kpi-value"><span class="counter" data-target="95.75" data-decimals="2">0</span><span class="unit">%</span></div>
+        <div class="kpi-trend">53,56 M abonnés</div>
+      </div>
+      <div class="kpi reveal" style="transition-delay:.3s">
+        <div class="kpi-label">Leader du marché</div>
+        <div class="kpi-value" style="font-size:1.75rem;color:var(--emerald-400);">Mobilis<br>41,97%</div>
+        <div class="kpi-trend">23,48 M abonnés</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- OPERATEURS -->
+<section class="section" id="operateurs">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">02 · Opérateurs</span>
+      <h2 class="display-2">Parts de marché des 3 opérateurs</h2>
+      <p class="lead">
+        Le marché algérien est partagé entre trois acteurs : <strong style="color:var(--emerald-400)">Mobilis</strong>
+        (Algérie Télécom Mobile), <strong style="color:var(--crimson-400)">Djezzy</strong>
+        (Optimum Télécom Algérie) et <strong style="color:var(--gold-300)">Ooredoo</strong>
+        (Wataniya Télécom Algérie). Mobilis conserve sa position de leader,
+        mais Djezzy gagne du terrain trimestre après trimestre.
+      </p>
+    </div>
+
+    <div class="split-grid">
+      <div class="data-block reveal">
+        <div class="data-block-title">
+          <h3>Répartition T3 2025</h3>
+          <button class="btn btn-ghost" data-export-csv="operateurs">CSV</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-parts-marche"></canvas>
+        </div>
+      </div>
+
+      <div class="data-block reveal" style="transition-delay:.1s">
+        <div class="data-block-title">
+          <h3>Évolution sur 5 trimestres</h3>
+          <button class="btn btn-ghost" data-export-csv="evolutionParc">CSV</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-evolution-parc"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-block reveal" style="margin-top:2rem;transition-delay:.2s">
+      <div class="data-block-title">
+        <h3>Tableau récapitulatif des opérateurs</h3>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Marque</th>
+              <th>Société</th>
+              <th>Abonnés T3 2025</th>
+              <th>Part de marché</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong style="color:var(--emerald-400)">Mobilis</strong></td><td>Algérie Télécom Mobile</td><td class="num">23 477 942</td><td class="num">41,97%</td></tr>
+            <tr><td><strong style="color:var(--crimson-400)">Djezzy</strong></td><td>Optimum Télécom Algérie</td><td class="num">17 758 639</td><td class="num">31,75%</td></tr>
+            <tr><td><strong style="color:var(--gold-300)">Ooredoo</strong></td><td>Wataniya Télécom Algérie</td><td class="num">14 704 505</td><td class="num">26,29%</td></tr>
+            <tr style="background:rgba(212,164,55,0.04);"><td><strong>Total</strong></td><td></td><td class="num"><strong>55 941 086</strong></td><td class="num"><strong>100,00%</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- TECHNOLOGIES -->
+<section class="section" id="technologies">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">03 · Technologies</span>
+      <h2 class="display-2">GSM, 3G &amp; 4G</h2>
+      <p class="lead">
+        La 4G concentre désormais <strong style="color:var(--emerald-400)">89,56%</strong> du parc total
+        d'abonnés mobiles. La 3G n'est plus qu'à 6,32% et le GSM tombe à 4,12%.
+        Tous les opérateurs ont massivement basculé vers la 4G, en particulier
+        Djezzy (93,31%) et Ooredoo (92,68%).
+      </p>
+    </div>
+
+    <div class="split-grid">
+      <div class="data-block reveal">
+        <div class="data-block-title">
+          <h3>Répartition globale</h3>
+          <button class="btn btn-ghost" data-export-csv="technologies">CSV</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-technologies"></canvas>
+        </div>
+        <p style="margin-top:1rem;color:var(--gold-300);font-family:var(--font-mono);font-size:0.8rem;text-align:center;letter-spacing:0.05em;">
+          ▲ DOMINATION QUASI-TOTALE DE LA 4G
+        </p>
+      </div>
+
+      <div class="data-block reveal" style="transition-delay:.1s">
+        <div class="data-block-title">
+          <h3>Détail par opérateur</h3>
+          <button class="btn btn-ghost" data-export-csv="technologiesOperateur">CSV</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-techs-operateur"></canvas>
+        </div>
+        <p style="margin-top:1rem;color:var(--gold-300);font-family:var(--font-mono);font-size:0.8rem;text-align:center;letter-spacing:0.05em;">
+          ▲ MOBILIS CONSERVE LE PLUS DE 3G (10,81%)
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ABONNEMENTS -->
+<section class="section" id="abonnements">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">04 · Abonnements</span>
+      <h2 class="display-2">Prépayé vs Postpayé</h2>
+      <p class="lead">
+        Le modèle prépayé reste l'archi-dominant en Algérie :
+        <strong style="color:var(--emerald-400)">95,75%</strong> des abonnés contre seulement
+        <strong style="color:var(--gold-300)">4,25%</strong> en postpayé. Le parc prépayé continue
+        de croître (+4,95% en un an), tandis que le postpayé recule légèrement (-2,54% en un an).
+      </p>
+    </div>
+
+    <div class="split-grid">
+      <div class="data-block reveal">
+        <div class="data-block-title">
+          <h3>Répartition T3 2025</h3>
+          <button class="btn btn-ghost" data-export-csv="abonnement">CSV</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-abonnement"></canvas>
+        </div>
+      </div>
+
+      <div class="data-block reveal" style="transition-delay:.1s">
+        <div class="data-block-title">
+          <h3>Prépayé / postpayé par opérateur</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-abonnement-operateur"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI prepaye / postpaye -->
+    <div class="split-grid" style="margin-top:2rem;">
+      <div class="data-block reveal" style="border-left:3px solid var(--emerald-500);">
+        <div class="data-block-title"><h3>📱 Marché prépayé</h3></div>
+        <div class="kpi-grid" style="margin-top:0.5rem;">
+          <div class="kpi" style="background:transparent;border:none;padding:0;">
+            <div class="kpi-label">Total abonnés</div>
+            <div class="kpi-value" style="font-size:2rem;color:var(--emerald-400);">53,56<span class="unit">M</span></div>
+            <div class="kpi-trend">▲ +4,95% / an</div>
+          </div>
+          <div class="kpi" style="background:transparent;border:none;padding:0;">
+            <div class="kpi-label">MOU mensuel</div>
+            <div class="kpi-value" style="font-size:2rem;">261<span class="unit">min</span></div>
+            <div class="kpi-trend" style="color:var(--slate-300);">par abonné/mois</div>
+          </div>
+          <div class="kpi" style="background:transparent;border:none;padding:0;">
+            <div class="kpi-label">ARPU mensuel</div>
+            <div class="kpi-value" style="font-size:2rem;">572<span class="unit">DA</span></div>
+            <div class="kpi-trend" style="color:var(--slate-300);">par abonné/mois</div>
+          </div>
+        </div>
+        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06);">
+          <button class="btn btn-ghost" data-export-csv="prepayeIndicateurs">Exporter indicateurs</button>
+        </div>
+      </div>
+
+      <div class="data-block reveal" style="border-left:3px solid var(--gold-500);transition-delay:.1s">
+        <div class="data-block-title"><h3>💼 Marché postpayé</h3></div>
+        <div class="kpi-grid" style="margin-top:0.5rem;">
+          <div class="kpi" style="background:transparent;border:none;padding:0;">
+            <div class="kpi-label">Total abonnés</div>
+            <div class="kpi-value" style="font-size:2rem;">2,38<span class="unit">M</span></div>
+            <div class="kpi-trend down">▼ -2,54% / an</div>
+          </div>
+          <div class="kpi" style="background:transparent;border:none;padding:0;">
+            <div class="kpi-label">MOU mensuel</div>
+            <div class="kpi-value" style="font-size:2rem;">512<span class="unit">min</span></div>
+            <div class="kpi-trend" style="color:var(--slate-300);">~2× plus que prépayé</div>
+          </div>
+          <div class="kpi" style="background:transparent;border:none;padding:0;">
+            <div class="kpi-label">ARPU mensuel</div>
+            <div class="kpi-value" style="font-size:2rem;">1 602<span class="unit">DA</span></div>
+            <div class="kpi-trend" style="color:var(--slate-300);">~3× plus que prépayé</div>
+          </div>
+        </div>
+        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06);">
+          <button class="btn btn-ghost" data-export-csv="postpayeIndicateurs">Exporter indicateurs</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- TRAFIC VOIX -->
+<section class="section" id="voix">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">05 · Trafic voix</span>
+      <h2 class="display-2">43,62 milliards de minutes</h2>
+      <p class="lead">
+        Au 3<sup>ème</sup> trimestre 2025, le trafic voix mobile a atteint
+        <strong>43,62 milliards de minutes</strong>, en hausse de
+        <strong style="color:var(--emerald-400)">+0,96%</strong> sur un an.
+        L'intra-réseau (appels entre abonnés d'un même opérateur) domine très
+        largement avec 81,39% du volume total.
+      </p>
+    </div>
+
+    <div class="split-grid">
+      <div class="data-block reveal">
+        <div class="data-block-title">
+          <h3>Répartition par destination</h3>
+          <button class="btn btn-ghost" data-export-csv="traficVoix">CSV</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-trafic-voix-repart"></canvas>
+        </div>
+        <div class="legend-inline" style="justify-content:center;font-size:0.8rem;">
+          <div class="legend-item"><span class="legend-swatch" style="background:#2D8A5F"></span>Intra : 35 501 M</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:#D4A437"></span>Off-net : 8 099 M</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:#B85042"></span>Sortant Int. : 11 M</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:#94a3b8"></span>Entrant Int. : 9 M</div>
+        </div>
+      </div>
+
+      <div class="data-block reveal" style="transition-delay:.1s">
+        <div class="data-block-title">
+          <h3>Évolution sur 5 trimestres</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-trafic-voix-evol"></canvas>
+        </div>
+        <div style="margin-top:1rem;text-align:center;">
+          <div style="font-family:var(--font-display);font-size:2rem;color:var(--emerald-400);">+0,96% ↗</div>
+          <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--slate-300);text-transform:uppercase;letter-spacing:0.1em;">Croissance annuelle</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- TRAFIC SMS -->
+<section class="section" id="sms">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">06 · Trafic SMS</span>
+      <h2 class="display-2">3,29 milliards de SMS</h2>
+      <p class="lead">
+        Le trafic SMS a quant à lui atteint <strong>3,29 milliards de SMS</strong>,
+        soit une <strong style="color:var(--crimson-400)">diminution de -6,92%</strong>
+        sur un an. Cette baisse confirme la migration progressive vers les services
+        de messagerie OTT (WhatsApp, Messenger, etc.). L'intra-réseau représente
+        ici 83,36% du trafic SMS.
+      </p>
+    </div>
+
+    <div class="split-grid">
+      <div class="data-block reveal">
+        <div class="data-block-title">
+          <h3>Répartition par destination</h3>
+          <button class="btn btn-ghost" data-export-csv="traficSms">CSV</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-trafic-sms-repart"></canvas>
+        </div>
+        <div class="legend-inline" style="justify-content:center;font-size:0.8rem;">
+          <div class="legend-item"><span class="legend-swatch" style="background:#2D8A5F"></span>Intra : 2 746 M</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:#D4A437"></span>Off-net : 489 M</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:#B85042"></span>Sortant Int. : 31 M</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:#94a3b8"></span>Entrant Int. : 28 M</div>
+        </div>
+      </div>
+
+      <div class="data-block reveal" style="transition-delay:.1s">
+        <div class="data-block-title">
+          <h3>Évolution sur 5 trimestres</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-trafic-sms-evol"></canvas>
+        </div>
+        <div style="margin-top:1rem;text-align:center;">
+          <div style="font-family:var(--font-display);font-size:2rem;color:var(--crimson-400);">-6,92% ↘</div>
+          <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--slate-300);text-transform:uppercase;letter-spacing:0.1em;">Croissance annuelle (recul)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- SYNTHESE -->
+<section class="section" id="synthese">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">07 · Synthèse</span>
+      <h2 class="display-2">Points clés à retenir</h2>
+      <p class="lead">
+        Trois enseignements majeurs caractérisent le marché de la téléphonie
+        mobile en Algérie au 3<sup>ème</sup> trimestre 2025.
+      </p>
+    </div>
+
+    <div class="synthese-grid">
+      <div class="synthese-card reveal">
+        <div class="synthese-title">Croissance Annuelle Soutenue</div>
+        <div class="synthese-figure">+4,65%</div>
+        <div class="synthese-context">Parc global mobile · 55,94 M abonnés</div>
+        <p class="synthese-desc">
+          Le parc de téléphonie mobile a progressé de +4,65% en un an pour atteindre
+          55,94 millions d'abonnés, soutenu par la montée en charge continue de la 4G.
+        </p>
+      </div>
+
+      <div class="synthese-card reveal" style="transition-delay:.1s">
+        <div class="synthese-title">Hégémonie de la 4G</div>
+        <div class="synthese-figure"><span class="counter" data-target="89.56" data-decimals="2">0</span>%</div>
+        <div class="synthese-context">des abonnés sont en 4G</div>
+        <p class="synthese-desc">
+          La 4G concentre désormais 89,56% du parc total. Les technologies GSM
+          (4,12%) et 3G (6,32%) deviennent résiduelles.
+        </p>
+      </div>
+
+      <div class="synthese-card reveal" style="transition-delay:.2s">
+        <div class="synthese-title">Le Prépayé Reste Roi</div>
+        <div class="synthese-figure"><span class="counter" data-target="95.75" data-decimals="2">0</span>%</div>
+        <div class="synthese-context">des abonnés en prépayé</div>
+        <p class="synthese-desc">
+          Le modèle prépayé domine massivement avec 53,56 millions d'abonnés,
+          contre seulement 2,38 millions pour le postpayé (en léger recul : -2,54%/an).
+        </p>
+      </div>
+    </div>
+
+    <!-- Exports globaux -->
+    <div class="reveal" style="margin-top:4rem;text-align:center;padding:2rem;background:linear-gradient(180deg,rgba(212,164,55,0.05),rgba(212,164,55,0.02));border:1px solid rgba(212,164,55,0.15);border-radius:var(--radius-xl);">
+      <span class="eyebrow">Exports &amp; téléchargements</span>
+      <h3 style="margin-top:1rem;margin-bottom:0.5rem;font-size:1.5rem;">Récupérez toutes les données</h3>
+      <p class="lead" style="margin:0.5rem auto 1.5rem;font-size:0.95rem;">
+        Format CSV (Excel/LibreOffice), JSON ou PDF — usage libre dans le respect
+        de la source ARPCE.
+      </p>
+      <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+        <button id="btn-export-all" class="btn btn-gold">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          CSV complet
+        </button>
+        <button id="btn-export-json" class="btn btn-ghost">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          JSON
+        </button>
+        <button id="btn-export-pdf" class="btn btn-ghost">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          PDF
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-title">À propos</div>
+        <p class="footer-text">
+          Cette synthèse interactive est basée sur le rapport public de l'Autorité
+          de Régulation de la Poste et des Communications Électroniques (ARPCE) sur
+          le marché de la téléphonie mobile en Algérie au 3<sup>ème</sup> trimestre 2025.
+        </p>
+      </div>
+      <div>
+        <div class="footer-title">Méthodologie</div>
+        <p class="footer-text">
+          Données chiffrées extraites du rapport officiel.<br>
+          Visualisations propulsées par Chart.js et Three.js.
+        </p>
+      </div>
+      <div>
+        <div class="footer-title">Navigation</div>
+        <p class="footer-text">
+          ↑↓ pour naviguer entre sections<br>
+          F pour le mode plein écran
+        </p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 · Source : ARPCE — T3 2025</span>
+      <span>Conçu pour la section infographie</span>
+    </div>
+  </div>
+</footer>
+
+<!-- FAB -->
+<div class="fab-stack" aria-label="Actions rapides">
+  <button id="fab-fullscreen" class="fab" title="Mode plein écran (F)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+  </button>
+  <button id="fab-top" class="fab" title="Retour en haut">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
+</div>
+
+<script type="module" src="assets/js/main.js"></script>
+
+<noscript>
+  <div style="padding:2rem;background:#b85042;color:white;text-align:center;font-family:monospace;">
+    Ce rapport interactif nécessite JavaScript activé. Une version PDF est disponible sur demande.
+  </div>
+</noscript>
+
+</body>
+</html>

@@ -6,6 +6,7 @@ let currentFilter = 'all';
 let currentTag = null;
 let articleViews = JSON.parse(localStorage.getItem('articleViews') || '{}');
 let currentEditingId = null;
+let isResetting = false;
 const synth = window.speechSynthesis;
 let currentUtterance = null;
 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -32,7 +33,7 @@ if (dateSpan) {
     dateSpan.textContent = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-// Horloge temps réel (Restauration)
+// Horloge temps rÃ©el (Restauration)
 const clockEl = document.getElementById('liveClock');
 function updateLiveClock() {
     if (clockEl) clockEl.textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -42,7 +43,7 @@ setInterval(updateLiveClock, 1000);
 
 // ===== CHARGEMENT DES ARTICLES =====
 async function loadArticles() {
-    // Affiche d'abord les articles en cache (si disponibles) pour UX immédiate
+    // Affiche d'abord les articles en cache (si disponibles) pour UX immÃ©diate
     if (allArticles.length > 0) {
         renderHero(allArticles);
         renderGrid(allArticles.slice(0, ITEMS_PER_PAGE));
@@ -53,7 +54,7 @@ async function loadArticles() {
         initCounters();
     } else {
         const grid = document.getElementById('newsGrid');
-        if (grid) grid.innerHTML = '<p style="text-align:center; padding:20px;">Chargement des derniers articles…</p>';
+        if (grid) grid.innerHTML = '<p style="text-align:center; padding:20px;">Chargement des derniers articlesâ€¦</p>';
     }
 
     // Fonction utilitaire avec timeout et retry
@@ -91,7 +92,7 @@ async function loadArticles() {
                     return art;
                 }
             } catch (err) {
-                console.warn("Article non chargé (timeout/retry échoué): ", fileName, err);
+                console.warn("Article non chargÃ© (timeout/retry Ã©chouÃ©): ", fileName, err);
             }
             return null;
         });
@@ -100,13 +101,13 @@ async function loadArticles() {
         allArticles.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         if (allArticles.length === 0) {
-            console.warn("Aucun article trouvé après appel API. ");
+            console.warn("Aucun article trouvÃ© aprÃ¨s appel API. ");
             const grid = document.getElementById('newsGrid');
             if (grid) grid.innerHTML = '<p style="text-align:center; padding:20px;">Aucun article disponible pour le moment.</p>';
             return;
         }
 
-        // Rafraîchit l'affichage avec les nouveaux articles
+        // RafraÃ®chit l'affichage avec les nouveaux articles
         renderHero(allArticles);
         renderGrid(allArticles.slice(0, ITEMS_PER_PAGE));
         renderTicker(allArticles);
@@ -116,10 +117,10 @@ async function loadArticles() {
         initCounters();
     } catch (e) {
         console.error('Erreur critique de chargement (API indisponible):', e);
-        // Garde les articles en cache affichés → pas de page blanche
+        // Garde les articles en cache affichÃ©s â†’ pas de page blanche
         if (allArticles.length === 0) {
             const grid = document.getElementById('newsGrid');
-            if (grid) grid.innerHTML = `<div style="text-align:center; padding:20px; color: #d97706;"><h3>⚠️ Connexion lente ou temporaire</h3><p>Les articles récents sont toujours visibles. Le serveur se réveille…</p></div>`;
+            if (grid) grid.innerHTML = `<div style="text-align:center; padding:20px; color: #d97706;"><h3>âš ï¸  Connexion lente ou temporaire</h3><p>Les articles rÃ©cents sont toujours visibles. Le serveur se rÃ©veilleâ€¦</p></div>`;
         }
     }
 }
@@ -179,7 +180,7 @@ function renderGrid(arts) {
     const grid = document.getElementById('newsGrid');
     if (!grid) return;
     if (!arts || arts.length === 0) {
-        grid.innerHTML = '<p style="text-align:center; padding:20px;">Aucun résultat.</p>';
+        grid.innerHTML = '<p style="text-align:center; padding:20px;">Aucun rÃ©sultat.</p>';
         return;
     }
     const getT = (art) => {
@@ -230,8 +231,8 @@ window.openArticle = function(id) {
     } else if (art.image && art.image.trim() !== "  ") {
         mediaHeader = `<img src="${art.image}" alt="${art.titre}" onerror="this.src='https://via.placeholder.com/800x400?text=Image+Indisponible'" style="width:100%; border-radius:15px; margin-bottom:25px;">`;
     }
-    let pdfLink = art.pdf ? `<div style="margin: 20px 0; padding: 15px; background: var(--bg-light); border-radius: 10px; display: flex; align-items: center; gap: 15px;"><i class="fas fa-file-pdf" style="font-size: 2rem; color: #D21034;"></i><div><p style="margin:0; font-weight:600;">Document d'accompagnement</p><a href="${art.pdf}" target="_blank" class="tag-filter" style="display:inline-block; margin-top:5px; text-decoration:none;"><i class="fas fa-download"></i> Télécharger le PDF</a></div></div>` : '';
-    let html = `${mediaHeader}<div class="article-body"><div class="article-meta"><span class="category-tag ${cls(art.categorie)}">${art.categorie}</span><span><i class="far fa-calendar"></i> ${art.date}</span><span><i class="far fa-clock"></i> ${art.heure}</span><span class="reading-time"><i class="fas fa-book-open"></i> ${art.readingTime} min</span><span><i class="far fa-eye"></i> ${art.views} vues</span><button class="meta-audio-btn" onclick="triggerAudio()"><i class="fas fa-volume-up"></i> Écouter</button></div><h1>${art.titre}</h1><div class="article-text">${bodyImage}${art.contenu}${pdfLink}</div>`;
+    let pdfLink = art.pdf ? `<div style="margin: 20px 0; padding: 15px; background: var(--bg-light); border-radius: 10px; display: flex; align-items: center; gap: 15px;"><i class="fas fa-file-pdf" style="font-size: 2rem; color: #D21034;"></i><div><p style="margin:0; font-weight:600;">Document d'accompagnement</p><a href="${art.pdf}" target="_blank" class="tag-filter" style="display:inline-block; margin-top:5px; text-decoration:none;"><i class="fas fa-download"></i> TÃ©lÃ©charger le PDF</a></div></div>` : '';
+    let html = `${mediaHeader}<div class="article-body"><div class="article-meta"><span class="category-tag ${cls(art.categorie)}">${art.categorie}</span><span><i class="far fa-calendar"></i> ${art.date}</span><span><i class="far fa-clock"></i> ${art.heure}</span><span class="reading-time"><i class="fas fa-book-open"></i> ${art.readingTime} min</span><span><i class="far fa-eye"></i> ${art.views} vues</span><button class="meta-audio-btn" onclick="triggerAudio()"><i class="fas fa-volume-up"></i> Ã‰couter</button></div><h1>${art.titre}</h1><div class="article-text">${bodyImage}${art.contenu}${pdfLink}</div>`;
     if (art.tags && art.tags.length) {
         html += `<div style="margin:30px 0;padding-top:20px;border-top:1px solid var(--border)"><strong>Tags: </strong>${art.tags.map(t => `<span class="tag-filter" style="margin-left:8px" onclick="filterByTag('${t}');goHome()">${t}</span>`).join('')}</div>`;
     }
@@ -288,12 +289,12 @@ window.goHome = function() {
     currentEditingId = null;
     currentFilter = 'all';
     currentPage = 1;
-    // Réinitialiser la navigation active
+    // RÃ©initialiser la navigation active
     document.querySelectorAll('.main-nav a').forEach(a => {
         a.classList.toggle('active', a.innerText.trim() === 'Accueil');
     });
     const searchInput = document.getElementById('searchInput');
-    if(searchInput) searchInput.value = '';
+    if(searchInput) { isResetting = true; searchInput.value = ''; isResetting = false; }
     const adminBtn = document.getElementById('adminBtn');
     if (adminBtn) adminBtn.innerHTML = '<i class="fas fa-plus"></i>';
     document.getElementById('mainContent').style.display = 'block';
@@ -344,16 +345,16 @@ function renderPagination(arts) {
 
 window.filterByCategory = function(cat, ev) {
     if(ev) ev.preventDefault();
-    // Préparation de l'affichage : on affiche le bloc principal et on cache l'article ou la veille
+    // PrÃ©paration de l'affichage : on affiche le bloc principal et on cache l'article ou la veille
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('articlePage').style.display = 'none';
     document.getElementById('veilleSection').style.display = 'none';
-    // Mise à jour de l'onglet actif dans la navigation
+    // Mise Ã  jour de l'onglet actif dans la navigation
     document.querySelectorAll('.main-nav a').forEach(a => {
         const text = a.innerText.trim();
         a.classList.toggle('active', text === cat || (cat === 'all' && text === 'Accueil'));
     });
-    if (cat === 'Vidéo') {
+    if (cat === 'VidÃ©o' || cat === 'Vidéo') {
         document.getElementById('heroSection').classList.add('hidden');
         loadYouTubeVideos();
         return;
@@ -414,7 +415,7 @@ window.addEventListener('scroll', () => {
 function showToast(msg) { const t = document.getElementById('toast'); if (!t) return; t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
 
 function cls(c) {
-    const maps = { 'Algérie':'tag-algerie','Télécoms':'tag-telecoms','Mobile':'tag-mobile','Startups':'tag-startups','Innovation':'tag-innovation','Infographies':'tag-video','Vidéo':'tag-video','Entreprises':'tag-startups' };
+    const maps = { 'AlgÃ©rie':'tag-algerie','TÃ©lÃ©coms':'tag-telecoms','Mobile':'tag-mobile','Startups':'tag-startups','Innovation':'tag-innovation','Infographies':'tag-video','VidÃ©o':'tag-video','Entreprises':'tag-startups' };
     return maps[c] || 'tag-telecoms';
 }
 
@@ -434,7 +435,7 @@ function initCounters() {
 // ===== GESTION ADMIN =====
 window.toggleAdminPanel = function() {
     const pass = prompt('Mot de passe Admin:');
-    if (pass !== ADMIN_PASSWORD) return showToast('  Accès refusé');
+    if (pass !== ADMIN_PASSWORD) return showToast('  AccÃ¨s refusÃ©');
     const modal = document.getElementById('adminModal');
     modal.classList.add('show');
     if (currentEditingId) {
@@ -469,7 +470,7 @@ window.submitArticle = async function(e) {
     try {
         const formData = new FormData();
         formData.append('titre', document.getElementById('titre').value);
-        formData.append('categorie', document.getElementById('categorie').value); // Correction: suppression de l'espace après 'categorie'
+        formData.append('categorie', document.getElementById('categorie').value); // Correction: suppression de l'espace aprÃ¨s 'categorie'
         formData.append('date', document.getElementById('date').value);
         formData.append('heure', document.getElementById('heure').value);
         formData.append('extrait', document.getElementById('extrait').value);
@@ -477,7 +478,7 @@ window.submitArticle = async function(e) {
         formData.append('contenu', document.getElementById('contenu').value);
         formData.append('video', document.getElementById('video').value);
 
-        // Correction: Accès sécurisé aux fichiers pour éviter les crashes si l'input est manquant
+        // Correction: AccÃ¨s sÃ©curisÃ© aux fichiers pour Ã©viter les crashes si l'input est manquant
         const imgInput = document.getElementById('image');
         if (imgInput && imgInput.files.length > 0) {
             formData.append('image', imgInput.files[0]);
@@ -490,35 +491,35 @@ window.submitArticle = async function(e) {
 
         if (currentEditingId) {
             const art = allArticles.find(a => a.id == currentEditingId);
-            if (art) { // Correction: vérification que l'article existe
+            if (art) { // Correction: vÃ©rification que l'article existe
                 formData.append('existingImage', art.image);
                 if (art.pdf) formData.append('existingPdf', art.pdf);
                 formData.append('id', currentEditingId);
             }
         }
 
-        showToast('⏳ Envoi au serveur...');
+        showToast('â ³ Envoi au serveur...');
         const response = await fetch(`${API_BASE}/api/create-article`, { method: 'POST', body: formData });
         if (response.ok) {
-            showToast('✅ Article enregistré !');
+            showToast('âœ… Article enregistrÃ© !');
             setTimeout(() => window.location.reload(), 2000);
         } else {
             const errText = await response.text();
-            showToast('❌ Erreur serveur: ' + errText);
+            showToast('â Œ Erreur serveur: ' + errText);
         }
     } catch (error) {
         console.error("Erreur submitArticle:", error);
-        showToast('❌ Erreur: ' + error.message);
+        showToast('â Œ Erreur: ' + error.message);
     }
 };
 
 async function deleteArticle() {
-    if (!confirm("⚠️ Supprimer définitivement cet article ?  ")) return;
+    if (!confirm("âš ï¸  Supprimer dÃ©finitivement cet article ?  ")) return;
     try {
-        showToast('⏳ Suppression...');
+        showToast('â ³ Suppression...');
         const response = await fetch(`${API_BASE}/api/delete-article/${currentEditingId}`, { method: 'DELETE' });
-        if (response.ok) { showToast('✅ Supprimé !'); setTimeout(() => window.location.reload(), 2000); }
-    } catch (e) { showToast('❌ Erreur réseau'); }
+        if (response.ok) { showToast('âœ… SupprimÃ© !'); setTimeout(() => window.location.reload(), 2000); }
+    } catch (e) { showToast('â Œ Erreur rÃ©seau'); }
 }
 
 window.previewImage = function(e) {
@@ -536,9 +537,9 @@ window.share = (p) => {
     if(urls[p]) window.open(urls[p], '_blank');
 };
 
-window.copyLink = () => { navigator.clipboard.writeText(window.location.href); showToast('Lien copié !'); };
+window.copyLink = () => { navigator.clipboard.writeText(window.location.href); showToast('Lien copiÃ© !'); };
 
-// ===== MÉTÉO =====
+// ===== MÃ‰TÃ‰O =====
 async function updateWeather() {
     const widget = document.getElementById('weatherWidget');
     if (!widget) return;
@@ -553,15 +554,16 @@ async function updateWeather() {
         if (code >= 71 && code <= 77) { icon = 'fa-snowflake'; color = '#bae6fd'; }
         if (code >= 80 && code <= 82) { icon = 'fa-cloud-showers-heavy'; color = '#2563eb'; }
         if (code >= 95) { icon = 'fa-bolt'; color = '#ef4444'; }
-        widget.innerHTML = `<i class="fas ${icon}" style="color:${color}; margin-right:5px;"></i> ${temp}°C`;
-        widget.title = `Météo Alger - Humidité: ${data.current.relative_humidity_2m}% | Vent: ${data.current.wind_speed_10m} km/h`;
-    } catch (e) { widget.innerHTML = `<i class="fas fa-sun" style="color:#fbbf24"></i> 22°C`; }
+        widget.innerHTML = `<i class="fas ${icon}" style="color:${color}; margin-right:5px;"></i> ${temp}Â°C`;
+        widget.title = `MÃ©tÃ©o Alger - HumiditÃ©: ${data.current.relative_humidity_2m}% | Vent: ${data.current.wind_speed_10m} km/h`;
+    } catch (e) { widget.innerHTML = `<i class="fas fa-sun" style="color:#fbbf24"></i> 22Â°C`; }
 }
 
 // ===== BARRE DE RECHERCHE =====
 const searchInput = document.getElementById('searchInput');
 if (searchInput) {
     searchInput.addEventListener('input', (e) => {
+        if (isResetting) return;
         const query = e.target.value.toLowerCase().trim();
         document.getElementById('mainContent').style.display = 'block';
         document.getElementById('articlePage').style.display = 'none';
@@ -569,7 +571,7 @@ if (searchInput) {
         document.getElementById('heroSection').classList.add('hidden');
         if (query === '') { goHome(); } else {
             currentPage = 1;
-            const filtered = allArticles.filter(a => a.titre.toLowerCase().includes(query) || a.extrait.toLowerCase().includes(query) || (a.tags && a.tags.some(t => t.toLowerCase().includes(query))));
+            const filtered = allArticles.filter(a => (a.titre && a.titre.toLowerCase().includes(query)) || (a.extrait && a.extrait.toLowerCase().includes(query)) || (a.tags && a.tags.some(t => t.toLowerCase().includes(query))));
             renderGrid(filtered.slice(0, ITEMS_PER_PAGE));
             renderPagination(filtered);
         }
@@ -589,7 +591,7 @@ async function loadVeille() {
         veilleData = await res.json();
         renderVeilleTable();
         if(loader) loader.style.display = 'none';
-    } catch(e) { console.error(e); if(loader) loader.textContent = '⚠️ Impossible de synchroniser la veille.'; }
+    } catch(e) { console.error(e); if(loader) loader.textContent = 'âš ï¸  Impossible de synchroniser la veille.'; }
 }
 
 function renderVeilleTable() {
@@ -637,26 +639,26 @@ window.handleVeilleSubmit = async (e) => {
     const endpoint = id ? `${API_BASE}/api/veille/${id}` : `${API_BASE}/api/veille`;
     try {
         const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, url, tag }) });
-        if(res.ok) { showToast(id ? '✅ Article modifié !' : '✅ Article ajouté !'); closeVeilleModal(); loadVeille(); }
-    } catch(err) { showToast('❌ Erreur réseau'); }
+        if(res.ok) { showToast(id ? 'âœ… Article modifiÃ© !' : 'âœ… Article ajoutÃ© !'); closeVeilleModal(); loadVeille(); }
+    } catch(err) { showToast('â Œ Erreur rÃ©seau'); }
 };
 
 window.deleteVeilleArticle = async (id) => {
-    if(!confirm('Supprimer définitivement cet article ?')) return;
+    if(!confirm('Supprimer dÃ©finitivement cet article ?')) return;
     try {
         const res = await fetch(`${API_BASE}/api/veille/${id}`, { method: 'DELETE' });
-        if(res.ok) { showToast('✅ Supprimé !'); loadVeille(); }
-    } catch(e) { showToast('❌ Erreur'); }
+        if(res.ok) { showToast('âœ… SupprimÃ© !'); loadVeille(); }
+    } catch(e) { showToast('â Œ Erreur'); }
 };
 
 // ==========================================
-// [YOUTUBE] RÉCUPÉRATION DYNAMIQUE
+// [YOUTUBE] RÃ‰CUPÃ‰RATION DYNAMIQUE
 // ==========================================
 async function loadYouTubeVideos() {
     const grid = document.getElementById('newsGrid');
     const hero = document.getElementById('heroSection');
     if(hero) hero.classList.add('hidden');
-    if(grid) grid.innerHTML = '<div class="loader">Chargement des vidéos Algeria Tech...</div>';
+    if(grid) grid.innerHTML = '<div class="loader">Chargement des vidÃ©os Algeria Tech...</div>';
     try {
         const url = `https://www.googleapis.com/youtube/v3/search?key=${YOUTUBE_API_KEY}&channelId=${YOUTUBE_CHANNEL_ID}&part=snippet,id&order=date&maxResults=12&type=video`;
         const res = await fetch(url);
@@ -667,11 +669,11 @@ async function loadYouTubeVideos() {
         } else if (data.error) {
              let msg = data.error.message;
             if (data.error.code === 403) {
-                msg = "L'accès à l'API YouTube est bloqué. Vérifiez que 'YouTube Data API v3' est bien activée dans votre console Google Cloud.";
+                msg = "L'accÃ¨s Ã  l'API YouTube est bloquÃ©. VÃ©rifiez que 'YouTube Data API v3' est bien activÃ©e dans votre console Google Cloud.";
             }
-            grid.innerHTML = `<p style="text-align:center; padding:20px; color:red;">⚠️ ${msg} (Code: ${data.error.code})</p>`;
+            grid.innerHTML = `<p style="text-align:center; padding:20px; color:red;">âš ï¸  ${msg} (Code: ${data.error.code})</p>`;
         } else {
-            grid.innerHTML = '<p style="text-align:center; padding:20px;">Aucune vidéo trouvée sur YouTube.</p>';
+            grid.innerHTML = '<p style="text-align:center; padding:20px;">Aucune vidÃ©o trouvÃ©e sur YouTube.</p>';
         }
     } catch (e) {
         grid.innerHTML = '<p style="text-align:center; padding:20px; color:red;">Erreur de connexion avec YouTube.</p>';
@@ -687,7 +689,7 @@ function renderYouTubeGrid(videos) {
         const thumb = v.snippet.thumbnails.high.url;
         const date = new Date(v.snippet.publishedAt).toLocaleDateString('fr-FR');
         return `<div class="news-card" style="animation-delay:${i*0.1}s" onclick="playYouTubeVideo('${vId}')">
-<div class="news-card-img"><img src="${thumb}" alt="${title}"><span class="category-tag tag-video"><i class="fab fa-youtube"></i> Vidéo</span></div>
+<div class="news-card-img"><img src="${thumb}" alt="${title}"><span class="category-tag tag-video"><i class="fab fa-youtube"></i> VidÃ©o</span></div>
 <div class="news-card-body"><h3>${title}</h3><div class="card-meta"><span><i class="far fa-calendar"></i> ${date}</span><span style="color:var(--primary);margin-left:auto">Regarder <i class="fas fa-play-circle"></i></span></div></div></div>`;
     }).join('');
 }

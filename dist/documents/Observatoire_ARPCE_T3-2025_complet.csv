@@ -1,0 +1,58 @@
+﻿# Evolution_trimestrielle
+Trimestre;Mobile (M);Fixe (M);Total (M)
+T3 2024;50.63;5.91;56.54
+T4 2024;51.32;6.22;57.54
+T1 2025;51.69;6.4;58.09
+T2 2025;52.42;6.6;59.02
+T3 2025;53.64;6.8;60.44
+
+# Internet_fixe_par_technologie
+Technologie;Part (%)
+Fibre FTTH;37.62
+ADSL;32.33
+4G LTE fixe;29.99
+Autres;0.06
+
+# Internet_fixe_par_segment
+Segment;Part (%)
+Résidentielles;96.79
+Professionnelles;3.21
+
+# Debits_reseau_fixe
+Palier de débit;Part (%)
+10 à <20 Mbps;57.14
+20 à <50 Mbps;18.2
+50 à <100 Mbps;11.17
+Moins de 10 Mbps;9.05
+
+# Internet_mobile_par_technologie
+Technologie;Abonnés (M);Part (%)
+4G;50.1;93.43
+3G;3.53;6.57
+
+# Internet_mobile_modele_paiement
+Modèle;Part (%)
+Prépayé;95.59
+Postpayé;4.41
+
+# Trafic_fixe
+Trimestre;Trafic (M de Go)
+T3 2024;2728
+T4 2024;2734
+T1 2025;2984
+T2 2025;3291
+T3 2025;3616
+
+# Trafic_mobile
+Trimestre;Trafic (M de Go)
+T3 2024;1323.85
+T4 2024;1343.89
+T1 2025;1366.89
+T2 2025;1489.14
+T3 2025;1630.45
+
+# M2M_par_operateur
+Marque;Société;Unités SIM;Part (%)
+Mobilis;Algérie Telecom Mobile;127765;44.7
+Ooredoo;Wataniya Telecom Algérie;111754;39.1
+Djezzy;Optimum Telecom Algérie;46516;16.2

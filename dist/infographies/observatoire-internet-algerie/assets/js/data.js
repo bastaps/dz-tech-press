@@ -1,0 +1,159 @@
+/**
+ * Observatoire du Marché de l'Internet en Algérie
+ * Données ARPCE — 3ème Trimestre 2025
+ * Source : Autorité de Régulation de la Poste et des Communications Electroniques
+ */
+
+export const DATASET = {
+  meta: {
+    titre: "Observatoire du Marché de l'Internet en Algérie",
+    sousTitre: "Synthèse des indicateurs clés — 3ème Trimestre 2025",
+    source: "ARPCE — Autorité de Régulation de la Poste et des Communications Électroniques",
+    periode: "T3 2025",
+    dateMaj: "T3 2025"
+  },
+
+  // === VUE D'ENSEMBLE ===
+  vueEnsemble: {
+    totalAbonnes: 60.46,          // en millions
+    totalAbonnesExact: 60460000,
+    partMobile: 88.72,             // %
+    partFixe: 11.28,               // %
+    croissanceAnnuelle: 7.07,      // %
+    abonnesFixe: 6.82,             // M
+    abonnesMobile: 53.64           // M
+  },
+
+  // === ÉVOLUTION TRIMESTRIELLE ===
+  evolutionTrimestrielle: [
+    { trimestre: "T3 2024", mobile: 50.63, fixe: 5.91, total: 56.54 },
+    { trimestre: "T4 2024", mobile: 51.32, fixe: 6.22, total: 57.54 },
+    { trimestre: "T1 2025", mobile: 51.69, fixe: 6.40, total: 58.09 },
+    { trimestre: "T2 2025", mobile: 52.42, fixe: 6.60, total: 59.02 },
+    { trimestre: "T3 2025", mobile: 53.64, fixe: 6.80, total: 60.44 }
+  ],
+
+  // === INTERNET FIXE ===
+  internetFixe: {
+    totalAbonnes: 6.82,
+    technologies: [
+      { nom: "Fibre FTTH",    part: 37.62, couleur: "#D4A437" },
+      { nom: "ADSL",          part: 32.33, couleur: "#8B6F2B" },
+      { nom: "4G LTE fixe",   part: 29.99, couleur: "#C9994A" },
+      { nom: "Autres",        part: 0.06,  couleur: "#5E4A1F" }
+    ],
+    segments: [
+      { nom: "Résidentielles",   part: 96.79 },
+      { nom: "Professionnelles", part: 3.21 }
+    ],
+    repartitionDetaillee: [
+      { techno: "FTTH", residentiel: 96.7, professionnel: 4.2 },
+      { techno: "ADSL", residentiel: 32.3, professionnel: 0.0 },
+      { techno: "4G LTE", residentiel: 29.9, professionnel: 3.1 }
+    ],
+    debits: [
+      { palier: "10 à <20 Mbps",   part: 57.14, couleur: "#1A2845" },
+      { palier: "20 à <50 Mbps",   part: 18.20, couleur: "#2D5A3D" },
+      { palier: "50 à <100 Mbps",  part: 11.17, couleur: "#D4A437" },
+      { palier: "Moins de 10 Mbps", part: 9.05,  couleur: "#8B7355" }
+    ]
+  },
+
+  // === INTERNET MOBILE ===
+  internetMobile: {
+    totalAbonnes: 53.64,
+    technologies: [
+      { nom: "4G", abonnes: 50.10, part: 93.43, couleur: "#2D5A3D" },
+      { nom: "3G", abonnes: 3.53,  part: 6.57,  couleur: "#D4A437" }
+    ],
+    paiement: [
+      { type: "Prépayé",   part: 95.59, couleur: "#2D5A3D" },
+      { type: "Postpayé",  part: 4.41,  couleur: "#D4A437" }
+    ]
+  },
+
+  // === TRAFIC DE DONNÉES (en millions de Go) ===
+  trafic: {
+    fixe: {
+      croissance: 32.55,
+      points: [
+        { trimestre: "T3 2024", valeur: 2728 },
+        { trimestre: "T4 2024", valeur: 2734 },
+        { trimestre: "T1 2025", valeur: 2984 },
+        { trimestre: "T2 2025", valeur: 3291 },
+        { trimestre: "T3 2025", valeur: 3616 }
+      ]
+    },
+    mobile: {
+      croissance: 23.16,
+      points: [
+        { trimestre: "T3 2024", valeur: 1323.85 },
+        { trimestre: "T4 2024", valeur: 1343.89 },
+        { trimestre: "T1 2025", valeur: 1366.89 },
+        { trimestre: "T2 2025", valeur: 1489.14 },
+        { trimestre: "T3 2025", valeur: 1630.45 }
+      ]
+    }
+  },
+
+  // === MARCHÉ M2M (Machine-to-Machine / IoT) ===
+  m2m: {
+    totalUnites: 286035,
+    operateurs: [
+      {
+        marque: "Mobilis",
+        societe: "Algérie Telecom Mobile",
+        unites: 127765,
+        part: 44.7,
+        couleur: "#2D5A3D"
+      },
+      {
+        marque: "Ooredoo",
+        societe: "Wataniya Telecom Algérie",
+        unites: 111754,
+        part: 39.1,
+        couleur: "#D4A437"
+      },
+      {
+        marque: "Djezzy",
+        societe: "Optimum Telecom Algérie",
+        unites: 46516,
+        part: 16.2,
+        couleur: "#B85042"
+      }
+    ]
+  },
+
+  // === SYNTHÈSE ===
+  syntheseClé: [
+    {
+      titre: "Croissance Robuste et Continue",
+      chiffre: "60,5 Millions",
+      contexte: "d'abonnés",
+      detail: "+7,07% Croissance Annuelle",
+      description: "Le parc global a progressé de +7,07% sur un an pour atteindre 60,5 millions d'abonnés, confirmant la vitalité du secteur."
+    },
+    {
+      titre: "Hégémonie du Mobile",
+      chiffre: "89%",
+      contexte: "de Part de Marché Mobile",
+      detail: "L'internet mobile représente près de 89% du marché total et d'accès au numérique pour la population.",
+      description: "L'internet mobile représente près de 89% du marché total."
+    },
+    {
+      titre: "Transition du Fixe vers la Fibre",
+      chiffre: "FTTH",
+      contexte: "1ère Technologie d'Accès Fixe",
+      detail: "~ 27,6%",
+      description: "Le FTTH est désormais la première technologie d'accès fixe (27,6%) du parc."
+    }
+  ]
+};
+
+// Helper pour formater les nombres à la française
+export const fmt = {
+  nombre: (n) => n.toLocaleString('fr-FR'),
+  millions: (n) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+  pourcent: (n) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%',
+  pourcentSimple: (n) => n.toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + '%'
+};

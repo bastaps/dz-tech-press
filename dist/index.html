@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algeria Tech - L'actualité numérique en Algérie par Basta</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="reading-progress" id="readingProgress"></div>
+    
+    <header>
+        <div class="top-bar">
+            <div class="container">
+                <div class="top-bar-left">
+                    <span><i class="fas fa-map-marker-alt" style="color:#D21034; margin-right:5px;"></i> Alger, Algérie</span>
+                    <span id="liveClock" style="font-weight: 500; margin-left: 8px;"></span>
+                    <span id="currentDate"></span>
+                    <a href="https://www.meteo.dz/" target="_blank" rel="noopener noreferrer" id="weatherWidget" style="color: inherit; text-decoration: none; cursor: pointer;"><i class="fas fa-sun" style="color:#fbbf24; margin-right:5px;"></i> 22°C</a>
+                </div>
+                <div class="top-bar-right">
+                    <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.twitter.com/" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter"></i></a>
+                    <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://www.youtube.com/@algeria-tech-by-basta" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="header">
+            <div class="container header-content">
+                <div class="logo" onclick="goHome()">
+                    <div class="logo-icon">AT</div>
+                    <div class="logo-text">
+                        <h1>Algeria <span>Tech</span></h1>
+                        <p>By Basta</p>
+                    </div>
+                </div>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="#" class="active" onclick="goHome()">Accueil</a></li>
+                        <li><a href="#" onclick="filterByCategory('Algérie')">Algérie</a></li>
+                        <li><a href="#" onclick="filterByCategory('Télécoms')">Télécoms</a></li>
+                        <li><a href="#" onclick="filterByCategory('Mobile')">Mobile</a></li>
+                        <li><a href="#" onclick="filterByCategory('Startups')">Startups</a></li>
+                        <li><a href="#" onclick="filterByCategory('Innovation')">Innovation</a></li>
+                        <li><a href="#" onclick="filterByCategory('Entreprises')">Entreprises</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-trigger">Explorer <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 5px;"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" onclick="filterByCategory('Vidéo')">Vidéo</a></li>
+                                <li><a href="infographies/index.html">Infographies</a></li>
+                                <li><a href="#" onclick="showVeille()" id="nav-veille">Veille</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" placeholder="Rechercher...">
+                    </div>
+                    <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="mainContent">
+        <section class="breaking-news">
+            <div class="container">
+                <span class="breaking-label">URGENT</span>
+                <div class="breaking-ticker">
+                    <div class="ticker-track" id="breakingTicker"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="hero-section container" id="heroSection">
+            <div class="hero-grid" id="heroGrid"></div>
+        </section>
+
+        <div class="container content-layout">
+            <div class="news-column">
+                <div class="section-header">
+                    <h2 class="section-title"><span class="icon"><i class="fas fa-bolt"></i></span> Dernières Actualités</h2>
+                    <div class="tag-filters">
+                        <button class="tag-filter active" onclick="filterByCategory('all', event)">Tous</button>
+                        <button class="tag-filter" onclick="filterByCategory('Télécoms', event)">Télécoms</button>
+                        <button class="tag-filter" onclick="filterByCategory('Startups', event)">Startups</button>
+                        <button class="tag-filter" onclick="filterByCategory('Mobile', event)">Mobile</button>
+                        <button class="tag-filter" onclick="filterByCategory('Entreprises', event)">Entreprises</button>
+                    </div>
+                </div>
+                <div class="news-grid" id="newsGrid"></div>
+                <div class="pagination" id="pagination"></div>
+            </div>
+            <aside class="sidebar">
+                <div class="sidebar-widget">
+                    <h3 class="widget-title"><i class="fas fa-fire"></i> Les Plus Lus</h3>
+                    <ul class="trending-list" id="trendingList"></ul>
+                </div>
+                <div class="sidebar-widget newsletter-widget">
+                    <h3 class="widget-title"><i class="fas fa-envelope-open-text"></i> Newsletter</h3>
+                    <p>Recevez l'essentiel de l'actualité tech chaque matin.</p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Votre adresse email">
+                        <button type="submit">S'abonner</button>
+                    </form>
+                </div>
+                <div class="sidebar-widget">
+                    <h3 class="widget-title"><i class="fas fa-tags"></i> Tags</h3>
+                    <div class="tag-cloud" id="tagCloud"></div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <section id="veilleSection" class="container veille-wrapper" style="display:none; margin: 40px auto;">
+        <div class="section-header">
+            <h2 class="section-title"><span class="icon"><i class="fas fa-rss"></i></span> Veille Technologique & Presse</h2>
+            <button class="tag-filter veille-add-btn" onclick="openVeilleModal('add')"><i class="fas fa-plus"></i> Ajouter un article</button>
+        </div>
+        <div class="veille-table-container">
+            <table class="veille-table">
+                <thead>
+                    <tr>
+                        <th style="width: 150px;">Date</th>
+                        <th>Titre / Sujet</th>
+                        <th style="width: 180px;">Tags</th>
+                        <th style="width: 130px;">Source</th>
+                        <th style="width: 100px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="veilleBody">
+                    <tr><td colspan="5" class="veille-loading" id="veilleLoading">Synchronisation de la veille...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="article-page" id="articlePage" style="display:none;">
+        <div class="container">
+            <button class="back-btn" onclick="goHome()"><i class="fas fa-arrow-left"></i> Retour à l'accueil</button>
+            <div class="article-wrapper">
+                <div class="audio-sticky-bar" id="stickyAudio">
+                    <button class="audio-fab" id="listenBtn" title="Écouter"><i class="fas fa-play"></i></button>
+                    <button class="audio-fab stop" id="stopBtn" style="display:none;" title="Arrêter"><i class="fas fa-stop"></i></button>
+                    <span class="audio-status">AUDIO</span>
+                </div>
+                <div class="article-content" id="articleContent">
+                      <div class="share-buttons">
+                        <button class="share-btn youtube" onclick="window.open('https://www.youtube.com/@algeria-tech-by-basta', '_blank')">
+                          <i class="fab fa-youtube"></i> YouTube
+                        </button>
+                      </div>
+                    </div>
+            </div>
+            <div class="related-articles" id="relatedArticles">
+                <h3>Vous pourriez aussi aimer</h3>
+                <div class="related-grid" id="relatedGrid"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div class="logo" style="margin-bottom:15px;">
+                        <div class="logo-icon">AT</div>
+                        <div class="logo-text"><h1 style="color:#fff;">Algeria <span style="color:var(--secondary);">Tech</span></h1></div>
+                    </div>
+                    <p>Algeria Tech est votre source d'information de référence sur l'actualité tech en Algérie par Basta.</p>
+                    <div class="footer-social">
+                        <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.twitter.com/" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.youtube.com/@algeria-tech-by-basta" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h3>Rubriques</h3>
+                    <ul>
+                        <li><a href="#" onclick="filterByCategory('Algérie')"><i class="fas fa-chevron-right"></i> Algérie</a></li>
+                        <li><a href="#" onclick="filterByCategory('Télécoms')"><i class="fas fa-chevron-right"></i> Télécoms</a></li>
+                        <li><a href="#" onclick="filterByCategory('Startups')"><i class="fas fa-chevron-right"></i> Startups</a></li>
+                        <li><a href="#" onclick="filterByCategory('Entreprises')"><i class="fas fa-chevron-right"></i> Entreprises</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>Services</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Newsletter</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Flux RSS</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>Légal</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Mentions légales</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Confidentialité</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">© 2026 Algeria Tech — The Pulse of Algerian Innovation</div>
+        </div>
+    </footer>
+
+    <button class="admin-btn" id="adminBtn" onclick="toggleAdminPanel()"><i class="fas fa-plus"></i></button>
+    <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="fas fa-arrow-up"></i></button>
+
+    <div class="admin-modal" id="adminModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeAdminPanel()"><i class="fas fa-times"></i></button>
+            <h2><i class="fas fa-pen-nib"></i> Créer un nouvel article</h2>
+            <form id="articleForm" onsubmit="submitArticle(event)">
+                <div class="form-group"><label>Titre <span class="required">*</span></label><input type="text" id="titre" required></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Catégorie <span class="required">*</span></label>
+                        <select id="categorie" required><option value="">-- Sélectionner --</option><option value="Algérie">Algérie</option><option value="Télécoms">Télécoms</option><option value="Mobile">Mobile</option><option value="Startups">Startups</option><option value="Innovation">Innovation</option><option value="Vidéo">Vidéo</option><option value="Infographies">Infographies</option><option value="Entreprises">Entreprises</option></select>
+                    </div>
+                    <div class="form-group"><label>Date <span class="required">*</span></label><input type="date" id="date" required></div>
+                    <div class="form-group"><label>Heure <span class="required">*</span></label><input type="time" id="heure" required></div>
+                </div>
+                <div class="form-group"><label>Extrait <span class="required">*</span></label><textarea id="extrait" rows="2" required></textarea></div>
+                <div class="form-group"><label>Tags (séparés par des virgules)</label><input type="text" id="tags"></div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Image</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="image" accept="image/*" onchange="previewImage(event)">
+                            <label for="image" class="file-label"><i class="fas fa-image"></i> Choisir une image</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Vidéo YouTube (Lien)</label>
+                        <input type="url" id="video" placeholder="https://www.youtube.com/...">
+                    </div>
+                </div>
+                <div class="image-preview" id="imagePreview"></div>
+                <div class="form-group"><label>Contenu <span class="required">*</span></label><textarea id="contenu" rows="8" required placeholder="Rédigez votre article ici (Markdown supporté)"></textarea></div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeAdminPanel()">Annuler</button>
+                    <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Créer & Déployer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="admin-modal" id="veilleModal">
+        <div class="modal-content" style="max-width:500px;">
+            <button class="modal-close" onclick="closeVeilleModal()"><i class="fas fa-times"></i></button>
+            <h2 id="veilleModalTitle"><i class="fas fa-plus"></i> Ajouter un article de veille</h2>
+            <form id="veilleForm" onsubmit="handleVeilleSubmit(event)">
+                <input type="hidden" id="veilleEditId">
+                <div class="form-group"><label>Titre <span class="required">*</span></label><input type="text" id="veilleTitle" required></div>
+                <div class="form-group"><label>URL de l'article <span class="required">*</span></label><input type="url" id="veilleUrl" required></div>
+                <div class="form-group"><label>Tags (séparés par des virgules)</label><input type="text" id="veilleTags"></div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeVeilleModal()">Annuler</button>
+                    <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loader"><div class="loader"></div><div class="loading-text">Chargement...</div></div>
+    <div class="toast" id="toast"></div>
+    <script src="script.js"></script>
+</body>
+</html>
