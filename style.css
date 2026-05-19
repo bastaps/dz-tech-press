@@ -122,6 +122,7 @@ padding: 0 15px; width: 100px; border: 1px solid var(--border); transition: var(
 .tag-filter { padding: 6px 14px; background: var(--bg-white); border: 1px solid var(--border); border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: var(--transition); }
 .tag-filter:hover, .tag-filter.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .news-card { background: var(--bg-white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); transition: var(--transition); cursor: pointer; opacity: 0; transform: translateY(20px); animation: fadeInUp 0.5s forwards; }
 @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 .news-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
@@ -319,3 +320,24 @@ color: var(--text-dark); background: var(--bg-white); transition: var(--transiti
 .veille-table td a { max-width: 180px; }
 }
 /* === FIN [VEILLE] STYLES === */
+
+/* === [REVUE DE PRESSE IA] STYLES MODERNES === */
+.revue-wrapper { margin: 40px auto; padding: 35px; background: var(--bg-white); border-radius: var(--radius); box-shadow: var(--shadow-md); border-top: 4px solid var(--accent); }
+.revue-container { margin-top: 25px; line-height: 1.8; color: var(--text-dark); }
+.revue-loading { text-align: center; padding: 40px; color: var(--text-muted); display: flex; flex-direction: column; gap: 15px; align-items: center; }
+.revue-loading i { font-size: 2rem; color: var(--accent); }
+.revue-intro { background: rgba(26, 115, 232, 0.05); padding: 25px; border-radius: var(--radius); margin-bottom: 30px; border-left: 5px solid var(--accent); font-style: italic; font-size: 1.05rem; }
+.revue-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+.revue-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: var(--transition); display: flex; flex-direction: column; gap: 12px; }
+.revue-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--accent); }
+.revue-card-tag { display: inline-block; padding: 3px 10px; border-radius: 4px; background: var(--accent); color: #fff; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; width: fit-content; }
+.revue-card h3 { font-size: 1.1rem; font-weight: 700; color: var(--text-dark); line-height: 1.4; }
+.revue-card p { font-size: 0.9rem; color: var(--text-muted); }
+.revue-card-link { margin-top: auto; display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--accent); font-weight: 600; text-decoration: none; }
+.revue-card-link:hover { text-decoration: underline; }
+@media (max-width: 768px) {
+    .revue-wrapper { padding: 20px; }
+    .revue-grid { grid-template-columns: 1fr; }
+    .revue-intro { font-size: 0.95rem; padding: 15px; }
+}
+/* === FIN [REVUE DE PRESSE IA] === */

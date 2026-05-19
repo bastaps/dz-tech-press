@@ -300,6 +300,7 @@ window.goHome = function() {
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('articlePage').style.display = 'none';
     document.getElementById('veilleSection').style.display = 'none';
+    document.getElementById('revueSection').style.display = 'none';
     document.getElementById('heroSection').classList.remove('hidden');
     renderGrid(allArticles.slice(0, ITEMS_PER_PAGE));
     renderPagination(allArticles);
@@ -314,12 +315,58 @@ window.showVeille = function() {
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('heroSection').classList.add('hidden');
     document.getElementById('articlePage').style.display = 'none';
+    document.getElementById('revueSection').style.display = 'none';
     document.getElementById('veilleSection').style.display = 'block';
     document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'));
     document.getElementById('nav-veille').classList.add('active');
     loadVeille();
     window.scrollTo({top: 0, behavior: 'smooth'});
 };
+
+// ===== NAVIGATION REVUE DE PRESSE IA =====
+window.showRevue = function() {
+    if (synth) synth.cancel();
+    currentFilter = 'all';
+    currentPage = 1;
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('heroSection').classList.add('hidden');
+    document.getElementById('articlePage').style.display = 'none';
+    document.getElementById('veilleSection').style.display = 'none';
+    document.getElementById('revueSection').style.display = 'block';
+    document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'));
+    const navRevue = document.getElementById('nav-revue');
+    if(navRevue) navRevue.classList.add('active');
+    loadRevue();
+    window.scrollTo({top: 0, behavior: 'smooth'});
+};
+
+async function loadRevue() {
+    const container = document.getElementById('revueContent');
+    const dateEl = document.getElementById('revueLastUpdate');
+    if(!container) return;
+    try {
+        // Chargement du fichier JSON généré par le robot
+        const res = await fetch('revue_presse.json');
+        if(!res.ok) throw new Error('Revue non disponible');
+        const data = await res.json();
+        if(dateEl) dateEl.textContent = `Mise à jour : ${data.date}`;
+        container.innerHTML = `
+            <div class="revue-intro">${data.synthese}</div>
+            <div class="revue-grid">
+                ${data.articles.map(a => `
+                    <div class="revue-card">
+                        <span class="revue-card-tag">${a.categorie}</span>
+                        <h3>${a.titre}</h3>
+                        <p>${a.resume}</p>
+                        <a href="${a.url}" target="_blank" class="revue-card-link">Lire la source <i class="fas fa-external-link-alt"></i></a>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch(e) {
+        container.innerHTML = '<div class="revue-loading"><i class="fas fa-exclamation-triangle"></i><p>La revue de presse sera disponible prochainement (Génération automatique à 06h00).</p></div>';
+    }
+}
 
 // ===== PAGINATION ET FILTRES =====
 function renderPagination(arts) {
@@ -349,6 +396,7 @@ window.filterByCategory = function(cat, ev) {
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('articlePage').style.display = 'none';
     document.getElementById('veilleSection').style.display = 'none';
+    document.getElementById('revueSection').style.display = 'none';
     // Mise Ã  jour de l'onglet actif dans la navigation
     document.querySelectorAll('.main-nav a').forEach(a => {
         const text = a.innerText.trim();
@@ -373,6 +421,7 @@ window.filterByTag = function(tag) {
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('articlePage').style.display = 'none';
     document.getElementById('veilleSection').style.display = 'none';
+    document.getElementById('revueSection').style.display = 'none';
     document.getElementById('heroSection').classList.add('hidden');
     const filtered = allArticles.filter(a => a.tags && a.tags.includes(tag));
     renderGrid(filtered.slice(0, ITEMS_PER_PAGE));
@@ -568,6 +617,7 @@ if (searchInput) {
         document.getElementById('mainContent').style.display = 'block';
         document.getElementById('articlePage').style.display = 'none';
         document.getElementById('veilleSection').style.display = 'none';
+        document.getElementById('revueSection').style.display = 'none';
         document.getElementById('heroSection').classList.add('hidden');
         if (query === '') { goHome(); } else {
             currentPage = 1;
