@@ -13,14 +13,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Indispensable pour la synchronisation automatique
+
       - uses: actions/setup-node@v3
         with:
           node-version: '18'
+
       - name: Générer la revue
         run: node generate_revue.js
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+
       - name: Sauvegarder sur GitHub
         run: |
           git config --local user.email "action@github.com"
@@ -28,7 +33,8 @@ jobs:
           if [ -f revue_presse.json ]; then
             git add revue_presse.json
             git commit -m "Automatique: Nouvelle Revue de Presse IA" || echo "Pas de changements"
-            git push
+            git pull --rebase origin main # SE SYNCHRONISE AUTOMATIQUEMENT
+            git push origin main
           else
             echo "Le fichier revue_presse.json n'a pas été généré."
           fi
