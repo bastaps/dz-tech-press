@@ -28,5 +28,5 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add veille_data.json
-          git commit -m "Automatique: Mise à jour flux RSS [skip ci]" || echo "Pas de changements"
+          git commit -m "Automatique: Mise à jour flux RSS" || echo "Pas de changements"
           git push
