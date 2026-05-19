@@ -3,6 +3,18 @@
   "feed": [
     {
       "id": "aHR0cHM6Ly93d3cu",
+      "title": "The Herman Miller Coyl Standing Desk Is Built Just for Gamers",
+      "url": "https://www.wired.com/story/exclusive-herman-miller-coyl-standing-desk-for-gamers/",
+      "tags": [
+        "Tech",
+        "Actualité"
+      ],
+      "date": "2026-05-19 11:00:00",
+      "source": "WIRED",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
       "title": "Tom Steyer Wants to Save California From Billionaires. But Also Doesn’t Want Them to Leave",
       "url": "https://www.wired.com/story/the-big-interview-podcast-tom-steyer/",
       "tags": [
@@ -830,5 +842,5 @@
       "isManual": false
     }
   ],
-  "lastUpdated": "2026-05-19T11:02:04.508Z"
+  "lastUpdated": "2026-05-19T11:56:29.012Z"
 }
