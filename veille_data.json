@@ -3,6 +3,42 @@
   "feed": [
     {
       "id": "aHR0cHM6Ly93d3cu",
+      "title": "Algérie-France : Darmanin propose de remplacer l’accord de 1968 par un traité d’amitié",
+      "url": "https://www.tsa-algerie.com/algerie-france-darmanin-propose-de-remplacer-laccord-de-1968-par-un-traite-damitie/",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-19 10:07:23",
+      "source": "tsa-algerie.com",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Microsoft intègre enfin la barre des tâches déplaçable à Windows 11 : voici qui peut déjà l'essayer",
+      "url": "https://www.zdnet.fr/actualites/microsoft-integre-enfin-la-barre-des-taches-deplacable-a-windows-11-voici-qui-peut-deja-lessayer-495236.htm?utm_source=rss_feed&utm_medium=link&utm_campaign=unknown",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-19 08:55:58",
+      "source": "zdnet.fr",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
+      "title": "Souveraineté numérique : pourquoi l'Allemagne choisit le Palantir français, ChapsVision",
+      "url": "https://www.zdnet.fr/actualites/souverainete-numerique-pourquoi-lallemagne-choisit-le-palantir-francais-chapsvision-495234.htm?utm_source=rss_feed&utm_medium=link&utm_campaign=unknown",
+      "tags": [
+        "Presse",
+        "Automatique"
+      ],
+      "date": "2026-05-19 08:23:53",
+      "source": "zdnet.fr",
+      "isManual": false
+    },
+    {
+      "id": "aHR0cHM6Ly93d3cu",
       "title": "La kachabia du colonel Amirouche remise à son fils, 68 ans après",
       "url": "https://www.tsa-algerie.com/la-kachabia-du-colonel-amirouche-remise-a-son-fils-68-ans-apres/",
       "tags": [
@@ -290,5 +326,5 @@
       "isManual": false
     }
   ],
-  "lastUpdated": "2026-05-19T08:56:46.873Z"
+  "lastUpdated": "2026-05-19T10:12:33.162Z"
 }
