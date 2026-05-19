@@ -1,0 +1,29 @@
+name: Génération Revue de Presse IA
+
+on:
+  schedule:
+    - cron: '0 5 * * *' # 5h00 UTC = 6h00 en Algérie
+  workflow_dispatch: # Pour lancer le test manuellement
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Générer la revue
+        run: node generate_revue.js
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      - name: Sauvegarder sur GitHub
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add revue_presse.json
+          git commit -m "Automatique: Nouvelle Revue de Presse IA" || echo "Pas de changements"
+          git push
